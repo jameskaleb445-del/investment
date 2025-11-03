@@ -25,11 +25,14 @@ export async function POST(request: Request) {
     }
 
     // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: validated.email,
+    const signUpCredentials: { email: string; password: string; phone?: string } = {
+      email: validated.email || '',
       password: validated.password || `temp_${Date.now()}`,
-      ...(validated.phone && { phone: validated.phone }),
-    })
+    }
+    if (validated.phone) {
+      signUpCredentials.phone = validated.phone
+    }
+    const { data: authData, error: authError } = await supabase.auth.signUp(signUpCredentials as any)
 
     if (authError) {
       return NextResponse.json(
