@@ -3,7 +3,7 @@
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { formatCurrencyUSD, formatCurrency } from '@/app/utils/format'
 import { HiEye, HiEyeOff, HiBell, HiSearch, HiArrowDown, HiArrowUp } from 'react-icons/hi'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/app/components/ui/button'
@@ -13,7 +13,7 @@ import { WithdrawalBottomSheet } from '@/app/components/wallet/WithdrawalBottomS
 import { WalletSkeleton } from '@/app/components/wallet/WalletSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 
-export default function WalletPage() {
+function WalletPageContent() {
   const t = useTranslations('wallet')
   const [loading, setLoading] = useState(true)
   const [wallet, setWallet] = useState<any>(null)
@@ -300,6 +300,18 @@ export default function WalletPage() {
         />
       </div>
     </AppLayout>
+  )
+}
+
+export default function WalletPage() {
+  return (
+    <Suspense fallback={
+      <AppLayout>
+        <WalletSkeleton />
+      </AppLayout>
+    }>
+      <WalletPageContent />
+    </Suspense>
   )
 }
 
