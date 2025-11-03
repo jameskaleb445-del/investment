@@ -9,8 +9,23 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'as-needed'
 })
 
+// Paths that should bypass locale routing (PWA files, etc.)
+const publicPaths = [
+  '/manifest.json',
+  '/sw.js',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
+]
+
 export async function proxy(request: NextRequest) {
-  // Handle i18n routing first
+  const { pathname } = request.nextUrl
+
+  // Bypass locale routing for PWA files and other public assets
+  if (publicPaths.some(path => pathname === path || pathname.startsWith(path))) {
+    return NextResponse.next()
+  }
+
+  // Handle i18n routing for all other paths
   const intlResponse = intlMiddleware(request)
   
   if (intlResponse) {

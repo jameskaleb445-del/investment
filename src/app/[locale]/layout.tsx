@@ -7,10 +7,28 @@ import '../globals.css'
 import { AuthProvider } from '../contexts/AuthContext'
 import { Toaster } from '../components/ui/toaster'
 import { TopLoadingBar } from '../components/ui/top-loading-bar'
+import { PWARegistration } from '../components/pwa/PWARegistration'
+import { InstallPrompt } from '../components/pwa/InstallPrompt'
 
 export const metadata: Metadata = {
   title: 'Investment Platform - Rapid Return Assets',
   description: 'Invest in physical assets with rapid returns',
+  manifest: '/manifest.json',
+  themeColor: '#1a1a1f',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Investment App',
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 }
 
 export function generateStaticParams() {
@@ -37,10 +55,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className="antialiased bg-[#1a1a1f]">
+        <PWARegistration />
         <NextIntlClientProvider messages={messages}>
           <TopLoadingBar />
           <AuthProvider>{children}</AuthProvider>
           <Toaster />
+          <InstallPrompt />
         </NextIntlClientProvider>
       </body>
     </html>
