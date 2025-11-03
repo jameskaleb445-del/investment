@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { MarketHeader } from '@/app/components/marketplace/MarketHeader'
 import { CategoryFilters } from '@/app/components/marketplace/CategoryFilters'
@@ -23,7 +23,7 @@ import {
 } from '@/app/components/ui/select'
 import { useTranslations } from 'next-intl'
 
-export default function MarketplacePage() {
+function MarketplacePageContent() {
   const t = useTranslations('marketplace')
   const [projects, setProjects] = useState<any[]>([])
   const [userInvestments, setUserInvestments] = useState<any[]>([])
@@ -537,6 +537,24 @@ export default function MarketplacePage() {
         />
       </div>
     </AppLayout>
+  )
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={
+      <AppLayout>
+        <div className="min-h-screen bg-[#1a1a1f] pt-[140px]">
+          <div className="px-4 space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-48 bg-[#2d2d35] rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    }>
+      <MarketplacePageContent />
+    </Suspense>
   )
 }
 

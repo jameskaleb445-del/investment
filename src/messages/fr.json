@@ -116,6 +116,7 @@
   },
   "marketplace": {
     "title": "Marché",
+    "filter": "Filtrer",
     "searchProjects": "Rechercher des projets...",
     "activeInvestments": "Mes investissements actifs",
     "recommendedProjects": "Projets recommandés",

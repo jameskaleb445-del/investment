@@ -116,6 +116,7 @@
   },
   "marketplace": {
     "title": "Market",
+    "filter": "Filter",
     "searchProjects": "Search projects...",
     "activeInvestments": "My Active Investments",
     "recommendedProjects": "Recommended Projects",
