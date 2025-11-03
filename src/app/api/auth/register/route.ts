@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: validated.email,
       password: validated.password || `temp_${Date.now()}`,
-      phone: validated.phone,
+      ...(validated.phone && { phone: validated.phone }),
     })
 
     if (authError) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const { error: profileError } = await supabase.from('users').insert({
       id: authData.user.id,
       email: validated.email,
-      phone: validated.phone,
+      ...(validated.phone && { phone: validated.phone }),
       full_name: validated.full_name,
       referrer_id: referrerId,
     })
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       user: {
         id: authData.user.id,
         email: validated.email,
-        phone: validated.phone,
+        ...(validated.phone && { phone: validated.phone }),
       },
     })
   } catch (error: any) {
