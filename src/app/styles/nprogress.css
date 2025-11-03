@@ -1,0 +1,62 @@
+/* YouTube-style top loading bar - MAXIMUM VISIBILITY */
+#nprogress {
+  pointer-events: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 999999 !important;
+  height: 5px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+#nprogress .bar {
+  background: #8b5cf6 !important;
+  position: fixed !important;
+  z-index: 999999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 5px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  transition: width 0.2s ease-out !important;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  transform: translateZ(0) !important; /* Force hardware acceleration */
+  /* Width is controlled dynamically via inline styles */
+  max-width: 100% !important;
+}
+
+/* Glowing effect at the end of the bar */
+#nprogress .bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Hide peg and spinner */
+#nprogress .peg {
+  display: none;
+}
+
+#nprogress .spinner {
+  display: none !important;
+}
