@@ -7,6 +7,7 @@ import '../globals.css'
 import { AuthProvider } from '../contexts/AuthContext'
 import { Toaster } from '../components/ui/toaster'
 import { TopLoadingBar } from '../components/ui/top-loading-bar'
+import { Suspense } from 'react'
 import { PWARegistration } from '../components/pwa/PWARegistration'
 import { InstallPrompt } from '../components/pwa/InstallPrompt'
 
@@ -57,7 +58,9 @@ export default async function LocaleLayout({
       <body className="antialiased bg-[#1a1a1f]">
         <PWARegistration />
         <NextIntlClientProvider messages={messages}>
-          <TopLoadingBar />
+          <Suspense fallback={null}>
+            <TopLoadingBar />
+          </Suspense>
           <AuthProvider>{children}</AuthProvider>
           <Toaster />
           <InstallPrompt />
