@@ -1,10 +1,18 @@
 import { createClient } from '@/app/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/navigation'
 import { ForgotPasswordForm } from '@/app/components/auth/ForgotPasswordForm'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { getTranslations } from 'next-intl/server'
 import { AiOutlineArrowLeft } from 'react-icons/ai'
 
-export default async function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const t = await getTranslations('auth')
+
   // Skip auth check if Supabase is not configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     const supabase = await createClient()
@@ -13,7 +21,7 @@ export default async function ForgotPasswordPage() {
     } = await supabase.auth.getUser()
 
     if (user) {
-      redirect('/')
+      redirect({ href: '/', locale })
     }
   }
 
@@ -25,7 +33,7 @@ export default async function ForgotPasswordPage() {
           className="inline-flex items-center gap-2 text-[#a0a0a8] hover:text-white transition-colors text-sm"
         >
           <AiOutlineArrowLeft className="w-4 h-4" />
-          Back to login
+          {t('backToLogin')}
         </Link>
         <ForgotPasswordForm />
       </div>

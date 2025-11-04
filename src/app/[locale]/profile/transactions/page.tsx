@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { TransactionsList } from '@/app/components/transactions/TransactionsList'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { AiOutlineArrowLeft } from 'react-icons/ai'
 import { HiFilter } from 'react-icons/hi'
 import {

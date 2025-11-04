@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
 import { OTPInput } from './OTPInput'
 import toast from 'react-hot-toast'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
+import { useTranslations } from 'next-intl'
 
 interface VerifyOTPFormProps {
   email?: string
@@ -16,6 +17,7 @@ interface VerifyOTPFormProps {
 
 export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormProps) {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -55,7 +57,7 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
         throw new Error(data.error || 'Invalid verification code')
       }
 
-      toast.success('Code verified successfully!')
+      toast.success(t('codeResent'))
 
       if (type === 'reset') {
         router.push(`/reset-password?token=${data.token}`)
@@ -90,7 +92,7 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
         throw new Error(data.error || 'Failed to resend code')
       }
 
-      toast.success('Code resent successfully!')
+      toast.success(t('codeResent'))
       setOtp('')
       setCountdown(60)
     } catch (err: any) {
@@ -101,21 +103,20 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
     }
   }
 
-  const title = type === 'reset' ? 'Reset Password' : type === 'login' ? 'Verify Login' : 'Verify Account'
   const identifier = email || phone || 'your email'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{title}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('verifyCode')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
-          We've sent a 6-digit verification code to {identifier}
+          {t('enterVerificationCode')} {identifier}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-center block">Enter Verification Code</Label>
+          <Label className="text-center block">{t('enterVerificationCode')}</Label>
           <OTPInput
             length={6}
             value={otp}
@@ -133,11 +134,11 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
 
         <div className="text-center">
           <p className="text-sm text-[#a0a0a8] mb-2">
-            Didn't receive the code?
+            {t('didntReceiveCode')}
           </p>
           {countdown > 0 ? (
             <p className="text-sm text-[#6b7280]">
-              Resend code in {countdown}s
+              {t('resendCode')} {countdown}s
             </p>
           ) : (
             <button
@@ -146,7 +147,7 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
               disabled={resendLoading}
               className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] font-semibold disabled:opacity-50 cursor-pointer"
             >
-              {resendLoading ? 'Sending...' : 'Resend Code'}
+              {resendLoading ? t('resending') : t('resendCode')}
             </button>
           )}
         </div>
@@ -158,7 +159,7 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
         size="lg"
         disabled={loading || otp.length !== 6}
       >
-        {loading ? 'Verifying...' : 'Verify Code'}
+        {loading ? t('verifying') : t('verify')}
       </Button>
     </form>
   )

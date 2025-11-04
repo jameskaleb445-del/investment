@@ -1,9 +1,17 @@
 import { createClient } from '@/app/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/navigation'
 import { LoginForm } from '@/app/components/auth/LoginForm'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { getTranslations } from 'next-intl/server'
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const t = await getTranslations('auth')
+
   // Skip auth check if Supabase is not configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     const supabase = await createClient()
@@ -12,7 +20,7 @@ export default async function LoginPage() {
     } = await supabase.auth.getUser()
 
     if (user) {
-      redirect('/')
+      redirect({ href: '/', locale })
     }
   }
 
@@ -22,12 +30,12 @@ export default async function LoginPage() {
         <LoginForm />
         <div className="text-center">
           <p className="text-sm text-[#a0a0a8]">
-            Don't have an account?{' '}
+            {t('noAccount')}{' '}
             <Link 
               href="/register" 
               className="text-[#8b5cf6] hover:text-[#7c3aed] font-semibold cursor-pointer"
             >
-              Sign Up
+              {t('signUp')}
             </Link>
           </p>
         </div>

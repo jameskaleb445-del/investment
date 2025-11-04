@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import createMiddleware from 'next-intl/middleware'
-import { locales } from './i18n'
+import { locales } from './i18n/config'
 
 // Create i18n middleware
 const intlMiddleware = createMiddleware({

@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { HiUser, HiShieldCheck, HiDocumentText } from 'react-icons/hi'
 import { AiOutlineRight } from 'react-icons/ai'
 import { useTranslations } from 'next-intl'

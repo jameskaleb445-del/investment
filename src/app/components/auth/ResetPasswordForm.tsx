@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { HiEye, HiEyeOff } from 'react-icons/hi'
 import toast from 'react-hot-toast'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
+import { useTranslations } from 'next-intl'
 
 interface ResetPasswordFormProps {
   token: string
@@ -15,6 +16,7 @@ interface ResetPasswordFormProps {
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -54,7 +56,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         throw new Error(data.error || 'Failed to reset password')
       }
 
-      toast.success('Password reset successfully!')
+      toast.success(t('resetPassword') + ' ' + t('success', { defaultValue: 'successfully!' }))
       router.push('/login')
     } catch (err: any) {
       setError(err.message)
@@ -67,15 +69,15 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Reset Password</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('resetPassword')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
-          Enter your new password below.
+          {t('enterNewPassword', { defaultValue: 'Enter your new password below.' })}
         </p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password">{t('newPassword')}</Label>
           <div className="relative">
             <Input
               id="password"
@@ -85,7 +87,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 setPassword(e.target.value)
                 setError('')
               }}
-              placeholder="Enter new password"
+              placeholder={t('newPasswordPlaceholder', { defaultValue: 'Enter new password' })}
               autoComplete="new-password"
               required
               className="pr-12"
@@ -105,7 +107,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
           <div className="relative">
             <Input
               id="confirmPassword"
@@ -115,7 +117,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 setConfirmPassword(e.target.value)
                 setError('')
               }}
-              placeholder="Confirm new password"
+              placeholder={t('confirmPasswordPlaceholder', { defaultValue: 'Confirm new password' })}
               autoComplete="new-password"
               required
               className="pr-12"
@@ -151,7 +153,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         size="lg"
         disabled={loading || !password || !confirmPassword}
       >
-        {loading ? 'Resetting...' : 'Reset Password'}
+        {loading ? t('resettingPassword') : t('resetPasswordButton')}
       </Button>
     </form>
   )

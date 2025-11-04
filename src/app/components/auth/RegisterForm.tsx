@@ -1,18 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Checkbox } from '../ui/checkbox'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
 import { Button } from '../ui'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
+import { useTranslations } from 'next-intl'
 
 export function RegisterForm() {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [formData, setFormData] = useState({
     phone: '',
     full_name: '',
@@ -55,15 +57,15 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="text- sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Create your account</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('createAccount')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
-          Let's get started with a free account.
+          {t('getStarted')}
         </p>
       </div>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="full_name">Full name</Label>
+          <Label htmlFor="full_name">{t('fullName')}</Label>
           <Input
             id="full_name"
             type="text"
@@ -72,13 +74,13 @@ export function RegisterForm() {
               setFormData({ ...formData, full_name: e.target.value })
               setError('')
             }}
-            placeholder="John Doe"
+            placeholder={t('fullNamePlaceholder')}
             autoComplete="name"
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">{t('phoneNumber')}</Label>
           <Input
             id="phone"
             type="tel"
@@ -87,14 +89,14 @@ export function RegisterForm() {
               setFormData({ ...formData, phone: e.target.value })
               setError('')
             }}
-            placeholder="+237 6XX XXX XXX"
+            placeholder={t('phonePlaceholder')}
             inputMode="tel"
             autoComplete="tel"
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="referral_code">Referral Code (Optional)</Label>
+          <Label htmlFor="referral_code">{t('referralCode')}</Label>
           <Input
             id="referral_code"
             type="text"
@@ -102,7 +104,7 @@ export function RegisterForm() {
             onChange={(e) =>
               setFormData({ ...formData, referral_code: e.target.value.toUpperCase() })
             }
-            placeholder="Enter referral code"
+            placeholder={t('referralCodePlaceholder')}
           />
         </div>
         {error && (
@@ -120,10 +122,10 @@ export function RegisterForm() {
           className="mt-1"
         />
         <Label htmlFor="terms" className="text-xs font-normal leading-relaxed cursor-pointer">
-          I certify that I'm 18 years of age or older, and I agree to the{' '}
-          <Link href="/terms" className="text-[#8b5cf6] hover:underline cursor-pointer">User Agreement</Link>
-          {' '}and{' '}
-          <Link href="/privacy" className="text-[#8b5cf6] hover:underline cursor-pointer">Privacy Policy</Link>.
+          {t('certifyAge')}{' '}
+          <Link href="/terms" className="text-[#8b5cf6] hover:underline cursor-pointer">{t('userAgreement')}</Link>
+          {' '}{t('and')}{' '}
+          <Link href="/privacy" className="text-[#8b5cf6] hover:underline cursor-pointer">{t('privacyPolicy')}</Link>.
         </Label>
       </div>
 
@@ -133,7 +135,7 @@ export function RegisterForm() {
         size="lg"
         disabled={!agreeToTerms || loading}
       >
-        {loading ? 'Creating account...' : 'Sign Up'}
+        {loading ? t('creatingAccount') : t('signUp')}
       </Button>
 
       <div className="relative my-6">
@@ -141,7 +143,7 @@ export function RegisterForm() {
           <div className="w-full border-t border-[#3a3a44]"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-[#1a1a1f] text-[#a0a0a8]">Or sign up with</span>
+          <span className="px-2 bg-[#1a1a1f] text-[#a0a0a8]">{t('orSignUpWith')}</span>
         </div>
       </div>
 

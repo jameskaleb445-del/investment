@@ -1,19 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
 import { HiEye, HiEyeOff } from 'react-icons/hi'
 import { Checkbox } from '../ui/checkbox'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
+import { useTranslations } from 'next-intl'
 
 export function LoginForm() {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [identifier, setIdentifier] = useState('') // email or phone
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -58,15 +60,15 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Welcome Back!</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('welcomeBack')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
-          Sign in to your account
+          {t('signInToAccount')}
         </p>
       </div>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="identifier">Email or Phone Number</Label>
+          <Label htmlFor="identifier">{t('emailOrPhone')}</Label>
           <Input
             id="identifier"
             type="text"
@@ -75,7 +77,7 @@ export function LoginForm() {
               setIdentifier(e.target.value)
               setError('')
             }}
-            placeholder="Email or Phone Number"
+            placeholder={t('emailOrPhonePlaceholder')}
             inputMode={identifier.includes('@') ? 'email' : 'tel'}
             autoComplete={identifier.includes('@') ? 'email' : 'tel'}
             required
@@ -83,7 +85,7 @@ export function LoginForm() {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('password')}</Label>
           <div className="relative">
             <Input
               id="password"
@@ -93,7 +95,7 @@ export function LoginForm() {
                 setPassword(e.target.value)
                 setError('')
               }}
-              placeholder="Password"
+              placeholder={t('passwordPlaceholder')}
               autoComplete="current-password"
               required
               className="pr-12"
@@ -130,14 +132,14 @@ export function LoginForm() {
             htmlFor="remember"
             className="text-sm font-normal cursor-pointer"
           >
-            Remember me
+            {t('rememberMe')}
           </Label>
         </div>
         <Link 
           href="/forgot-password"
           className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] font-medium cursor-pointer"
         >
-          Forgot Password?
+          {t('forgotPassword')}
         </Link>
       </div>
 
@@ -147,7 +149,7 @@ export function LoginForm() {
         size="lg"
         disabled={loading}
       >
-        {loading ? 'Signing in...' : 'Sign In'}
+        {loading ? t('signingIn') : t('signIn')}
       </Button>
 
       <div className="relative my-6">
@@ -155,7 +157,7 @@ export function LoginForm() {
           <div className="w-full border-t border-[#3a3a44]"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-[#1a1a1f] text-[#a0a0a8]">Or sign in with</span>
+          <span className="px-2 bg-[#1a1a1f] text-[#a0a0a8]">{t('orSignInWith')}</span>
         </div>
       </div>
 

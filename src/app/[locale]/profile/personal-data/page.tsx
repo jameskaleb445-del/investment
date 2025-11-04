@@ -1,19 +1,21 @@
 import { createClient } from '@/app/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/navigation'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { PersonalDataForm } from '@/app/components/profile/PersonalDataForm'
-import Link from 'next/link'
-import { AiOutlineArrowLeft } from 'react-icons/ai'
 
 export default async function PersonalDataPage({
+  params,
   searchParams,
 }: {
-  searchParams: { edit?: string }
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ edit?: string }>
 }) {
+  const { locale } = await params
+  const { edit } = await searchParams
   // AUTH DISABLED - Commented out temporarily
   // // Check if Supabase is configured
   // if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  //   redirect('/login')
+  //   redirect({ href: '/login', locale })
   // }
 
   // const supabase = await createClient()
@@ -22,7 +24,7 @@ export default async function PersonalDataPage({
   // } = await supabase.auth.getUser()
 
   // if (!user) {
-  //   redirect('/login')
+  //   redirect({ href: '/login', locale })
   // }
 
   // // Get user profile data
@@ -43,7 +45,7 @@ export default async function PersonalDataPage({
     email: 'helenasarapova@mail.com',
   }
 
-  const shouldEdit = searchParams?.edit === 'true'
+  const shouldEdit = edit === 'true'
 
   return (
     <AppLayout>
