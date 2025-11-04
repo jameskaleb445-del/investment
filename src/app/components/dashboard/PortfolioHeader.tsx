@@ -76,7 +76,9 @@ export function PortfolioHeader({
     <div className="relative overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#6d28d9] via-[#7c3aed] to-[#8b5cf6] opacity-90" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1f] via-transparent to-transparent" />
+      {/* Dark mode overlay fades to black; light mode overlay fades to white */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1f] via-transparent to-transparent dark:block light:hidden" />
+      <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:hidden light:block" />
       
       {/* Content */}
       <div className="relative px-4 pt-6 pb-6 overflow-visible">
