@@ -20,7 +20,7 @@ export function CategoryFilters({ selectedCategory, onCategoryChange }: Category
             "px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors cursor-pointer",
             selectedCategory === null
               ? "bg-[#8b5cf6] text-white"
-              : "bg-[#1f1f24] text-[#a0a0a8] border border-[#2d2d35] hover:border-[#3a3a44]"
+              : "theme-bg-secondary theme-text-secondary theme-border border hover:theme-border-secondary"
           )}
         >
           {t('allProjects')}
@@ -33,7 +33,7 @@ export function CategoryFilters({ selectedCategory, onCategoryChange }: Category
               "px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors cursor-pointer",
               selectedCategory === category
                 ? "bg-[#8b5cf6] text-white"
-                : "bg-[#1f1f24] text-[#a0a0a8] border border-[#2d2d35] hover:border-[#3a3a44]"
+                : "theme-bg-secondary theme-text-secondary theme-border border hover:theme-border-secondary"
             )}
           >
             {category}

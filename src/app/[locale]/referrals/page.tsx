@@ -151,13 +151,13 @@ export default function ReferralsPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         {/* Header - Fixed */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 border-b border-[#2d2d35] bg-[#1a1a1f] backdrop-blur-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 theme-border border-b theme-bg-primary backdrop-blur-sm">
           <div className="flex-1" /> {/* Spacer */}
-          <h1 className="text-lg font-semibold text-white">{t('title')}</h1>
+          <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
           <div className="flex-1 flex justify-end">
-            <button className="text-white/80 hover:text-white transition-colors cursor-pointer relative">
+            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
               <FaRegBell className="w-6 h-6" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -180,7 +180,7 @@ export default function ReferralsPage() {
 
           {/* Referral Tree */}
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 px-1">{t('yourReferralNetwork')}</h2>
+            <h2 className="text-base sm:text-lg font-semibold theme-text-primary mb-3 sm:mb-4 px-1">{t('yourReferralNetwork')}</h2>
             <ReferralTree levels={referralData.levels} />
           </div>
         </div>

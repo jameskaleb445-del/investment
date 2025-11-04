@@ -32,7 +32,7 @@ export function CategoryIcons({ selectedCategory, onCategorySelect, showAll = fa
   return (
     <div className="px-4 mb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold theme-text-primary">
           {showAll ? 'All Categories' : 'Top Categories'}
         </h2>
         {!showAll && (
@@ -54,13 +54,13 @@ export function CategoryIcons({ selectedCategory, onCategorySelect, showAll = fa
             >
               <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
                 isSelected
-                  ? 'bg-[#8b5cf6] text-white'
-                  : 'bg-[#1f1f24] border border-[#2d2d35] text-[#a0a0a8] group-hover:border-[#8b5cf6]/50 group-hover:text-[#8b5cf6]'
+                  ? 'bg-[#8b5cf6] theme-text-primary'
+                  : 'theme-bg-secondary theme-border border theme-text-secondary group-hover:border-[#8b5cf6]/50 group-hover:text-[#8b5cf6]'
               }`}>
                 <Icon className="w-6 h-6" />
               </div>
               <span className={`text-xs text-center font-medium ${
-                isSelected ? 'text-white' : 'text-[#a0a0a8] group-hover:text-white'
+                isSelected ? 'theme-text-primary' : 'theme-text-secondary group-hover:theme-text-primary'
               }`}>
                 {category.split(' ')[0]}
               </span>

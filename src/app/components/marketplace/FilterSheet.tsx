@@ -76,8 +76,8 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
       <div className="px-5 py-6 space-y-6">
         {/* Active Filters Count */}
         {activeFiltersCount > 0 && (
-          <div className="flex items-center justify-between p-3 bg-[#1f1f24] border border-[#2d2d35] rounded-lg">
-            <span className="text-sm text-[#a0a0a8]">
+          <div className="flex items-center justify-between p-3 theme-bg-secondary theme-border border rounded-lg">
+            <span className="text-sm theme-text-secondary">
               {t('filtersActive', { count: activeFiltersCount })}
             </span>
             <button
@@ -91,7 +91,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
 
         {/* Status Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-3">{t('projectStatus')}</h3>
+          <h3 className="text-sm font-semibold theme-text-primary mb-3">{t('projectStatus')}</h3>
           <div className="flex flex-wrap gap-2">
             {statusOptions.map((option) => {
               const isSelected = localFilters.status.includes(option.value)
@@ -101,8 +101,8 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                   onClick={() => handleStatusToggle(option.value)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#8b5cf6] text-white border border-[#8b5cf6]'
-                      : 'bg-[#1f1f24] text-[#a0a0a8] border border-[#2d2d35] hover:border-[#3a3a44]'
+                      ? 'bg-[#8b5cf6] theme-text-primary border border-[#8b5cf6]'
+                      : 'bg-[#1f1f24] theme-text-secondary border border-[#2d2d35] hover:theme-border-secondary'
                   }`}
                 >
                   {option.label}
@@ -114,10 +114,10 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
 
         {/* ROI Range */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-3">{t('roiRange')}</h3>
+          <h3 className="text-sm font-semibold theme-text-primary mb-3">{t('roiRange')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('minRoi')}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('minRoi')}</label>
               <input
                 type="number"
                 min="0"
@@ -138,7 +138,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                     }
                   }
                 }}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
               {localFilters.minRoi !== null && localFilters.minRoi < 0 && (
                 <p className="text-xs text-red-400 mt-1">{t('roiCannotBeNegative', { defaultValue: 'Minimum ROI cannot be negative' })}</p>
@@ -148,7 +148,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
               )}
             </div>
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('maxRoi')}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('maxRoi')}</label>
               <input
                 type="number"
                 min="0"
@@ -169,7 +169,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                     }
                   }
                 }}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
               {localFilters.maxRoi !== null && localFilters.maxRoi < 0 && (
                 <p className="text-xs text-red-400 mt-1">{t('roiCannotBeNegative', { defaultValue: 'Maximum ROI cannot be negative' })}</p>
@@ -184,10 +184,10 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
 
         {/* Duration Range */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-3">{t('duration')}</h3>
+          <h3 className="text-sm font-semibold theme-text-primary mb-3">{t('duration')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('minDuration', { defaultValue: 'Min' })}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('minDuration', { defaultValue: 'Min' })}</label>
               <input
                 type="number"
                 placeholder="1"
@@ -196,11 +196,11 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                   ...prev,
                   minDuration: e.target.value ? parseInt(e.target.value) : null
                 }))}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
             </div>
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('maxDuration', { defaultValue: 'Max' })}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('maxDuration', { defaultValue: 'Max' })}</label>
               <input
                 type="number"
                 placeholder="365"
@@ -209,7 +209,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                   ...prev,
                   maxDuration: e.target.value ? parseInt(e.target.value) : null
                 }))}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
             </div>
           </div>
@@ -217,10 +217,10 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
 
         {/* Goal Amount Range */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-3">{t('fundingGoal')}</h3>
+          <h3 className="text-sm font-semibold theme-text-primary mb-3">{t('fundingGoal')}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('minGoal', { defaultValue: 'Min' })}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('minGoal', { defaultValue: 'Min' })}</label>
               <input
                 type="number"
                 placeholder="0"
@@ -229,11 +229,11 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                   ...prev,
                   minGoal: e.target.value ? parseFloat(e.target.value) : null
                 }))}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
             </div>
             <div>
-              <label className="text-xs text-[#a0a0a8] mb-1 block">{t('maxGoal', { defaultValue: 'Max' })}</label>
+              <label className="text-xs theme-text-secondary mb-1 block">{t('maxGoal', { defaultValue: 'Max' })}</label>
               <input
                 type="number"
                 placeholder="10,000,000"
@@ -242,7 +242,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                   ...prev,
                   maxGoal: e.target.value ? parseFloat(e.target.value) : null
                 }))}
-                className="w-full px-3 py-2 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
+                className="w-full px-3 py-2 theme-bg-secondary theme-border border rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent"
               />
             </div>
           </div>
@@ -253,13 +253,13 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
           <Button
             onClick={handleReset}
             variant="outline"
-            className="flex-1 border-[#2d2d35] text-[#a0a0a8] hover:bg-[#2d2d35]"
+            className="flex-1 border-[#2d2d35] theme-text-secondary hover:theme-bg-tertiary"
           >
             {t('clearAll')}
           </Button>
           <Button
             onClick={handleApply}
-            className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white"
+            className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary"
           >
             {t('applyFilters')}
           </Button>

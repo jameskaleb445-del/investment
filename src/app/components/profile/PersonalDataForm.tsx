@@ -59,20 +59,20 @@ export function PersonalDataForm({ user, profile, initialEditMode = false }: Per
   return (
     <div>
         {/* Header - Fixed */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 border-b border-[#2d2d35] bg-[#1a1a1f] backdrop-blur-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 theme-border border-b theme-bg-primary backdrop-blur-sm">
           <Link
             href="/profile"
-            className="text-[#a0a0a8] hover:text-white transition-colors"
+            className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
           >
             <AiOutlineArrowLeft className="w-6 h-6" />
           </Link>
           
-          <h1 className="text-lg font-semibold text-white">Personal Data</h1>
+          <h1 className="text-lg font-semibold theme-text-primary">Personal Data</h1>
           
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="text-[#a0a0a8] hover:text-white transition-colors"
+              className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
             >
               <AiOutlineEdit className="w-6 h-6" />
             </button>
@@ -84,13 +84,13 @@ export function PersonalDataForm({ user, profile, initialEditMode = false }: Per
         {/* Profile Picture */}
         <div className="flex flex-col items-center pt-24 pb-6">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center theme-text-primary text-2xl font-bold">
               {formData.full_name.charAt(0).toUpperCase()}
             </div>
             {isEditing && (
-              <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#8b5cf6] border-4 border-[#1a1a1f] flex items-center justify-center">
+              <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#8b5cf6] border-4 theme-bg-primary flex items-center justify-center">
                 <svg 
-                  className="w-4 h-4 text-white" 
+                  className="w-4 h-4 theme-text-primary" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -124,9 +124,9 @@ export function PersonalDataForm({ user, profile, initialEditMode = false }: Per
           <div className="space-y-2">
             <Label htmlFor="phone">Phone number</Label>
             <div className="flex gap-2">
-              <div className="flex items-center gap-2 px-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg">
+              <div className="flex items-center gap-2 px-3 theme-bg-tertiary theme-border-secondary border rounded-lg">
                 <span className="text-2xl">🇺🇸</span>
-                <span className="text-white text-sm">+1</span>
+                <span className="theme-text-primary text-sm">+1</span>
               </div>
               <Input
                 id="phone"
@@ -149,7 +149,7 @@ export function PersonalDataForm({ user, profile, initialEditMode = false }: Per
               disabled
               className="opacity-50 cursor-not-allowed"
             />
-            <p className="text-xs text-[#a0a0a8]">Email cannot be changed</p>
+            <p className="text-xs theme-text-secondary">Email cannot be changed</p>
           </div>
 
           {isEditing && (

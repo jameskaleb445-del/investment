@@ -299,7 +299,7 @@ function MarketplacePageContent() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         {/* Market Header with Search - Fixed */}
         <MarketHeader 
           onSearch={handleSearch}
@@ -312,7 +312,7 @@ function MarketplacePageContent() {
         {/* Content with padding for fixed header */}
         <div className="pt-[140px]">
         {/* Category Filter Pills - Sticky below header */}
-        <div className="sticky top-[108px] z-40 bg-[#1a1a1f] pt-3 pb-2 border-b border-[#2d2d35]">
+        <div className="sticky top-[108px] z-40 theme-bg-primary pt-3 pb-2 theme-border border-b">
           <CategoryFilters
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
@@ -325,7 +325,7 @@ function MarketplacePageContent() {
             <>
               {/* Skeleton Cards */}
               <div className="px-4 mb-6">
-                <div className="h-6 w-48 bg-[#2d2d35] rounded mb-3 animate-pulse"></div>
+                <div className="h-6 w-48 theme-bg-tertiary rounded mb-3 animate-pulse"></div>
                 <div className="overflow-x-auto scrollbar-hide scroll-smooth">
                   <div className="flex gap-4 pb-2" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
                     {[1, 2, 3].map((i) => (
@@ -544,10 +544,10 @@ export default function MarketplacePage() {
   return (
     <Suspense fallback={
       <AppLayout>
-        <div className="min-h-screen bg-[#1a1a1f] pt-[140px]">
+        <div className="min-h-screen theme-bg-primary pt-[140px]">
           <div className="px-4 space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-48 bg-[#2d2d35] rounded-lg animate-pulse" />
+              <div key={i} className="h-48 theme-bg-tertiary rounded-lg animate-pulse" />
             ))}
           </div>
         </div>

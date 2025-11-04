@@ -256,6 +256,7 @@
     "paymentMethod": "Mode de paiement",
     "accountName": "Nom du compte",
     "accountNumber": "Numéro de compte",
+    "phoneNumber": "Numéro de téléphone",
     "enterAccountName": "Entrer le nom du compte",
     "enterAccountNumber": "Entrer le numéro de compte",
     "enterPhoneNumberExample": "Entrer le numéro de téléphone (ex. : 697123456)",
@@ -267,7 +268,11 @@
     "paymentMethodRemoved": "Mode de paiement supprimé",
     "failedToRemovePaymentMethod": "Échec de la suppression du mode de paiement",
     "defaultPaymentMethodUpdated": "Mode de paiement par défaut mis à jour",
-    "failedToUpdateDefaultPaymentMethod": "Échec de la mise à jour du mode de paiement par défaut"
+    "failedToUpdateDefaultPaymentMethod": "Échec de la mise à jour du mode de paiement par défaut",
+    "confirmDelete": "Confirmer la suppression",
+    "deleteWarning": "Cette action ne peut pas être annulée.",
+    "deleting": "Suppression en cours...",
+    "cancel": "Annuler"
   },
   "transactions": {
     "deposit": "Dépôt",

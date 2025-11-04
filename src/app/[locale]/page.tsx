@@ -215,10 +215,10 @@ export default function Home() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         {/* Sticky Header - Appears on scroll */}
         <div 
-          className={`fixed top-0 left-0 right-0 z-50 bg-[#1a1a1f] border-b border-[#2d2d35] backdrop-blur-sm shadow-lg transition-all duration-300 ease-in-out ${
+          className={`fixed top-0 left-0 right-0 z-50 theme-bg-primary theme-border border-b backdrop-blur-sm shadow-lg transition-all duration-300 ease-in-out ${
             showStickyHeader 
               ? 'translate-y-0 opacity-100' 
               : '-translate-y-full opacity-0 pointer-events-none'
@@ -231,13 +231,13 @@ export default function Home() {
                 showStickyHeader ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
               }`}>
                 <div className="flex-shrink-0">
-                  <p className="text-xs text-[#a0a0a8] mb-0.5">{t('totalAssetValue')}</p>
-                  <p className="text-lg font-bold text-white truncate">
+                  <p className="text-xs theme-text-secondary mb-0.5">{t('totalAssetValue')}</p>
+                  <p className="text-lg font-bold theme-text-primary truncate">
                     {isBalanceVisible ? formatCurrencyUSD(totalAssetValue) : '••••••'}
                   </p>
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-xs text-[#707079]">
+                  <p className="text-xs theme-text-muted">
                     {t('available')}: {isBalanceVisible ? formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '') : '•••'}
                   </p>
                 </div>
@@ -249,26 +249,26 @@ export default function Home() {
               }`}>
                 <Link
                   href="/wallet?action=deposit"
-                  className="text-white/80 border border-[#fff]/20 rounded-full p-2 hover:text-white transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                  className="theme-text-secondary border border-white/20 dark:border-white/20 light:border-black/20 rounded-full p-2 hover:theme-text-primary transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
                   title={t('quickActions.deposit')}
                 >
                   <HiMiniArrowLongDown className="w-6 h-6" />
                 </Link>
                 <Link
                   href="/wallet?action=withdraw"
-                  className="text-white/80 border border-[#fff]/20 rounded-full p-2 hover:text-white transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                  className="theme-text-secondary border border-white/20 dark:border-white/20 light:border-black/20 rounded-full p-2 hover:theme-text-primary transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
                   title={t('quickActions.withdraw')}
                 >
                   <HiMiniArrowLongUp className="w-6 h-6" />
                 </Link>
                 <Link
                   href="/marketplace"
-                  className="text-white/80 border border-[#fff]/20 rounded-full p-2 hover:text-white transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                  className="theme-text-secondary border border-white/20 dark:border-white/20 light:border-black/20 rounded-full p-2 hover:theme-text-primary transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
                   title={t('quickActions.invest')}
                 >
                   <HiTrendingUp className="w-6 h-6" />
                 </Link>
-                <button className="text-white/80 hover:text-white transition-all duration-200 cursor-pointer relative hover:scale-110 active:scale-95">
+                <button className="theme-text-secondary hover:theme-text-primary transition-all duration-200 cursor-pointer relative hover:scale-110 active:scale-95">
                   <FaRegBell className="w-6 h-6" />
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 </button>
@@ -297,7 +297,7 @@ export default function Home() {
                     <GiMoneyStack  className="w-5 h-5 text-[#10b981]" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium text-[#a0a0a8] mb-2 uppercase tracking-wide">{t('available')}</h3>
+                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('available')}</h3>
                 <p className="text-2xl font-bold text-[#10b981] mb-1">
                   {formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '')}
                 </p>
@@ -311,7 +311,7 @@ export default function Home() {
                     <HiTrendingUp className="w-5 h-5 text-[#a78bfa]" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium text-[#a0a0a8] mb-2 uppercase tracking-wide">{t('invested')}</h3>
+                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('invested')}</h3>
                 <p className="text-2xl font-bold text-[#a78bfa] mb-1">
                   {formatCurrencyUSD(totalInvested).replace(/\.\d{2}$/, '')}
                 </p>
@@ -325,7 +325,7 @@ export default function Home() {
                       <GiTakeMyMoney  className="w-5 h-5 text-[#10b981]" />
                     </div>
                 </div>
-                <h3 className="text-xs font-medium text-[#a0a0a8] mb-2 uppercase tracking-wide">{t('earnings')}</h3>
+                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('earnings')}</h3>
                 <p className="text-2xl font-bold text-[#10b981] mb-1">
                   {formatCurrencyUSD(totalEarnings).replace(/\.\d{2}$/, '')}
                 </p>
@@ -350,19 +350,19 @@ export default function Home() {
             />
 
             {/* Earnings Chart */}
-            <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4">
+            <div className="theme-bg-secondary theme-border border rounded-xl p-4">
               <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h2 className="text-base font-semibold text-white mb-1">{t('earningsOverview')}</h2>
-                  <p className="text-xs text-[#a0a0a8]">{t('last7Days')}</p>
+                  <h2 className="text-base font-semibold theme-text-primary mb-1">{t('earningsOverview')}</h2>
+                  <p className="text-xs theme-text-secondary">{t('last7Days')}</p>
                 </div>
               </div>
               <EarningsChart data={earningsData} />
             </div>
             {/* Active Investments */}
-            <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-5">
+            <div className="theme-bg-secondary theme-border border rounded-xl p-5">
               <div className="flex justify-between items-center mb-5">
-                <h2 className="text-lg font-semibold text-white">{t('activeInvestments')}</h2>
+                <h2 className="text-lg font-semibold theme-text-primary">{t('activeInvestments')}</h2>
                 <Link href="/marketplace">
                   <Button variant="outline" size="sm" className="cursor-pointer text-xs">
                     {t('viewAll')}
@@ -374,28 +374,28 @@ export default function Home() {
                   {investments.map((inv: any) => (
                     <div
                       key={inv.id}
-                      className="border-b border-[#2d2d35] pb-4 last:border-0 last:pb-0"
+                      className="border-b theme-border pb-4 last:border-0 last:pb-0"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="font-medium text-white text-sm mb-1">
+                          <p className="font-medium theme-text-primary text-sm mb-1">
                             {inv.projects?.name || t('marketplace.allProjects')}
                           </p>
-                          <p className="text-xs text-[#a0a0a8]">
+                          <p className="text-xs theme-text-secondary">
                             {inv.projects?.category}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-white text-sm mb-1">
+                          <p className="font-semibold theme-text-primary text-sm mb-1">
                             {formatCurrencyUSD(inv.amount)}
                           </p>
-                          <p className="text-xs text-[#707079] mb-0.5">
+                          <p className="text-xs theme-text-muted mb-0.5">
                             {formatCurrency(inv.amount)}
                           </p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
                             inv.status === 'active' 
                               ? 'bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30' 
-                              : 'bg-yellow-500/20 text-yellow-300'
+                              : 'bg-yellow-500/20 theme-text-primary border border-yellow-500/30'
                           }`}>
                             {inv.status === 'active' 
                               ? tMarketplace('active') 
@@ -409,7 +409,7 @@ export default function Home() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[#a0a0a8] text-center py-8 text-sm">
+                <p className="theme-text-secondary text-center py-8 text-sm">
                   {t('noActiveInvestments')}
                 </p>
               )}
@@ -418,9 +418,9 @@ export default function Home() {
          
 
             {/* Recent Transactions */}
-            <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4">
+            <div className="theme-bg-secondary theme-border border rounded-xl p-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-base font-semibold text-white">{t('recentTransactions')}</h2>
+                <h2 className="text-base font-semibold theme-text-primary">{t('recentTransactions')}</h2>
                 <Link href="/profile/transactions">
                   <Button variant="outline" size="sm" className="cursor-pointer text-xs">
                     {t('viewAll')}

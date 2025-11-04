@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "./styles/nprogress.css";
 
+/* Ensure theme transitions work */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
 /* Manrope Font Face Declarations */
 @font-face {
   font-family: 'Manrope';
@@ -105,4 +112,87 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: #8b5cf6 #1f1f24;
+}
+
+/* Light theme scrollbar */
+.light * {
+  scrollbar-color: #8b5cf6 #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+  border: 2px solid #f1f5f9;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+/* Theme-specific utility classes */
+.theme-bg-primary {
+  background-color: #1a1a1f;
+}
+
+.light .theme-bg-primary {
+  background-color: white;
+}
+
+.theme-bg-secondary {
+  background-color: #1f1f24;
+}
+
+.light .theme-bg-secondary {
+  background-color: #f8fafc;
+}
+
+.theme-bg-tertiary {
+  background-color: #2d2d35;
+}
+
+.light .theme-bg-tertiary {
+  background-color: white;
+}
+
+.theme-border {
+  border-color: #2d2d35;
+}
+
+.light .theme-border {
+  border-color: #e2e8f0;
+}
+
+.theme-border-secondary {
+  border-color: #3a3a44;
+}
+
+.light .theme-border-secondary {
+  border-color: #cbd5e1;
+}
+
+.theme-text-primary {
+  color: white;
+}
+
+.light .theme-text-primary {
+  color: black;
+}
+
+.theme-text-secondary {
+  color: #a0a0a8;
+}
+
+.light .theme-text-secondary {
+  color: #64748b;
+}
+
+.theme-text-muted {
+  color: #707079;
+}
+
+.light .theme-text-muted {
+  color: #94a3b8;
 }

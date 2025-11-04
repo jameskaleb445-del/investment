@@ -162,17 +162,15 @@ function WalletPageContent() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
       
 
         {/* App Bar - Sticky Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a1f] px-4 py-3 flex items-center justify-between border-b border-[#2d2d35] backdrop-blur-sm">
-          <span className="text-white font-semibold text-base">{t('title')}</span>
-          <div className="flex items-center gap-4">
-            <button className="text-white/80 hover:text-white transition-colors cursor-pointer">
-              <HiSearch className="w-6 h-6" />
-            </button>
-            <button className="text-white/80 hover:text-white transition-colors cursor-pointer relative">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 theme-border border-b theme-bg-primary backdrop-blur-sm">
+          <div className="flex-1" /> {/* Spacer */}
+          <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
+          <div className="flex-1 flex justify-end">
+            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
               <HiBell className="w-6 h-6" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -180,15 +178,15 @@ function WalletPageContent() {
         </div>
 
             {/* Total Asset Value Section */}
-            <div className="px-4 pt-20 pb-6 bg-[#1a1a1f]">
-              <p className="text-sm text-[#a0a0a8] mb-4">{t('totalAssetValue')}</p>
+            <div className="px-4 pt-20 pb-6 theme-bg-primary">
+              <p className="text-sm theme-text-secondary mb-4">{t('totalAssetValue')}</p>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold text-white">
+            <h1 className="text-4xl font-bold theme-text-primary">
               {isBalanceVisible ? formatCurrencyUSD(totalAssetValue) : '••••••'}
             </h1>
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-              className="text-[#a0a0a8] hover:text-white transition-colors cursor-pointer p-1"
+              className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer p-1"
             >
               {isBalanceVisible ? (
                 <HiEyeOff className="w-5 h-5" />
@@ -201,7 +199,7 @@ function WalletPageContent() {
             </span>
           </div>
           {isBalanceVisible && (
-            <p className="text-sm text-[#a0a0a8]">
+            <p className="text-sm theme-text-secondary">
               {formatCurrency(totalAssetValue)}
             </p>
           )}
@@ -209,7 +207,7 @@ function WalletPageContent() {
 
         {/* Quick Actions - Deposit & Withdrawal */}
         <div className="px-4 pb-4">
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4">
+          <div className="theme-bg-secondary theme-border border rounded-xl p-4">
             <div className="grid grid-cols-2 gap-3">
               <Button
                 onClick={() => setShowDepositModal(true)}
@@ -232,35 +230,35 @@ function WalletPageContent() {
         {/* Quick Stats */}
         <div className="px-4 pb-4">
           <div className="grid grid-cols-3 gap-3">
-                <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-3">
-                  <p className="text-xs text-[#a0a0a8] mb-1 uppercase tracking-wide">{t('available')}</p>
-              <p className="text-lg font-bold text-white">
+                <div className="theme-bg-secondary theme-border border rounded-xl p-3">
+                  <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('available')}</p>
+              <p className="text-lg font-bold theme-text-primary">
                 {isBalanceVisible ? formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '') : '•••'}
               </p>
               {isBalanceVisible && (
-                <p className="text-[10px] text-[#707079] mt-0.5">
+                <p className="text-[10px] theme-text-muted mt-0.5">
                   {formatCurrency(availableBalance)}
                 </p>
               )}
             </div>
-                <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-3">
-                  <p className="text-xs text-[#a0a0a8] mb-1 uppercase tracking-wide">{t('invested')}</p>
+                <div className="theme-bg-secondary theme-border border rounded-xl p-3">
+                  <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('invested')}</p>
               <p className="text-lg font-bold text-[#a78bfa]">
                 {isBalanceVisible ? formatCurrencyUSD(wallet.invested_amount).replace(/\.\d{2}$/, '') : '•••'}
               </p>
               {isBalanceVisible && (
-                <p className="text-[10px] text-[#707079] mt-0.5">
+                <p className="text-[10px] theme-text-muted mt-0.5">
                   {formatCurrency(wallet.invested_amount)}
                 </p>
               )}
             </div>
-                <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-3">
-                  <p className="text-xs text-[#a0a0a8] mb-1 uppercase tracking-wide">{t('earnings')}</p>
+                <div className="theme-bg-secondary theme-border border rounded-xl p-3">
+                  <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('earnings')}</p>
                   <p className="text-lg font-bold text-[#10b981]">
                 {isBalanceVisible ? formatCurrencyUSD(wallet.total_earnings).replace(/\.\d{2}$/, '') : '•••'}
               </p>
               {isBalanceVisible && (
-                <p className="text-[10px] text-[#707079] mt-0.5">
+                <p className="text-[10px] theme-text-muted mt-0.5">
                   {formatCurrency(wallet.total_earnings)}
                 </p>
               )}
@@ -270,9 +268,9 @@ function WalletPageContent() {
 
         {/* Recent Transactions */}
         <div className="px-4 pb-6">
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-5">
+          <div className="theme-bg-secondary theme-border border rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-white">{t('recentTransactions')}</h2>
+                  <h2 className="text-lg font-semibold theme-text-primary">{t('recentTransactions')}</h2>
                 </div>
             <TransactionsList transactions={transactions} variant="compact" />
           </div>

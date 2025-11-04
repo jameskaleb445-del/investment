@@ -82,12 +82,12 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f] flex flex-col">
+      <div className="min-h-screen theme-bg-primary flex flex-col">
         {/* Sticky Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a1f] px-4 py-3 flex items-center justify-between border-b border-[#2d2d35] backdrop-blur-sm">
-          <span className="text-white font-semibold text-base">{t('title')}</span>
+        <div className="fixed top-0 left-0 right-0 z-50 theme-bg-primary px-4 py-3 flex items-center justify-between theme-border border-b backdrop-blur-sm">
+          <span className="theme-text-primary font-semibold text-base">{t('title')}</span>
           <div className="flex items-center gap-4">
-            <button className="text-white/80 hover:text-white transition-colors cursor-pointer relative">
+            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
               <FaRegBell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
@@ -112,7 +112,7 @@ export default function ProfilePage() {
                 )}
               </div>
               {/* Verified badge */}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#10b981] border-4 border-[#1a1a1f] flex items-center justify-center shadow-lg">
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#10b981] border-4 theme-bg-primary flex items-center justify-center shadow-lg">
                 <HiCheckCircle className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -120,9 +120,9 @@ export default function ProfilePage() {
             {/* Name and Email */}
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+                <h1 className="text-2xl font-bold theme-text-primary">{displayName}</h1>
               </div>
-              <p className="text-[#a0a0a8] text-sm mb-3">{displayEmail}</p>
+              <p className="theme-text-secondary text-sm mb-3">{displayEmail}</p>
               <div className="flex items-center gap-2">
                 <HiShieldCheck className="w-4 h-4 text-[#10b981]" />
                 <span className="px-3 py-1 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
@@ -147,11 +147,11 @@ export default function ProfilePage() {
 
           {/* Language Selection */}
           <div className="px-4 mb-4">
-            <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4">
+            <div className="theme-bg-secondary theme-border border rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                  <h2 className="text-base font-semibold text-white mb-1">{t('languageAndRegion')}</h2>
-                  <p className="text-[#a0a0a8] text-xs">{t('chooseLanguage')}</p>
+                  <h2 className="text-base font-semibold theme-text-primary mb-1">{t('languageAndRegion')}</h2>
+                  <p className="theme-text-secondary text-xs">{t('chooseLanguage')}</p>
                 </div>
                 <LanguageSelector />
               </div>

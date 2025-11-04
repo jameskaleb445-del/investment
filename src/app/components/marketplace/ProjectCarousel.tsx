@@ -28,7 +28,7 @@ export function ProjectCarousel({ projects, title, onProjectClick }: ProjectCaro
     <div className="mb-6">
       {title && (
         <div className="px-4 mb-3">
-          <h2 className="text-lg font-semibold text-white">Recommended Projects</h2>
+          <h2 className="text-lg font-semibold theme-text-primary">Recommended Projects</h2>
         </div>
       )}
       <div className="overflow-x-auto scrollbar-hide scroll-smooth">

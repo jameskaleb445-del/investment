@@ -45,7 +45,7 @@ export function WithdrawalBottomSheet({
       id: PAYMENT_METHODS.MTN_MOBILE_MONEY,
       name: 'MTN Mobile Money',
       icon: 'https://telecoms-channel.co.za/wp-content/uploads/2023/06/MTN_2022_Logo_Yellow_CMYK-removebg-preview.png',
-      color: 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400',
+      color: 'bg-yellow-500/20 border-yellow-500/30 theme-text-primary',
       isDefault: false,
     },
   ]

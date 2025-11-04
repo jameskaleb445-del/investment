@@ -134,16 +134,16 @@ export default function SecurityPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         {/* Header - Fixed */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 border-b border-[#2d2d35] bg-[#1a1a1f] backdrop-blur-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 theme-border border-b theme-bg-primary backdrop-blur-sm">
           <Link
             href="/profile"
-            className="text-[#9ca3af] hover:text-white transition-colors"
+            className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
           >
             <AiOutlineArrowLeft className="w-6 h-6" />
           </Link>
-          <h1 className="text-lg font-semibold text-white">Security</h1>
+          <h1 className="text-lg font-semibold theme-text-primary">Security</h1>
           <div className="w-6 h-6" /> {/* Spacer for centering */}
         </div>
 
@@ -155,8 +155,8 @@ export default function SecurityPage() {
                 <HiCheckCircle className="w-6 h-6 text-[#10b981]" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-white">Account Secure</h2>
-                <p className="text-sm text-[#9ca3af]">Your account is protected with active security features</p>
+                <h2 className="text-lg font-bold theme-text-primary">Account Secure</h2>
+                <p className="text-sm theme-text-secondary">Your account is protected with active security features</p>
               </div>
             </div>
           </div>
@@ -164,14 +164,14 @@ export default function SecurityPage() {
 
         {/* Security Settings */}
         <div className="px-4 space-y-3 pb-6">
-          <h2 className="text-base font-semibold text-white mb-3 px-1">Security Settings</h2>
+          <h2 className="text-base font-semibold theme-text-primary mb-3 px-1">Security Settings</h2>
           
           {settings.map((setting) => {
             const Icon = setting.icon
             return (
               <div
                 key={setting.id}
-                className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4 hover:bg-[#25252a] hover:border-[#3a3a44] transition-all"
+                className="theme-bg-secondary theme-border border rounded-xl p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -179,8 +179,8 @@ export default function SecurityPage() {
                       <Icon className="w-6 h-6 text-[#8b5cf6]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-sm mb-1">{setting.title}</h3>
-                      <p className="text-[#6b7280] text-xs leading-relaxed">{setting.description}</p>
+                      <h3 className="theme-text-primary font-semibold text-sm mb-1">{setting.title}</h3>
+                      <p className="theme-text-muted text-xs leading-relaxed">{setting.description}</p>
                     </div>
                   </div>
                   {setting.type === 'toggle' && (
@@ -201,18 +201,18 @@ export default function SecurityPage() {
 
         {/* Change Password Section */}
         <div className="px-4 pb-6">
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-5">
+          <div className="theme-bg-secondary theme-border border rounded-xl p-5">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6]/20 to-[#7c3aed]/10 flex items-center justify-center border border-[#8b5cf6]/20">
                 <HiLockClosed className="w-6 h-6 text-[#8b5cf6]" />
               </div>
               <div className="flex-1">
-                <h3 className="text-white font-semibold text-sm mb-1">Change Password</h3>
-                <p className="text-[#6b7280] text-xs mb-4">Update your password regularly to keep your account secure</p>
+                <h3 className="theme-text-primary font-semibold text-sm mb-1">Change Password</h3>
+                <p className="theme-text-muted text-xs mb-4">Update your password regularly to keep your account secure</p>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto cursor-pointer"
                   onClick={handleChangePassword}
                   disabled={loading}
                 >
@@ -225,27 +225,27 @@ export default function SecurityPage() {
 
         {/* Active Sessions */}
         <div className="px-4 pb-6">
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-5">
+          <div className="theme-bg-secondary theme-border border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-white font-semibold text-sm mb-1">Active Sessions</h3>
-                <p className="text-[#6b7280] text-xs">Manage devices that have access to your account</p>
+                <h3 className="theme-text-primary font-semibold text-sm mb-1">Active Sessions</h3>
+                <p className="theme-text-muted text-xs">Manage devices that have access to your account</p>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-[#8b5cf6] hover:text-[#7c3aed]"
+                className="text-[#8b5cf6] hover:text-[#7c3aed] cursor-pointer"
               >
                 View All
               </Button>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-[#2d2d35] rounded-lg">
+              <div className="flex items-center justify-between p-3 theme-bg-tertiary rounded-lg">
                 <div className="flex items-center gap-3">
-                  <HiDeviceMobile className="w-5 h-5 text-[#9ca3af]" />
+                  <HiDeviceMobile className="w-5 h-5 theme-text-secondary" />
                   <div>
-                    <p className="text-white text-sm font-medium">iPhone 14 Pro</p>
-                    <p className="text-[#6b7280] text-xs">Current session • iOS</p>
+                    <p className="theme-text-primary text-sm font-medium">iPhone 14 Pro</p>
+                    <p className="theme-text-muted text-xs">Current session • iOS</p>
                   </div>
                 </div>
                 <span className="px-2 py-1 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-md border border-[#10b981]/30">

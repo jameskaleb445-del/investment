@@ -14,10 +14,10 @@ export function InviteCard() {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="w-full bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-5 text-left hover:bg-[#25252a] hover:border-[#3a3a44] transition-all active:scale-[0.98] flex items-center justify-between gap-4 cursor-pointer"
+        className="w-full theme-bg-secondary theme-border border rounded-xl p-5 text-left hover:theme-bg-tertiary hover:theme-border-secondary transition-all active:scale-[0.98] flex items-center justify-between gap-4 cursor-pointer"
       >
         <div className="flex-1">
-          <p className="text-white font-medium text-sm leading-relaxed">
+          <p className="theme-text-primary font-medium text-sm leading-relaxed">
             {t('inviteFriendsMessage', { defaultValue: 'Invite your friends and win free asset up to $100' })}
           </p>
         </div>
