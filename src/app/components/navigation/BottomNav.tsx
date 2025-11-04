@@ -132,9 +132,9 @@ export function BottomNav() {
                       // Navigate to wallet with deposit action
                       router.push(`${buildHref('/wallet')}?action=deposit`)
                     }}
-                    className="absolute -top-0.5 -right-0.5 w-7 h-7 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-border transition-colors cursor-pointer z-10 shadow-lg"
+                    className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-border transition-colors cursor-pointer z-10 shadow-lg"
                   >
-                    <HiPlus className="w-4 h-4 text-white" style={{ strokeWidth: '3px', fontWeight: 'bold' }} />
+                    <HiPlus className="w-3.5 h-3.5 text-white" />
                   </button>
                 </div>
               )
