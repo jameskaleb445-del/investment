@@ -58,11 +58,11 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
   if (filteredTransactions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
-        <div className="w-16 h-16 rounded-full bg-[#2d2d35] flex items-center justify-center mb-4">
-          <FaHandHoldingUsd className="w-8 h-8 text-[#a0a0a8]" />
+        <div className="w-16 h-16 rounded-full theme-bg-tertiary flex items-center justify-center mb-4">
+          <FaHandHoldingUsd className="w-8 h-8 theme-text-secondary" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">{t('noTransactions')}</h3>
-        <p className="text-sm text-[#a0a0a8] text-center max-w-xs">
+        <h3 className="text-lg font-semibold theme-text-primary mb-2">{t('noTransactions')}</h3>
+        <p className="text-sm theme-text-secondary text-center max-w-xs">
           {t('noTransactionsDescription')}
         </p>
       </div>
@@ -179,18 +179,18 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
     : 'space-y-3'
   
   const dateLabelClasses = variant === 'compact'
-    ? 'text-xs font-medium text-[#6b7280] uppercase tracking-wider px-1'
-    : 'text-xs font-medium text-[#6b7280] uppercase tracking-wider px-2'
+    ? 'text-xs font-medium theme-text-muted uppercase tracking-wider px-1'
+    : 'text-xs font-medium theme-text-muted uppercase tracking-wider px-2'
   
-  const transactionCardClasses = variant === 'compact'
-    ? 'bg-transparent border-b border-[#2d2d35] rounded-none py-3 first:pt-0 last:border-0 hover:bg-[#25252a]/50 transition-all'
-    : 'bg-[#1f1f24] border border-[#2d2d35] rounded-lg p-4 hover:bg-[#25252a] hover:border-[#3a3a44] transition-all'
+      const transactionCardClasses = variant === 'compact'
+        ? 'bg-transparent border-b theme-border rounded-none py-3 first:pt-0 last:border-0 hover:theme-bg-tertiary/50 transition-all'
+        : 'theme-bg-secondary theme-border border rounded-lg p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all'
   
-  const iconClasses = variant === 'compact'
-    ? 'w-9 h-9 rounded-full bg-[#2d2d35] flex items-center justify-center flex-shrink-0'
-    : 'w-11 h-11 rounded-full bg-[#2d2d35] flex items-center justify-center flex-shrink-0 border border-[#3a3a44]'
+      const iconClasses = variant === 'compact'
+        ? 'w-9 h-9 rounded-full theme-bg-tertiary flex items-center justify-center flex-shrink-0'
+        : 'w-11 h-11 rounded-full theme-bg-tertiary flex items-center justify-center flex-shrink-0 border theme-border-secondary'
   
-  const titleClasses = 'text-white font-medium text-sm leading-tight flex-1 min-w-0'
+  const titleClasses = 'theme-text-primary font-medium text-sm leading-tight flex-1 min-w-0'
   
   const amountContainerClasses = variant === 'compact'
     ? 'flex flex-col items-end ml-2 flex-shrink-0 min-w-[100px]'
@@ -201,12 +201,12 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
     : `font-bold text-base ${getTransactionColor(type)} whitespace-nowrap`
   
   const xafAmountClasses = variant === 'compact'
-    ? 'text-[10px] text-[#707079] mt-0.5 whitespace-nowrap'
-    : 'text-xs text-[#6b7280] mt-0.5 whitespace-nowrap'
+    ? 'text-[10px] theme-text-muted mt-0.5 whitespace-nowrap'
+    : 'text-xs theme-text-muted mt-0.5 whitespace-nowrap'
   
   const timeClasses = variant === 'compact'
-    ? 'text-[11px] text-[#707079]'
-    : 'text-xs text-[#6b7280]'
+    ? 'text-[11px] theme-text-muted'
+    : 'text-xs theme-text-muted'
   
   const detailsSpacing = variant === 'compact'
     ? 'gap-2 mb-1'

@@ -51,7 +51,7 @@ export function ProjectMarketCard({
 
   return (
     <div
-      className="bg-[#1f1f24] border border-[#2d2d35] rounded-lg p-4 hover:bg-[#25252a] hover:border-[#3a3a44] transition-all w-full h-full flex-shrink-0 relative"
+      className="theme-bg-secondary theme-border border rounded-lg p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all w-full h-full flex-shrink-0 relative"
     >
       {/* ROI percentage and circular progress at top right */}
       <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
@@ -79,8 +79,9 @@ export function ProjectMarketCard({
               cy="18"
               r="15"
               fill="none"
-              stroke="#2d2d35"
+              stroke="currentColor"
               strokeWidth="3"
+              className="text-gray-300 dark:text-[#2d2d35]"
             />
             {/* Progress circle */}
             <circle
@@ -97,7 +98,7 @@ export function ProjectMarketCard({
           </svg>
           {/* Percentage text in center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[8px] font-semibold text-white">
+            <span className="text-[8px] font-semibold theme-text-primary">
               {Math.round(fundingPercentage)}%
             </span>
           </div>
@@ -106,7 +107,7 @@ export function ProjectMarketCard({
 
       <div className="flex items-start justify-between mb-3 pr-16">
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-semibold text-base mb-1 truncate">{name}</h3>
+          <h3 className="theme-text-primary font-semibold text-base mb-1 truncate">{name}</h3>
           <p className="text-xs text-[#a0a0a8] mb-2">{category}</p>
           {status === 'active' ? (
             <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
@@ -136,7 +137,7 @@ export function ProjectMarketCard({
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onFocus={(e) => e.stopPropagation()}
-                className="bg-[#2d2d35] border-[#3a3a44] text-white text-sm placeholder:text-[#6b7280] pr-16"
+                className="theme-bg-tertiary theme-border-secondary theme-text-primary text-sm placeholder:theme-text-muted pr-16"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#a0a0a8]">XAF</span>
             </div>
@@ -144,7 +145,7 @@ export function ProjectMarketCard({
               <div className="bg-gradient-to-r from-[#10b981]/20 to-[#10b981]/10 border border-[#10b981]/30 rounded-lg p-3 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[#a0a0a8]">{t('youInvest', { defaultValue: 'You invest' })}</span>
-                  <span className="text-xs font-medium text-white">{formatCurrencyUSD(investmentAmount)}</span>
+                  <span className="text-xs font-medium theme-text-primary">{formatCurrencyUSD(investmentAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[#a0a0a8]">{t('youCouldGet', { defaultValue: 'You could get' })}</span>
@@ -182,7 +183,7 @@ export function ProjectMarketCard({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-[#a0a0a8] mb-1">{t('yourInvestment', { defaultValue: 'Your Investment' })}</p>
-                <p className="text-sm font-semibold text-white">{formatCurrencyUSD(userInvestmentAmount)}</p>
+                <p className="text-sm font-semibold theme-text-primary">{formatCurrencyUSD(userInvestmentAmount)}</p>
                 <p className="text-xs text-[#6b7280]">{formatCurrency(userInvestmentAmount)}</p>
               </div>
               <div className="text-right">
@@ -198,7 +199,7 @@ export function ProjectMarketCard({
               e.stopPropagation()
               onClick?.()
             }}
-            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] text-white font-semibold mt-2"
+            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold mt-2"
             size="sm"
           >
             {t('investNow', { defaultValue: 'Invest Now' })}
@@ -215,21 +216,21 @@ export function ProjectMarketCard({
         <div className="px-5 py-6 space-y-4">
           <div className="space-y-3">
             <div>
-              <h3 className="text-base font-semibold text-white mb-2">{t('whatIsRoi', { defaultValue: 'What is ROI?' })}</h3>
+              <h3 className="text-base font-semibold theme-text-primary mb-2">{t('whatIsRoi', { defaultValue: 'What is ROI?' })}</h3>
               <p className="text-sm text-[#a0a0a8] leading-relaxed">
-                {t('roiStandsFor', { defaultValue: 'ROI stands for' })} <strong className="text-white">{t('roiDefinition', { defaultValue: 'Return on Investment' })}</strong>. {t('roiPercentageDescription', { defaultValue: "It's the percentage of profit you'll earn on your investment." })}
+                {t('roiStandsFor', { defaultValue: 'ROI stands for' })} <strong className="theme-text-primary">{t('roiDefinition', { defaultValue: 'Return on Investment' })}</strong>. {t('roiPercentageDescription', { defaultValue: "It's the percentage of profit you'll earn on your investment." })}
               </p>
             </div>
 
             <div className="bg-gradient-to-r from-[#8b5cf6]/20 to-[#7c3aed]/10 border border-[#8b5cf6]/30 rounded-lg p-4 space-y-2">
-              <h4 className="text-sm font-semibold text-white">{t('example', { defaultValue: 'Example:' })}</h4>
+              <h4 className="text-sm font-semibold theme-text-primary">{t('example', { defaultValue: 'Example:' })}</h4>
               <p className="text-sm text-[#a0a0a8]">
                 {t('ifYouInvestInProject', { amount: '100,000 XAF', roi: formatPercentage(estimatedRoi), defaultValue: `If you invest 100,000 XAF in a project with ${formatPercentage(estimatedRoi)} ROI:` })}
               </p>
               <ul className="space-y-1.5 text-sm text-[#a0a0a8] ml-4">
                 <li className="flex items-start gap-2">
                   <span className="text-[#8b5cf6] mt-0.5">•</span>
-                  <span>{t('yourProfit', { defaultValue: 'Your profit' })}: <span className="text-white font-semibold">{formatCurrency(100000 * estimatedRoi / 100)}</span></span>
+                  <span>{t('yourProfit', { defaultValue: 'Your profit' })}: <span className="theme-text-primary font-semibold">{formatCurrency(100000 * estimatedRoi / 100)}</span></span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#8b5cf6] mt-0.5">•</span>
@@ -238,8 +239,8 @@ export function ProjectMarketCard({
               </ul>
             </div>
 
-            <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-lg p-4 space-y-2">
-              <h4 className="text-sm font-semibold text-white">{t('keyPoints', { defaultValue: 'Key Points:' })}</h4>
+            <div className="theme-bg-secondary theme-border border rounded-lg p-4 space-y-2">
+              <h4 className="text-sm font-semibold theme-text-primary">{t('keyPoints', { defaultValue: 'Key Points:' })}</h4>
               <ul className="space-y-1.5 text-xs text-[#a0a0a8] ml-4">
                 <li className="flex items-start gap-2">
                   <span className="text-[#8b5cf6] mt-0.5">•</span>

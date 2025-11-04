@@ -21,7 +21,7 @@ export function BottomNav() {
   // Helper function to remove locale prefix from pathname
   const getPathWithoutLocale = (path: string) => {
     // Remove locale prefix if present (e.g., /fr/wallet -> /wallet)
-    const localePattern = new RegExp(`^/(${['en', 'fr', 'es'].join('|')})(/|$)`)
+    const localePattern = new RegExp(`^/(${['en', 'fr'].join('|')})(/|$)`)
     return path.replace(localePattern, '/') || '/'
   }
 
@@ -67,7 +67,7 @@ export function BottomNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[#1a1a1f] border-t border-[#3a3a44]">
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] theme-bg-primary theme-border border-t transition-colors">
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
@@ -93,7 +93,7 @@ export function BottomNav() {
                         "relative w-14 h-14 rounded-full flex items-center justify-center transition-colors",
                         isActive 
                           ? "bg-[#8b5cf6]" 
-                          : "bg-[#2d2d35] hover:bg-[#35353d]"
+                          : "theme-bg-tertiary hover:bg-[#35353d] dark:hover:bg-[#35353d] light:hover:bg-gray-100"
                       )}
                       animate={isActive ? {
                         scale: [1, 1.1, 1],
@@ -119,7 +119,7 @@ export function BottomNav() {
                       >
                         <Icon className={cn(
                           "w-6 h-6 transition-colors",
-                          isActive ? "text-white" : "text-[#a0a0a8]"
+                          isActive ? "text-white" : "theme-text-secondary"
                         )} />
                       </motion.div>
                     </motion.div>
@@ -132,9 +132,9 @@ export function BottomNav() {
                       // Navigate to wallet with deposit action
                       router.push(`${buildHref('/wallet')}?action=deposit`)
                     }}
-                    className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 border-[#1a1a1f] transition-colors cursor-pointer z-10"
+                    className="absolute -top-0.5 -right-0.5 w-7 h-7 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-bg-primary transition-colors cursor-pointer z-10 shadow-lg"
                   >
-                    <HiPlus className="w-3.5 h-3.5 text-white" />
+                    <HiPlus className="w-4 h-4 text-white dark:text-white light:text-black" style={{ strokeWidth: '3px', fontWeight: 'bold' }} />
                   </button>
                 </div>
               )
@@ -171,7 +171,7 @@ export function BottomNav() {
                       "w-6 h-6 transition-colors",
                       isActive 
                         ? "text-[#8b5cf6]" 
-                        : "text-[#a0a0a8] hover:text-white"
+                        : "theme-text-secondary hover:text-[#8b5cf6]"
                     )} />
                   </motion.div>
                   {isActive && (

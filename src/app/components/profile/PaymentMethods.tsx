@@ -63,6 +63,8 @@ const mockPaymentMethods: PaymentMethod[] = [
 export function PaymentMethods() {
   const t = useTranslations('profile')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [paymentMethodToDelete, setPaymentMethodToDelete] = useState<string | null>(null)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -105,22 +107,34 @@ export function PaymentMethods() {
     }
   }
 
-  const handleDeletePaymentMethod = async (id: string) => {
-    if (window.confirm(t('confirmRemovePaymentMethod', { defaultValue: 'Are you sure you want to remove this payment method?' }))) {
-      setLoading(true)
+  const handleDeleteClick = (id: string) => {
+    setPaymentMethodToDelete(id)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!paymentMethodToDelete) return
+
+    setLoading(true)
+    setIsDeleteModalOpen(false)
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 300))
       
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300))
-        
-        setPaymentMethods(paymentMethods.filter(method => method.id !== id))
-        toast.success(t('paymentMethodRemoved', { defaultValue: 'Payment method removed' }))
-      } catch (error) {
-        toast.error(t('failedToRemovePaymentMethod', { defaultValue: 'Failed to remove payment method' }))
-      } finally {
-        setLoading(false)
-      }
+      setPaymentMethods(paymentMethods.filter(method => method.id !== paymentMethodToDelete))
+      toast.success(t('paymentMethodRemoved', { defaultValue: 'Payment method removed' }))
+    } catch (error) {
+      toast.error(t('failedToRemovePaymentMethod', { defaultValue: 'Failed to remove payment method' }))
+    } finally {
+      setLoading(false)
+      setPaymentMethodToDelete(null)
     }
+  }
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false)
+    setPaymentMethodToDelete(null)
   }
 
   const handleSetDefault = async (id: string) => {
@@ -159,10 +173,10 @@ export function PaymentMethods() {
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-white px-1">{t('paymentMethods')}</h2>
+          <h2 className="text-base font-semibold theme-text-primary px-1">{t('paymentMethods')}</h2>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary text-sm font-medium rounded-lg transition-colors cursor-pointer"
           >
             <HiOutlinePlus className="w-4 h-4" />
             <span>{t('add', { defaultValue: 'Add' })}</span>
@@ -170,11 +184,11 @@ export function PaymentMethods() {
         </div>
 
         {paymentMethods.length === 0 ? (
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#2d2d35] flex items-center justify-center mx-auto mb-4">
-              <HiCreditCard className="w-8 h-8 text-[#6b7280]" />
+          <div className="theme-bg-secondary theme-border border rounded-xl p-8 text-center">
+            <div className="w-16 h-16 rounded-full theme-bg-tertiary flex items-center justify-center mx-auto mb-4">
+              <HiCreditCard className="w-8 h-8 theme-text-muted" />
             </div>
-            <p className="text-[#6b7280] text-sm mb-4">{t('noPaymentMethodsAdded', { defaultValue: 'No payment methods added yet' })}</p>
+            <p className="theme-text-muted text-sm mb-4">{t('noPaymentMethodsAdded', { defaultValue: 'No payment methods added yet' })}</p>
             <Button
               onClick={() => setIsAddModalOpen(true)}
               size="sm"
@@ -191,7 +205,7 @@ export function PaymentMethods() {
               return (
                 <div
                   key={method.id}
-                  className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4 relative hover:bg-[#25252a] hover:border-[#3a3a44] transition-all"
+                  className="theme-bg-secondary theme-border border rounded-xl p-4 relative hover:theme-bg-tertiary hover:theme-border-secondary transition-all"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3 flex-1">
@@ -208,14 +222,14 @@ export function PaymentMethods() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-white font-semibold text-sm">{method.name}</h3>
+                          <h3 className="theme-text-primary font-semibold text-sm">{method.name}</h3>
                           {method.isDefault && (
                             <span className="px-2 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
                               {t('default', { defaultValue: 'Default' })}
                             </span>
                           )}
                         </div>
-                        <p className="text-[#a0a0a8] text-sm font-mono">
+                        <p className="theme-text-secondary text-sm font-mono">
                           {formatAccountNumber(method.accountNumber)}
                         </p>
                       </div>
@@ -225,15 +239,15 @@ export function PaymentMethods() {
                       {!method.isDefault && (
                         <button
                           onClick={() => handleSetDefault(method.id)}
-                          className="w-8 h-8 rounded-lg bg-[#2d2d35] hover:bg-[#35353d] flex items-center justify-center text-[#a0a0a8] hover:text-white transition-colors cursor-pointer"
+                          className="w-8 h-8 rounded-lg theme-bg-tertiary hover:theme-bg-secondary flex items-center justify-center theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
                           title={t('setAsDefault', { defaultValue: 'Set as default' })}
                         >
                           <HiCreditCard className="w-4 h-4" />
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeletePaymentMethod(method.id)}
-                        className="w-8 h-8 rounded-lg bg-[#2d2d35] hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center text-[#a0a0a8] hover:text-red-400 transition-colors cursor-pointer border border-transparent"
+                        onClick={() => handleDeleteClick(method.id)}
+                        className="w-8 h-8 rounded-lg theme-bg-tertiary hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center theme-text-secondary hover:text-red-400 transition-colors cursor-pointer border border-transparent"
                         title={t('delete', { defaultValue: 'Delete' })}
                       >
                         <AiOutlineDelete className="w-4 h-4" />
@@ -265,7 +279,7 @@ export function PaymentMethods() {
                 setFormData({ ...formData, type: value })
               }
             >
-              <SelectTrigger className="w-full bg-[#1f1f24] border-[#2d2d35] text-white cursor-pointer">
+              <SelectTrigger className="w-full bg-[#1f1f24] theme-border theme-text-primary cursor-pointer">
                 <SelectValue>
                   {formData.type && (() => {
                     const methodType = PAYMENT_METHOD_TYPES[formData.type]
@@ -289,10 +303,10 @@ export function PaymentMethods() {
                   })()}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-[#1f1f24] border-[#2d2d35]">
+              <SelectContent className="bg-[#1f1f24] theme-border">
                 <SelectItem
                   value="orange_money"
-                  className="text-white hover:bg-[#2d2d35] cursor-pointer"
+                  className="theme-text-primary hover:theme-bg-tertiary cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <img
@@ -308,7 +322,7 @@ export function PaymentMethods() {
                 </SelectItem>
                 <SelectItem
                   value="mtn_mobile_money"
-                  className="text-white hover:bg-[#2d2d35] cursor-pointer"
+                  className="theme-text-primary hover:theme-bg-tertiary cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <img
@@ -324,7 +338,7 @@ export function PaymentMethods() {
                 </SelectItem>
                 <SelectItem
                   value="bank_account"
-                  className="text-white hover:bg-[#2d2d35] cursor-pointer"
+                  className="theme-text-primary hover:theme-bg-tertiary cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{PAYMENT_METHOD_TYPES.bank_account.icon}</span>
@@ -344,7 +358,7 @@ export function PaymentMethods() {
                 value={formData.accountName}
                 onChange={(e) => setFormData({ ...formData, accountName: e.target.value })}
                 placeholder={t('enterAccountName', { defaultValue: 'Enter account name' })}
-                className="bg-[#1f1f24] border-[#2d2d35] text-white"
+                className="bg-[#1f1f24] theme-border theme-text-primary"
               />
             </div>
           )}
@@ -363,7 +377,7 @@ export function PaymentMethods() {
                   ? t('enterAccountNumber', { defaultValue: 'Enter account number' })
                   : t('enterPhoneNumberExample', { defaultValue: 'Enter phone number (e.g., 697123456)' })
               }
-              className="bg-[#1f1f24] border-[#2d2d35] text-white"
+              className="bg-[#1f1f24] theme-border theme-text-primary"
             />
           </div>
 
@@ -375,6 +389,46 @@ export function PaymentMethods() {
               disabled={loading}
             >
               {loading ? t('adding', { defaultValue: 'Adding...' }) : t('addPaymentMethod')}
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
+
+      {/* Delete Confirmation Modal */}
+      <BottomSheet
+        isOpen={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        title={t('confirmDelete', { defaultValue: 'Confirm Delete' })}
+      >
+        <div className="px-5 py-6 space-y-6">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+              <AiOutlineDelete className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold theme-text-primary mb-2">
+              {t('confirmRemovePaymentMethod', { defaultValue: 'Are you sure you want to remove this payment method?' })}
+            </h3>
+            <p className="text-sm theme-text-secondary">
+              {t('deleteWarning', { defaultValue: 'This action cannot be undone.' })}
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+              className="flex-1 cursor-pointer"
+              disabled={loading}
+            >
+              {t('cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="flex-1 cursor-pointer"
+              disabled={loading}
+            >
+              {loading ? t('deleting', { defaultValue: 'Deleting...' }) : t('delete', { defaultValue: 'Delete' })}
             </Button>
           </div>
         </div>

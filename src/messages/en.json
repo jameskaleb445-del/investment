@@ -256,6 +256,7 @@
     "paymentMethod": "Payment Method",
     "accountName": "Account Name",
     "accountNumber": "Account Number",
+    "phoneNumber": "Phone Number",
     "enterAccountName": "Enter account name",
     "enterAccountNumber": "Enter account number",
     "enterPhoneNumberExample": "Enter phone number (e.g., 697123456)",
@@ -267,7 +268,11 @@
     "paymentMethodRemoved": "Payment method removed",
     "failedToRemovePaymentMethod": "Failed to remove payment method",
     "defaultPaymentMethodUpdated": "Default payment method updated",
-    "failedToUpdateDefaultPaymentMethod": "Failed to update default payment method"
+    "failedToUpdateDefaultPaymentMethod": "Failed to update default payment method",
+    "confirmDelete": "Confirm Delete",
+    "deleteWarning": "This action cannot be undone.",
+    "deleting": "Deleting...",
+    "cancel": "Cancel"
   },
   "transactions": {
     "deposit": "Deposit",

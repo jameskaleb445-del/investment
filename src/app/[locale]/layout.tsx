@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { locales } from '../../i18n/config'
 import '../globals.css'
 import { AuthProvider } from '../contexts/AuthContext'
+import { ThemeProvider } from '../contexts/ThemeContext'
 import { Toaster } from '../components/ui/toaster'
 import { TopLoadingBar } from '../components/ui/top-loading-bar'
 import { Suspense } from 'react'
@@ -15,7 +16,6 @@ export const metadata: Metadata = {
   title: 'Investment Platform - Rapid Return Assets',
   description: 'Invest in physical assets with rapid returns',
   manifest: '/manifest.json',
-  themeColor: '#1a1a1f',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -30,6 +30,12 @@ export const metadata: Metadata = {
       { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
     ],
   },
+}
+
+export function generateViewport() {
+  return {
+    themeColor: '#1a1a1f',
+  }
 }
 
 export function generateStaticParams() {
@@ -55,16 +61,18 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="antialiased bg-[#1a1a1f]">
+      <body className="antialiased theme-bg-primary transition-colors">
         <PWARegistration />
-        <NextIntlClientProvider messages={messages}>
-          <Suspense fallback={null}>
-            <TopLoadingBar />
-          </Suspense>
-          <AuthProvider>{children}</AuthProvider>
-          <Toaster />
-          <InstallPrompt />
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider messages={messages}>
+            <Suspense fallback={null}>
+              <TopLoadingBar />
+            </Suspense>
+            <AuthProvider>{children}</AuthProvider>
+            <Toaster />
+            <InstallPrompt />
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

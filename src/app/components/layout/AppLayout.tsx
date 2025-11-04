@@ -9,7 +9,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <>
-      <main className="pb-28 min-h-screen overflow-x-hidden bg-[#1a1a1f] relative">
+      <main className="pb-28 min-h-screen overflow-x-hidden theme-bg-primary relative transition-colors">
         {children}
       </main>
       <BottomNav />

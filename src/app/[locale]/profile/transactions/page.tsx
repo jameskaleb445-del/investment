@@ -116,19 +116,19 @@ export default function TransactionsPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         {/* Header - Fixed */}
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 border-b border-[#2d2d35] bg-[#1a1a1f] backdrop-blur-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 theme-border border-b theme-bg-primary backdrop-blur-sm">
           <Link
             href="/profile"
-            className="text-[#9ca3af] hover:text-white transition-colors"
+            className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
           >
             <AiOutlineArrowLeft className="w-6 h-6" />
           </Link>
-          <h1 className="text-lg font-semibold text-white">Transaction History</h1>
+          <h1 className="text-lg font-semibold theme-text-primary">Transaction History</h1>
           <button
             onClick={() => setIsFilterOpen(true)}
-            className="text-[#9ca3af] hover:text-white transition-colors cursor-pointer"
+            className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
           >
             <FaSlidersH size={16}  />
           </button>
@@ -147,40 +147,40 @@ export default function TransactionsPage() {
         >
           <div className="px-5 py-6 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white">Filter by Type</label>
+              <label className="text-sm font-medium theme-text-primary">Filter by Type</label>
               <Select value={filter} onValueChange={(value) => {
                 setFilter(value)
                 setIsFilterOpen(false)
               }}>
-                <SelectTrigger className="w-full bg-[#1f1f24] border-[#2d2d35] text-white">
+                <SelectTrigger className="w-full theme-bg-secondary theme-border theme-text-primary cursor-pointer">
                   <SelectValue placeholder="Filter transactions" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1f1f24] border-[#2d2d35]">
-                  <SelectItem value="all" className="text-white hover:bg-[#2d2d35]">
+                <SelectContent className="theme-bg-secondary theme-border">
+                  <SelectItem value="all" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     All Transactions
                   </SelectItem>
-                  <SelectItem value="deposit" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="deposit" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Deposits
                   </SelectItem>
-                  <SelectItem value="withdrawal" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="withdrawal" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Withdrawals
                   </SelectItem>
-                  <SelectItem value="investment" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="investment" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Investments
                   </SelectItem>
-                  <SelectItem value="return" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="return" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Returns
                   </SelectItem>
-                  <SelectItem value="commission" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="commission" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Commissions
                   </SelectItem>
-                  <SelectItem value="completed" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="completed" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Completed
                   </SelectItem>
-                  <SelectItem value="pending" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="pending" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Pending
                   </SelectItem>
-                  <SelectItem value="failed" className="text-white hover:bg-[#2d2d35]">
+                  <SelectItem value="failed" className="theme-text-primary hover:theme-bg-tertiary cursor-pointer">
                     Failed
                   </SelectItem>
                 </SelectContent>

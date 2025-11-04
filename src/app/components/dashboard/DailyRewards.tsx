@@ -55,7 +55,7 @@ export function DailyRewards({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TfiGift className="w-5 h-5 text-[#8b5cf6]" />
-          <h3 className="text-base font-semibold text-white">{t('title')}</h3>
+          <h3 className="text-base font-semibold theme-text-primary">{t('title')}</h3>
         </div>
         {streak > 0 && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#8b5cf6]/20 border border-[#8b5cf6]/30">
@@ -69,15 +69,15 @@ export function DailyRewards({
 
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-xs text-[#a0a0a8] mb-1">{t('todaysReward')}</p>
-          <p className="text-xl font-bold text-white">
+          <p className="text-xs theme-text-secondary mb-1">{t('todaysReward')}</p>
+          <p className="text-xl font-bold theme-text-primary">
             {formatCurrency(dailyReward)}
           </p>
         </div>
         <Button
           onClick={handleClaim}
           disabled={claimed || isClaiming}
-          className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isClaiming ? (
             t('claiming')
@@ -94,7 +94,7 @@ export function DailyRewards({
 
       {/* Weekly Progress */}
       <div className="pt-3 border-t border-[#8b5cf6]/20">
-        <p className="text-xs text-[#a0a0a8] mb-2">{t('thisWeek')}</p>
+        <p className="text-xs theme-text-secondary mb-2">{t('thisWeek')}</p>
         <div className="flex items-center justify-between gap-1.5">
           {days.map((day, index) => {
             const isPast = index < todayIndex
@@ -111,10 +111,10 @@ export function DailyRewards({
                     ? 'bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 ring-2 ring-[#8b5cf6]/30'
                     : isToday && claimed
                     ? 'bg-[#8b5cf6]/20 border border-[#8b5cf6]/30'
-                    : 'bg-[#1f1f24] border border-[#2d2d35] opacity-50'
+                    : 'theme-bg-secondary theme-border border opacity-50'
                 }`}
               >
-                <span className="text-[10px] font-medium text-[#a0a0a8]">
+                <span className="text-[10px] font-medium theme-text-secondary">
                   {day}
                 </span>
                 {isPast || (isToday && claimed) ? (

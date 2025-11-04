@@ -95,7 +95,7 @@ export function BottomSheet({
             exit="exit"
             transition={backdropTransition}
             onClick={handleBackdropClick}
-            className="fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 bg-black/80 z-[100] cursor-pointer"
             style={{ willChange: 'opacity' }}
           />
 
@@ -106,7 +106,7 @@ export function BottomSheet({
             animate="visible"
             exit="exit"
             transition={sheetTransition}
-            className="fixed bottom-0 left-0 right-0 z-[101] bg-[#1a1a1f] rounded-t-3xl border-t border-[#2d2d35] shadow-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[101] theme-bg-primary rounded-t-3xl border-t theme-border shadow-2xl overflow-hidden flex flex-col"
             style={{ 
               maxHeight,
               willChange: 'transform',
@@ -115,11 +115,11 @@ export function BottomSheet({
           >
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between p-5 border-b border-[#2d2d35] flex-shrink-0">
-                <h2 className="text-xl font-bold text-white">{title}</h2>
+              <div className="flex items-center justify-between p-5 border-b theme-border flex-shrink-0">
+                <h2 className="text-xl font-bold theme-text-primary">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#a0a0a8] hover:text-white hover:bg-[#2d2d35] transition-colors cursor-pointer"
+                  className="w-9 h-9 rounded-full flex items-center justify-center theme-text-secondary hover:theme-text-primary hover:theme-bg-tertiary transition-colors cursor-pointer"
                   aria-label="Close"
                 >
                   <AiOutlineClose className="w-5 h-5" />

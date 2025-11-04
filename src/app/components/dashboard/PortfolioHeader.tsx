@@ -8,6 +8,8 @@ import { IoPersonCircleOutline } from 'react-icons/io5'
 import Link from 'next/link'
 import { HiArrowPath, HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
 import { useTranslations } from 'next-intl'
+import { LanguageSelector } from '@/app/components/ui/language-selector'
+import { ThemeToggle } from '@/app/components/ui/theme-toggle'
 
 interface PortfolioHeaderProps {
   totalBalance: number
@@ -77,10 +79,13 @@ export function PortfolioHeader({
       <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1f] via-transparent to-transparent" />
       
       {/* Content */}
-      <div className="relative px-4 pt-6 pb-6">
-        {/* Top Bar - Notifications and Profile */}
+      <div className="relative px-4 pt-6 pb-6 overflow-visible">
+        {/* Top Bar - Language, Theme, Notifications and Profile */}
         <div className="flex items-center justify-between mb-6">
-          <div className="w-10" /> {/* Spacer for alignment */}
+          <div className="flex items-center gap-3 relative z-10">
+            <LanguageSelector variant="compact" className="flex-shrink-0" />
+            <ThemeToggle variant="compact" />
+          </div>
           <div className="flex items-center gap-4">
             <button className="text-white/80 hover:text-white transition-colors cursor-pointer relative">
               <FaRegBell  className="w-6 h-6" />

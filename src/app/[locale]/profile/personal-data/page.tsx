@@ -49,7 +49,7 @@ export default async function PersonalDataPage({
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#1a1a1f]">
+      <div className="min-h-screen theme-bg-primary">
         <PersonalDataForm 
           user={user}
           profile={profile}

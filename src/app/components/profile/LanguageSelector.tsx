@@ -14,7 +14,6 @@ import { HiTranslate } from 'react-icons/hi'
 const languages = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
 ]
 
 export function LanguageSelector() {
@@ -34,7 +33,7 @@ export function LanguageSelector() {
     
     // Get current path without locale prefix
     const getPathWithoutLocale = (path: string) => {
-      const localePattern = new RegExp(`^/(${['en', 'fr', 'es'].join('|')})(/|$)`)
+      const localePattern = new RegExp(`^/(${['en', 'fr'].join('|')})(/|$)`)
       return path.replace(localePattern, '/') || '/'
     }
     
@@ -62,9 +61,9 @@ export function LanguageSelector() {
 
   return (
     <div className="flex items-center gap-2">
-      <HiTranslate className="w-5 h-5 text-[#a0a0a8]" />
+      <HiTranslate className="w-5 h-5 theme-text-secondary" />
       <Select value={locale} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="w-[140px] bg-[#2d2d35] border-[#3a3a44] text-white h-9">
+        <SelectTrigger className="w-[140px] theme-bg-tertiary theme-border-secondary theme-text-primary h-9">
           <SelectValue>
             <span className="flex items-center gap-2">
               <span>{currentLanguage.flag}</span>
@@ -72,12 +71,12 @@ export function LanguageSelector() {
             </span>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="bg-[#1f1f24] border-[#2d2d35]">
+        <SelectContent className="theme-bg-secondary theme-border">
           {languages.map((lang) => (
             <SelectItem
               key={lang.code}
               value={lang.code}
-              className="text-white hover:bg-[#2d2d35] cursor-pointer"
+              className="theme-text-primary hover:theme-bg-tertiary cursor-pointer"
             >
               <span className="flex items-center gap-2">
                 <span>{lang.flag}</span>

@@ -22,8 +22,8 @@ export function PerformanceInsights({
     <div className="bg-gradient-to-br from-[#8b5cf6]/10 via-[#7c3aed]/5 to-transparent border border-[#8b5cf6]/20 rounded-xl p-4">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-white mb-1">{t('title')}</h3>
-          <p className="text-2xl font-bold text-white">{formatCurrencyUSD(totalEarnings)}</p>
+          <h3 className="text-sm font-semibold theme-text-primary mb-1">{t('title')}</h3>
+          <p className="text-2xl font-bold theme-text-primary">{formatCurrencyUSD(totalEarnings)}</p>
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
           isPositive 
@@ -40,12 +40,12 @@ export function PerformanceInsights({
       </div>
       <div className="flex items-center gap-4 pt-3 border-t border-[#8b5cf6]/20">
         <div>
-          <p className="text-xs text-[#a0a0a8] mb-0.5">{t('activeProjects')}</p>
-          <p className="text-base font-semibold text-white">{activeProjects}</p>
+          <p className="text-xs theme-text-secondary mb-0.5">{t('activeProjects')}</p>
+          <p className="text-base font-semibold theme-text-primary">{activeProjects}</p>
         </div>
-        <div className="w-px h-8 bg-[#2d2d35]"></div>
+        <div className="w-px h-8 theme-bg-tertiary"></div>
         <div>
-          <p className="text-xs text-[#a0a0a8] mb-0.5">{t('roiAverage')}</p>
+          <p className="text-xs theme-text-secondary mb-0.5">{t('roiAverage')}</p>
           <p className="text-base font-semibold text-[#10b981]">15.2%</p>
         </div>
       </div>

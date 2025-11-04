@@ -38,10 +38,10 @@ export function ReferralCode({ referralCode }: ReferralCodeProps) {
   }
 
   return (
-    <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4 sm:p-5 space-y-4">
+    <div className="theme-bg-secondary theme-border border rounded-xl p-4 sm:p-5 space-y-4">
       <div>
-        <h3 className="text-lg font-bold text-white mb-2">{t('yourReferralCode')}</h3>
-        <p className="text-sm text-[#a0a0a8] leading-relaxed">
+        <h3 className="text-lg font-bold theme-text-primary mb-2">{t('yourReferralCode')}</h3>
+        <p className="text-sm theme-text-secondary leading-relaxed">
           {t('shareDescription')}
         </p>
       </div>
@@ -52,12 +52,12 @@ export function ReferralCode({ referralCode }: ReferralCodeProps) {
           type="text"
           value={referralCode}
           readOnly
-          className="bg-[#2d2d35] border-[#3a3a44] text-white text-base sm:text-lg font-semibold pr-12 sm:pr-14 py-3 cursor-pointer"
+          className="theme-bg-tertiary theme-border-secondary theme-text-primary text-base sm:text-lg font-semibold pr-12 sm:pr-14 py-3 cursor-pointer"
           onClick={handleCopy}
         />
         <button
           onClick={handleCopy}
-          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[#8b5cf6] hover:text-[#7c3aed] transition-colors cursor-pointer p-2 hover:bg-[#3a3a44] rounded-lg active:scale-95"
+          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-[#8b5cf6] hover:text-[#7c3aed] transition-colors cursor-pointer p-2 hover:theme-bg-tertiary rounded-lg active:scale-95"
         >
           <FaCopy className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -65,52 +65,52 @@ export function ReferralCode({ referralCode }: ReferralCodeProps) {
 
       {/* Sharing Options */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-white">{t('shareOn')}</p>
+        <p className="text-sm font-medium theme-text-primary">{t('shareOn')}</p>
         <div className="grid grid-cols-4 gap-2">
           <button
             onClick={handleCopy}
-            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 bg-[#2d2d35] hover:bg-[#35353d] border border-[#3a3a44] hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
+            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 theme-bg-tertiary hover:theme-bg-secondary border theme-border-secondary hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
             title={t('copy')}
           >
             <FaCopy className="w-5 h-5 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
-            <span className="text-xs text-white font-medium hidden sm:inline">{t('copy')}</span>
+            <span className="text-xs theme-text-primary font-medium hidden sm:inline">{t('copy')}</span>
           </button>
 
           <button
             onClick={() => handleShare('whatsapp')}
-            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 bg-[#2d2d35] hover:bg-[#35353d] border border-[#3a3a44] hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
+            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 theme-bg-tertiary hover:theme-bg-secondary border theme-border-secondary hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
             title={t('whatsapp')}
           >
             <FaWhatsapp className="w-5 h-5 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
-            <span className="text-xs text-white font-medium hidden sm:inline">{t('whatsapp')}</span>
+            <span className="text-xs theme-text-primary font-medium hidden sm:inline">{t('whatsapp')}</span>
           </button>
 
           <button
             onClick={() => handleShare('instagram')}
-            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 bg-[#2d2d35] hover:bg-[#35353d] border border-[#3a3a44] hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
+            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 theme-bg-tertiary hover:theme-bg-secondary border theme-border-secondary hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
             title={t('instagram')}
           >
             <BsInstagram className="w-5 h-5 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
-            <span className="text-xs text-white font-medium hidden sm:inline">{t('instagram')}</span>
+            <span className="text-xs theme-text-primary font-medium hidden sm:inline">{t('instagram')}</span>
           </button>
 
           <button
             onClick={handleCopy}
-            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 bg-[#2d2d35] hover:bg-[#35353d] border border-[#3a3a44] hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
+            className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 theme-bg-tertiary hover:theme-bg-secondary border theme-border-secondary hover:border-[#8b5cf6]/50 rounded-lg transition-all cursor-pointer group active:scale-95"
             title={t('more')}
           >
             <HiDotsHorizontal className="w-5 h-5 text-[#8b5cf6] group-hover:scale-110 transition-transform" />
-            <span className="text-xs text-white font-medium hidden sm:inline">{t('more')}</span>
+            <span className="text-xs theme-text-primary font-medium hidden sm:inline">{t('more')}</span>
           </button>
         </div>
       </div>
 
       {/* Commission Info */}
       <div className="bg-gradient-to-br from-[#8b5cf6]/20 to-[#7c3aed]/10 border border-[#8b5cf6]/30 rounded-lg p-3 sm:p-4">
-        <p className="text-xs sm:text-sm text-[#a0a0a8] mb-2">
-          <span className="font-semibold text-white">{t('commissionStructure')}:</span>
+        <p className="text-xs sm:text-sm theme-text-secondary mb-2">
+          <span className="font-semibold theme-text-primary">{t('commissionStructure')}:</span>
         </p>
-        <div className="space-y-1.5 text-xs text-[#a0a0a8] leading-relaxed">
+        <div className="space-y-1.5 text-xs theme-text-secondary leading-relaxed">
           <p className="flex items-start gap-2">
             <span className="text-[#8b5cf6] mt-0.5">•</span>
             <span>{t('level1', { percentage: '10', defaultValue: 'Level 1 (Direct): 10% commission' })}</span>

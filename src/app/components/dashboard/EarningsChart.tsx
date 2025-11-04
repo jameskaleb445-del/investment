@@ -71,7 +71,7 @@ export function EarningsChart({ data }: EarningsChartProps) {
         <ChartTooltip
           content={
             <ChartTooltipContent
-              className="w-[150px] !bg-[#1f1f24] !border-[#2d2d35] !text-white z-[9999]"
+              className="w-[150px] !theme-bg-secondary !theme-border !theme-text-primary z-[9999]"
               nameKey="earnings"
               labelFormatter={(value) => {
                 return value
