@@ -162,10 +162,14 @@ export function InstallPrompt() {
             </div>
 
             <div className="mb-6 space-y-4">
-              <div className="bg-[#2d2d35] rounded-lg p-4">
-                <p className="text-sm font-medium text-white mb-2">How to install:</p>
-                <ol className="text-xs text-[#a0a0a8] space-y-2 list-decimal list-inside">
-                  <li>Tap the Share button <span className="inline-block w-4 h-4 bg-white/20 rounded mx-1">⎋</span> at the bottom</li>
+              <div className="theme-bg-secondary theme-border border rounded-lg p-4">
+                <p className="text-sm font-medium theme-text-primary mb-2">How to install:</p>
+                <ol className="text-xs theme-text-secondary space-y-2 list-decimal list-inside">
+                  <li>
+                    Tap the Share button
+                    <span className="inline-block w-4 h-4 theme-bg-tertiary theme-border-secondary border rounded mx-1 text-center leading-4">⎋</span>
+                    at the bottom
+                  </li>
                   <li>Scroll down and tap "Add to Home Screen"</li>
                   <li>Tap "Add" to confirm</li>
                 </ol>
