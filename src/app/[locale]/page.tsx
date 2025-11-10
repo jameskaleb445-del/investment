@@ -8,8 +8,6 @@ import { GiMoneyStack, GiTakeMyMoney } from "react-icons/gi";
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { PortfolioHeader } from '@/app/components/dashboard/PortfolioHeader'
 import { TransactionsList } from '@/app/components/transactions/TransactionsList'
-import { EarningsChart } from '@/app/components/dashboard/EarningsChart'
-import { PerformanceInsights } from '@/app/components/dashboard/PerformanceInsights'
 import { DailyRewards } from '@/app/components/dashboard/DailyRewards'
 import { HomeSkeleton } from '@/app/components/dashboard/HomeSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
@@ -196,18 +194,6 @@ export default function Home() {
   const totalInvested = wallet ? Number(wallet.invested_amount) : 0
   const totalEarnings = wallet ? Number(wallet.total_earnings) : 0
 
-  // Mock earnings data for chart (last 7 days) - with variation for zigzag effect
-  // Values in USD * 100 for better chart readability (so $200 = 20000)
-  const earningsData = [
-    { date: 'Mon', earnings: 2000 }, // $200 USD = 120000 XAF
-    { date: 'Tue', earnings: 1092 }, // $292 USD = 175000 XAF
-    { date: 'Wed', earnings: 2330 }, // $233 USD = 140000 XAF
-    { date: 'Thu', earnings: 3250 }, // $325 USD = 195000 XAF
-    { date: 'Fri', earnings: 275 }, // $275 USD = 165000 XAF
-    { date: 'Sat', earnings: 367 }, // $367 USD = 220000 XAF
-    { date: 'Today', earnings: Math.round(totalEarnings / 600) }, // Convert XAF to USD
-  ]
-
   const totalAssetValue = totalBalance + totalInvested
   const calculatedPercentageChange = totalBalance > 0 
     ? parseFloat(((totalEarnings / totalBalance) * 100).toFixed(2))
@@ -343,22 +329,6 @@ export default function Home() {
             />
 
    {/* Performance Insights */}
-   <PerformanceInsights 
-              totalEarnings={totalEarnings}
-              monthlyGrowth={12.5}
-              activeProjects={investments.length}
-            />
-
-            {/* Earnings Chart */}
-            <div className="theme-bg-secondary theme-border border rounded-xl p-4">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h2 className="text-base font-semibold theme-text-primary mb-1">{t('earningsOverview')}</h2>
-                  <p className="text-xs theme-text-secondary">{t('last7Days')}</p>
-                </div>
-              </div>
-              <EarningsChart data={earningsData} />
-            </div>
             {/* Active Investments */}
             <div className="theme-bg-secondary theme-border border rounded-xl p-5">
               <div className="flex justify-between items-center mb-5">

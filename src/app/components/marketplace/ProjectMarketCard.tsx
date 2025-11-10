@@ -10,6 +10,14 @@ import { Button } from '@/app/components/ui/button'
 import { BottomSheet } from '@/app/components/ui/bottom-sheet'
 import { useTranslations } from 'next-intl'
 
+export interface ProjectLevel {
+  id: string
+  level: string
+  priceXaf: number
+  hourlyReturnXaf: number
+  tag?: string
+}
+
 interface ProjectMarketCardProps {
   id: string
   name: string
@@ -22,6 +30,9 @@ interface ProjectMarketCardProps {
   onClick?: () => void
   isUserInvestment?: boolean
   userInvestmentAmount?: number
+  levels?: ProjectLevel[]
+  activeLevel?: ProjectLevel | null
+  onShowLevels?: () => void
 }
 
 export function ProjectMarketCard({
@@ -36,6 +47,9 @@ export function ProjectMarketCard({
   onClick,
   isUserInvestment = false,
   userInvestmentAmount = 0,
+  levels = [],
+  activeLevel = null,
+  onShowLevels,
 }: ProjectMarketCardProps) {
   const t = useTranslations('marketplace')
   const [customAmount, setCustomAmount] = useState('')
@@ -51,7 +65,7 @@ export function ProjectMarketCard({
 
   return (
     <div
-      className="theme-bg-secondary theme-border border rounded-lg p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all w-full h-full flex-shrink-0 relative"
+      className="theme-bg-secondary theme-border border rounded-lg p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all w-full flex-shrink-0 relative"
     >
       {/* ROI percentage and circular progress at top right */}
       <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
@@ -118,12 +132,22 @@ export function ProjectMarketCard({
               {t('funding')}
             </span>
           )}
+          {activeLevel && (
+            <div className="mt-2 inline-flex items-center gap-2 px-2 py-1 rounded-md bg-[#8b5cf6]/10 border border-[#8b5cf6]/25">
+              <span className="text-[11px] font-semibold text-[#8b5cf6] uppercase tracking-wide">
+                {t('selectedLevelLabel', { level: activeLevel.level, defaultValue: `Level ${activeLevel.level}` })}
+              </span>
+              <span className="text-[10px] theme-text-secondary">
+                {formatCurrency(activeLevel.priceXaf)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="space-y-3">
         {/* Custom Investment Input - Only show for non-user investments */}
-        {!isUserInvestment && (
+        {!isUserInvestment && levels.length === 0 && (
           <div className="space-y-2">
             <label className="text-xs text-[#a0a0a8]">{t('calculateYourReturns', { defaultValue: 'Calculate your returns' })}</label>
             <div className="relative">
@@ -177,6 +201,24 @@ export function ProjectMarketCard({
           <span>{durationDays} {t('days', { defaultValue: 'days' })}</span>
         </div>
 
+        {/* Investment Levels */}
+        {levels.length > 0 && !isUserInvestment && (
+          <div className="mt-3">
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onShowLevels?.()
+              }}
+              className="flex items-center justify-between w-full px-3 py-2 theme-bg-tertiary theme-border border rounded-lg text-xs font-medium theme-text-primary hover:theme-bg-tertiary/80 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={!onShowLevels}
+            >
+              <span>{t('viewInvestmentPlans', { defaultValue: 'View investment levels' })}</span>
+              <span className="text-[#8b5cf6] text-xs">+</span>
+            </button>
+          </div>
+        )}
+
         {/* Invest Button or Investment Info */}
         {isUserInvestment ? (
           <div className="bg-gradient-to-r from-[#10b981]/20 to-[#10b981]/10 border border-[#10b981]/30 rounded-lg p-3 mt-2">
@@ -194,16 +236,18 @@ export function ProjectMarketCard({
             </div>
           </div>
         ) : (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation()
-              onClick?.()
-            }}
-            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold mt-2"
-            size="sm"
-          >
-            {t('investNow', { defaultValue: 'Invest Now' })}
-          </Button>
+          levels.length === 0 && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation()
+                onClick?.()
+              }}
+              className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold mt-2"
+              size="sm"
+            >
+              {t('investNow', { defaultValue: 'Invest Now' })}
+            </Button>
+          )
         )}
       </div>
 

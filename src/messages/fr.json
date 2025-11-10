@@ -22,7 +22,7 @@
   },
   "navigation": {
     "home": "Accueil",
-    "marketplace": "Marché",
+    "marketplace": "Investir",
     "wallet": "Portefeuille",
     "referrals": "Parrainage",
     "profile": "Profil",
@@ -115,7 +115,7 @@
     "enterAmount": "Entrer le montant..."
   },
   "marketplace": {
-    "title": "Marché",
+    "title": "Investir",
     "filter": "Filtrer",
     "searchProjects": "Rechercher des projets...",
     "activeInvestments": "Mes investissements actifs",
@@ -191,7 +191,15 @@
     "keyPoints": "Points clés :",
     "roiCalculatedOnInvestment": "Le ROI est calculé sur votre montant d'investissement",
     "getBackOriginalPlusProfit": "Vous récupérez votre investissement initial + le profit",
-    "returnsPaidAfterDays": "Les retours sont payés automatiquement après {days} jours"
+    "returnsPaidAfterDays": "Les retours sont payés automatiquement après {days} jours",
+    "viewInvestmentPlans": "Voir les niveaux d'investissement",
+    "hideInvestmentPlans": "Masquer les niveaux d'investissement",
+    "levelLabel": "Niveau",
+    "priceLabel": "Prix",
+    "hourlyReturnLabel": "Gain par heure",
+    "investInLevel": "Investir dans {level}",
+    "selectedLevelLabel": "Niveau {level}",
+    "selectedLevelButton": "Niveau sélectionné"
   },
   "referrals": {
     "title": "Parrainage",

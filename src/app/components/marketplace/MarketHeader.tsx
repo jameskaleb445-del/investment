@@ -7,8 +7,7 @@ import { FaRegBell, FaSlidersH } from 'react-icons/fa'
 import { GiMoneyStack } from 'react-icons/gi'
 import { GiTakeMyMoney } from 'react-icons/gi'
 import { useTranslations } from 'next-intl'
-import { LanguageSelector } from '@/app/components/ui/language-selector'
-import { ThemeToggle } from '@/app/components/ui/theme-toggle'
+// Removed LanguageSelector and ThemeToggle to keep them only on Home
 
 interface MarketHeaderProps {
   onSearch?: (query: string) => void
@@ -36,8 +35,6 @@ export function MarketHeader({ onSearch, onFilterClick, totalInvested = 0, total
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold theme-text-primary">{t('title')}</h1>
           <div className="flex items-center gap-3">
-            <LanguageSelector variant="compact" />
-            <ThemeToggle variant="compact" />
             {(totalInvested > 0 || totalExpected > 0) && (
               <>
                 <div className="flex items-center gap-1.5 px-2 py-1 theme-bg-secondary rounded-md theme-border border">
