@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { HiHome, HiChartBar, HiUser, HiPlus, HiUserGroup } from 'react-icons/hi'
 import { FaWallet } from 'react-icons/fa'
 import { cn } from '@/app/lib/utils'
@@ -17,6 +17,7 @@ export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const locale = useLocale()
+  const tNavigation = useTranslations('navigation')
 
   // Helper function to remove locale prefix from pathname
   const getPathWithoutLocale = (path: string) => {
@@ -59,11 +60,11 @@ export function BottomNav() {
   }
 
   const navItems = [
-    { href: buildHref('/'), icon: RiHome2Line  },
-    { href: buildHref('/marketplace'), icon: SlChart  },
-    { href: buildHref('/wallet'), icon: IoWalletOutline   , isMiddle: true },
-    { href: buildHref('/referrals'), icon: GiCheckboxTree  },
-    { href: buildHref('/profile'), icon: FaRegCircleUser  },
+    { href: buildHref('/'), icon: RiHome2Line, label: tNavigation('home') },
+    { href: buildHref('/marketplace'), icon: SlChart, label: tNavigation('marketplace') },
+    { href: buildHref('/wallet'), icon: IoWalletOutline, label: tNavigation('wallet'), isMiddle: true },
+    { href: buildHref('/referrals'), icon: GiCheckboxTree, label: tNavigation('referrals') },
+    { href: buildHref('/profile'), icon: FaRegCircleUser, label: tNavigation('profile') },
   ]
 
   return (
@@ -124,6 +125,14 @@ export function BottomNav() {
                       </motion.div>
                     </motion.div>
                   </Link>
+                  <span
+                    className={cn(
+                      "mt-1 text-[11px] font-medium transition-colors",
+                      isActive ? "theme-text-primary" : "theme-text-secondary"
+                    )}
+                  >
+                    {item.label}
+                  </span>
                   {/* Plus button overlay - triggers deposit */}
                   <button
                     onClick={(e) => {
@@ -144,7 +153,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center justify-center px-3 py-2 rounded-lg relative"
+                className="flex flex-col items-center justify-center px-3 py-1 rounded-lg relative"
               >
                 <motion.div
                   animate={isActive ? {
@@ -184,6 +193,14 @@ export function BottomNav() {
                     />
                   )}
                 </motion.div>
+                <span
+                  className={cn(
+                    "mt-1 text-[11px] font-medium transition-colors",
+                    isActive ? "theme-text-primary" : "theme-text-secondary"
+                  )}
+                >
+                  {item.label}
+                </span>
               </Link>
             )
           })}

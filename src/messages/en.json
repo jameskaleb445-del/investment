@@ -22,7 +22,7 @@
   },
   "navigation": {
     "home": "Home",
-    "marketplace": "Market",
+    "marketplace": "Invest",
     "wallet": "Wallet",
     "referrals": "Referrals",
     "profile": "Profile",
@@ -115,7 +115,7 @@
     "enterAmount": "Enter amount..."
   },
   "marketplace": {
-    "title": "Market",
+    "title": "Invest",
     "filter": "Filter",
     "searchProjects": "Search projects...",
     "activeInvestments": "My Active Investments",
@@ -191,7 +191,15 @@
     "keyPoints": "Key Points:",
     "roiCalculatedOnInvestment": "ROI is calculated on your investment amount",
     "getBackOriginalPlusProfit": "You get back your original investment + the profit",
-    "returnsPaidAfterDays": "Returns are paid automatically after {days} days"
+    "returnsPaidAfterDays": "Returns are paid automatically after {days} days",
+    "viewInvestmentPlans": "View investment levels",
+    "hideInvestmentPlans": "Hide investment levels",
+    "levelLabel": "Level",
+    "priceLabel": "Price",
+    "hourlyReturnLabel": "Earnings per hour",
+    "investInLevel": "Invest in {level}",
+    "selectedLevelLabel": "Level {level}",
+    "selectedLevelButton": "Selected level"
   },
   "referrals": {
     "title": "Referrals",
