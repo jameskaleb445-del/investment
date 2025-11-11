@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import { formatCurrencyUSD, formatCurrency } from '@/app/utils/format'
-import { HiEye, HiEyeOff, HiBell, HiDocumentText, HiTrendingUp } from 'react-icons/hi'
-import { FaArrowUp, FaArrowDown, FaChartLine, FaExchangeAlt, FaRegBell, FaRegUserCircle } from 'react-icons/fa'
-import { IoPersonCircleOutline } from 'react-icons/io5'
+import { HiEye, HiEyeOff, HiTrendingUp } from 'react-icons/hi'
+import { FaRegBell, FaRegUserCircle } from 'react-icons/fa'
 import Link from 'next/link'
 import { HiArrowPath, HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
 import { useTranslations } from 'next-intl'
@@ -27,14 +26,12 @@ export function PortfolioHeader({
   const t = useTranslations('home.quickActions')
   const tHome = useTranslations('home')
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
-  
-  // Calculate total asset value (balance + invested)
+
   const totalAssetValue = totalBalance + totalInvested
-  
-  // Calculate percentage change from earnings (mock calculation)
-  const calculatedPercentageChange = percentageChange !== 0 
-    ? percentageChange 
-    : totalBalance > 0 
+  const calculatedPercentageChange =
+    percentageChange !== 0
+      ? percentageChange
+      : totalBalance > 0
       ? parseFloat(((totalEarnings / totalBalance) * 100).toFixed(2))
       : 0
 
@@ -42,66 +39,35 @@ export function PortfolioHeader({
   const percentageDisplay = calculatedPercentageChange.toFixed(2)
 
   const actionButtons = [
-    {
-      label: t('deposit'),
-      icon: HiMiniArrowLongDown ,
-      href: '/wallet?action=deposit',
-      bgColor: 'bg-[#8b5cf6]',
-      color: '#8b5cf6',
-    },
-    {
-      label: t('withdraw'),
-      icon: HiMiniArrowLongUp,
-      href: '/wallet?action=withdraw',
-      bgColor: 'bg-[#3b82f6]',
-      color: '#3b82f6',
-    },
-    {
-      label: t('invest'),
-      icon: HiTrendingUp,
-      href: '/marketplace',
-      bgColor: 'bg-[#10b981]',
-      color: '#10b981',
-    },
-    {
-      label: t('transfer'),
-      icon: HiArrowPath,
-      href: '/wallet?action=transfer',
-      bgColor: 'bg-[#f59e0b]',
-      color: '#f59e0b',
-    },
+    { label: t('deposit'), icon: HiMiniArrowLongDown, href: '/wallet?action=deposit' },
+    { label: t('withdraw'), icon: HiMiniArrowLongUp, href: '/wallet?action=withdraw' },
+    { label: t('invest'), icon: HiTrendingUp, href: '/marketplace' },
+    { label: t('transfer'), icon: HiArrowPath, href: '/wallet?action=transfer' },
   ]
 
   return (
     <div className="relative overflow-hidden">
-      {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#6d28d9] via-[#7c3aed] to-[#8b5cf6] opacity-90" />
-      {/* Dark mode overlay fades to black; light mode overlay fades to white */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1f] via-transparent to-transparent dark:block light:hidden" />
-      <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:hidden light:block" />
-      
-      {/* Content */}
-      <div className="relative px-4 pt-6 pb-6 overflow-visible">
-        {/* Top Bar - Language, Theme, Notifications and Profile */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-[#cbb9ff] to-[#8b5cf6] dark:from-[#4c1d95] dark:via-[#6d28d9] dark:to-[#7c3aed]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-white to-white pointer-events-none dark:hidden" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-transparent to-[#0c0c12]/80 pointer-events-none hidden dark:block" />
+
+      <div className="relative px-4 pt-6 pb-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3 relative z-10">
-            <LanguageSelector variant="compact" className="flex-shrink-0" />
+          <div className="flex items-center gap-3">
+            <LanguageSelector variant="compact" />
             <ThemeToggle variant="compact" />
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-white/80 hover:text-white transition-colors cursor-pointer relative">
-              <FaRegBell  className="w-6 h-6" />
-              {/* Notification badge */}
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            <button className="text-white/80 hover:text-white transition-colors relative">
+              <FaRegBell className="w-6 h-6" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
-           
-            <Link href="/profile" className="text-white/80 hover:text-white transition-colors cursor-pointer">
-              <FaRegUserCircle  className="w-7 h-7" />
+            <Link href="/profile" className="text-white/80 hover:text-white transition-colors">
+              <FaRegUserCircle className="w-7 h-7" />
             </Link>
           </div>
         </div>
 
-        {/* Total Asset Value Section */}
         <div className="mb-6">
           <p className="text-sm text-white/80 mb-2">{tHome('totalAssetValue')}</p>
           <div className="flex items-center gap-2 mb-3">
@@ -110,13 +76,9 @@ export function PortfolioHeader({
             </h1>
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-              className="text-white/80 hover:text-white transition-colors cursor-pointer p-1"
+              className="text-white/80 hover:text-white transition-colors p-1"
             >
-              {isBalanceVisible ? (
-                <HiEyeOff className="w-5 h-5" />
-              ) : (
-                <HiEye className="w-5 h-5" />
-              )}
+              {isBalanceVisible ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
             </button>
             <span
               className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${
@@ -129,28 +91,16 @@ export function PortfolioHeader({
               {percentageDisplay}%
             </span>
           </div>
-          
-          {isBalanceVisible && (
-            <p className="text-xs text-white/60">
-              {formatCurrency(totalAssetValue)}
-            </p>
-          )}
+          {isBalanceVisible && <p className="text-xs text-white/60">{formatCurrency(totalAssetValue)}</p>}
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-4 gap-3 relative z-10">
+        <div className="grid grid-cols-4 gap-3">
           {actionButtons.map((button) => {
             const Icon = button.icon
             return (
-              <Link
-                key={button.label}
-                href={button.href}
-                className="flex flex-col items-center gap-2 cursor-pointer group"
-              >
-                <div 
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg group-active:scale-95 transition-transform relative z-10 bg-transparent border-2 border-white/20" 
-                >
-                  <Icon className="w-6 h-6 text-white relative z-10" />
+              <Link key={button.label} href={button.href} className="flex flex-col items-center gap-2 group">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center border-2 border-white/20 bg-transparent shadow-lg group-active:scale-95 transition-transform">
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-xs font-medium text-white/90 group-hover:text-white transition-colors">
                   {button.label}
@@ -163,4 +113,3 @@ export function PortfolioHeader({
     </div>
   )
 }
-
