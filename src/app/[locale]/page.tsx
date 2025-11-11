@@ -4,16 +4,18 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatCurrencyUSD } from '@/app/utils/format'
 import { Button } from '@/app/components/ui/button'
-import { GiMoneyStack, GiTakeMyMoney } from "react-icons/gi";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { FaChartLine } from 'react-icons/fa'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { PortfolioHeader } from '@/app/components/dashboard/PortfolioHeader'
+import { LiveCreditTicker } from '@/app/components/dashboard/LiveCreditTicker'
 import { TransactionsList } from '@/app/components/transactions/TransactionsList'
 import { DailyRewards } from '@/app/components/dashboard/DailyRewards'
 import { HomeSkeleton } from '@/app/components/dashboard/HomeSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
-import { HiCash, HiTrendingUp, HiChartBar, HiBell } from 'react-icons/hi'
-import { FaRegBell } from 'react-icons/fa'
+import { HiTrendingUp } from 'react-icons/hi'
 import { HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
+import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 
 export default function Home() {
@@ -275,48 +277,50 @@ export default function Home() {
           {/* Dashboard Content */}
           <div className="px-4 pb-28 pt-4 space-y-6">
 
+            <LiveCreditTicker />
+
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-1">
-              <div className="relative bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 border border-[#10b981]/20 rounded-xl p-4 hover:border-[#10b981]/30 transition-all group">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="relative bg-gradient-to-br from-[#10b981]/12 via-[#10b981]/5 to-transparent border border-[#10b981]/25 rounded-xl p-4 hover:border-[#10b981]/40 transition-all">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center  transition-colors">
-                    <GiMoneyStack  className="w-5 h-5 text-[#10b981]" />
+                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('lifetimeEarnings')}</h3>
+                  <div className="w-9 h-9 rounded-full bg-[#10b981]/15 flex items-center justify-center">
+                    <GiTakeMyMoney className="w-4.5 h-4.5 text-[#10b981]" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('available')}</h3>
-                <p className="text-2xl font-bold text-[#10b981] mb-1">
-                  {formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '')}
-                </p>
-                <p className="text-xs text-[#10b981]/70">
-                  {formatCurrency(availableBalance)}
-                </p>
-              </div>
-              <div className="relative bg-gradient-to-br from-[#8b5cf6]/10 to-[#8b5cf6]/5 border border-[#8b5cf6]/20 rounded-xl p-4 hover:border-[#8b5cf6]/30 transition-all group">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center transition-colors">
-                    <HiTrendingUp className="w-5 h-5 text-[#a78bfa]" />
-                  </div>
-                </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('invested')}</h3>
-                <p className="text-2xl font-bold text-[#a78bfa] mb-1">
-                  {formatCurrencyUSD(totalInvested).replace(/\.\d{2}$/, '')}
-                </p>
-                <p className="text-xs text-[#a78bfa]/70">
-                  {formatCurrency(totalInvested)}
-                </p>
-              </div>
-              <div className="relative bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 border border-[#10b981]/20 rounded-xl p-4 hover:border-[#10b981]/30 transition-all group">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center transition-colors">
-                      <GiTakeMyMoney  className="w-5 h-5 text-[#10b981]" />
-                    </div>
-                </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('earnings')}</h3>
-                <p className="text-2xl font-bold text-[#10b981] mb-1">
+                <p className="text-2xl font-semibold text-[#0d9b6c] mb-1">
                   {formatCurrencyUSD(totalEarnings).replace(/\.\d{2}$/, '')}
                 </p>
                 <p className="text-xs text-[#10b981]/70">
                   {formatCurrency(totalEarnings)}
+                </p>
+              </div>
+              <div className="relative bg-gradient-to-br from-[#8b5cf6]/12 via-[#8b5cf6]/5 to-transparent border border-[#8b5cf6]/25 rounded-xl p-4 hover:border-[#8b5cf6]/40 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('activeInvestmentsCount')}</h3>
+                  <div className="w-9 h-9 rounded-full bg-[#8b5cf6]/15 flex items-center justify-center">
+                    <FaChartLine className="w-4.5 h-4.5 text-[#8b5cf6]" />
+                  </div>
+                </div>
+                <p className="text-2xl font-semibold text-[#7c3aed] mb-1">
+                  {investments.length}
+                </p>
+                <p className="text-xs text-[#7c3aed]/70">
+                  {t('activeInvestmentsDetail', { count: investments.length })}
+                </p>
+              </div>
+              <div className="relative bg-gradient-to-br from-[#f97316]/12 via-[#f97316]/5 to-transparent border border-[#f97316]/25 rounded-xl p-4 hover:border-[#f97316]/40 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('pendingWithdrawals')}</h3>
+                  <div className="w-9 h-9 rounded-full bg-[#f97316]/20 flex items-center justify-center">
+                    <HiMiniArrowLongUp className="w-4.5 h-4.5 text-[#f97316]" />
+                  </div>
+                </div>
+                <p className="text-2xl font-semibold text-[#f97316] mb-1">
+                  {formatCurrencyUSD(wallet?.pending_withdrawal || 0).replace(/\.\d{2}$/, '')}
+                </p>
+                <p className="text-xs text-[#f97316]/70">
+                  {formatCurrency(wallet?.pending_withdrawal || 0)}
                 </p>
               </div>
             </div>

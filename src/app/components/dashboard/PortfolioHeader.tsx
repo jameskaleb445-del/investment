@@ -42,7 +42,6 @@ export function PortfolioHeader({
     { label: t('deposit'), icon: HiMiniArrowLongDown, href: '/wallet?action=deposit' },
     { label: t('withdraw'), icon: HiMiniArrowLongUp, href: '/wallet?action=withdraw' },
     { label: t('invest'), icon: HiTrendingUp, href: '/marketplace' },
-    { label: t('transfer'), icon: HiArrowPath, href: '/wallet?action=transfer' },
   ]
 
   return (
