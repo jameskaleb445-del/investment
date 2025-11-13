@@ -12,12 +12,20 @@ import { SlChart } from "react-icons/sl";
 import { RiHome2Line } from "react-icons/ri";
 import { IoWalletOutline } from "react-icons/io5";
 import { motion } from 'framer-motion'
+import { useTheme } from '@/app/contexts/ThemeContext'
 
 export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const locale = useLocale()
   const tNavigation = useTranslations('navigation')
+
+  let theme: 'light' | 'dark' = 'light'
+  try {
+    theme = useTheme().theme
+  } catch (error) {
+    theme = 'light'
+  }
 
   // Helper function to remove locale prefix from pathname
   const getPathWithoutLocale = (path: string) => {
@@ -70,7 +78,7 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[100] theme-bg-primary theme-border border-t transition-colors">
       <div className="max-w-md mx-auto">
-        <div className="flex items-center justify-around px-2 py-2">
+        <div className="flex items-center w-full">
           {navItems.map((item) => {
             const Icon = item.icon
             const isWallet = item.isMiddle
@@ -84,18 +92,28 @@ export function BottomNav() {
             // Middle item is the Wallet with plus button
             if (isWallet) {
               return (
-                <div key={item.href} className="flex flex-col items-center justify-center relative">
+                <div key={item.href} className="flex flex-1 flex-col items-center justify-center relative">
                   <Link
                     href={item.href}
-                    className="flex items-center justify-center relative"
+                    className="flex items-center justify-center relative py-2"
                   >
                     <motion.div
                       className={cn(
-                        "relative w-14 h-14 rounded-full flex items-center justify-center transition-colors",
-                        isActive 
-                          ? "bg-[#8b5cf6]" 
-                          : "theme-bg-tertiary hover:bg-[#35353d] dark:hover:bg-[#35353d] light:hover:bg-gray-100"
+                        "relative w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-md border",
+                        isActive ? "shadow-[0_0_18px_rgba(139,92,246,0.35)]" : ""
                       )}
+                      style={{
+                        backgroundColor: isActive
+                          ? '#8b5cf6'
+                          : theme === 'dark'
+                          ? '#2d2d35'
+                          : '#ede9fe',
+                        borderColor: isActive
+                          ? 'transparent'
+                          : theme === 'dark'
+                          ? '#3a3a44'
+                          : '#d8b4fe',
+                      }}
                       animate={isActive ? {
                         scale: [1, 1.1, 1],
                         boxShadow: [
@@ -119,16 +137,23 @@ export function BottomNav() {
                         }}
                       >
                         <Icon className={cn(
-                          "w-6 h-6 transition-colors",
-                          isActive ? "text-white" : "theme-text-secondary"
-                        )} />
+                          "w-6 h-6 transition-colors"
+                        )}
+                        style={{
+                          color: isActive
+                            ? '#ffffff'
+                            : theme === 'dark'
+                            ? '#8b5cf6'
+                            : '#6d28d9'
+                        }}
+                        />
                       </motion.div>
                     </motion.div>
                   </Link>
                   <span
                     className={cn(
-                      "mt-1 text-[11px] font-medium transition-colors",
-                      isActive ? "theme-text-primary" : "theme-text-secondary"
+                      "mt-1 text-[11px] font-medium transition-all duration-200",
+                      isActive ? "opacity-100 translate-y-0 theme-text-primary" : "opacity-0 -translate-y-1 pointer-events-none"
                     )}
                   >
                     {item.label}
@@ -153,7 +178,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center justify-center px-3 py-1 rounded-lg relative"
+                className="flex flex-1 flex-col items-center justify-center py-2 rounded-lg relative"
               >
                 <motion.div
                   animate={isActive ? {
@@ -195,8 +220,8 @@ export function BottomNav() {
                 </motion.div>
                 <span
                   className={cn(
-                    "mt-1 text-[11px] font-medium transition-colors",
-                    isActive ? "theme-text-primary" : "theme-text-secondary"
+                    "mt-1 text-[11px] font-medium transition-all duration-200",
+                    isActive ? "opacity-100 translate-y-0 theme-text-primary" : "opacity-0 -translate-y-1 pointer-events-none"
                   )}
                 >
                   {item.label}

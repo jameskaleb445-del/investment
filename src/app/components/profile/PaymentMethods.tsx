@@ -176,7 +176,7 @@ export function PaymentMethods() {
           <h2 className="text-base font-semibold theme-text-primary px-1">{t('paymentMethods')}</h2>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary text-sm font-medium rounded-lg transition-colors cursor-pointer"
+            className="flex  items-center gap-2 px-3 py-1.5 bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary text-sm font-medium rounded-lg !text-white transition-colors cursor-pointer"
           >
             <HiOutlinePlus className="w-4 h-4" />
             <span>{t('add', { defaultValue: 'Add' })}</span>

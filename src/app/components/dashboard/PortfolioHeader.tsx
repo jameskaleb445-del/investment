@@ -9,6 +9,7 @@ import { HiArrowPath, HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons
 import { useTranslations } from 'next-intl'
 import { LanguageSelector } from '@/app/components/ui/language-selector'
 import { ThemeToggle } from '@/app/components/ui/theme-toggle'
+import { useTheme } from '@/app/contexts/ThemeContext'
 
 interface PortfolioHeaderProps {
   totalBalance: number
@@ -26,6 +27,7 @@ export function PortfolioHeader({
   const t = useTranslations('home.quickActions')
   const tHome = useTranslations('home')
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
+  const { theme } = useTheme()
 
   const totalAssetValue = totalBalance + totalInvested
   const calculatedPercentageChange =
@@ -46,9 +48,14 @@ export function PortfolioHeader({
 
   return (
     <div className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-[#cbb9ff] to-[#8b5cf6] dark:from-[#4c1d95] dark:via-[#6d28d9] dark:to-[#7c3aed]" />
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-white to-white pointer-events-none dark:hidden" />
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-transparent to-[#0c0c12]/80 pointer-events-none hidden dark:block" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#4c1d95] via-[#6d28d9] to-[#7c3aed]" />
+        <div
+          className={`absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b pointer-events-none ${
+            theme === 'dark'
+              ? 'from-transparent via-transparent to-[#0c0c12]/80'
+              : 'from-transparent via-transparent to-[#ffffff]'
+          }`}
+        />
 
       <div className="relative px-4 pt-6 pb-6">
         <div className="flex items-center justify-between mb-6">
@@ -93,7 +100,7 @@ export function PortfolioHeader({
           {isBalanceVisible && <p className="text-xs text-white/60">{formatCurrency(totalAssetValue)}</p>}
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {actionButtons.map((button) => {
             const Icon = button.icon
             return (

@@ -280,11 +280,11 @@ export default function Home() {
             <LiveCreditTicker />
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-1">
               <div className="relative bg-gradient-to-br from-[#10b981]/12 via-[#10b981]/5 to-transparent border border-[#10b981]/25 rounded-xl p-4 hover:border-[#10b981]/40 transition-all">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('lifetimeEarnings')}</h3>
-                  <div className="w-9 h-9 rounded-full bg-[#10b981]/15 flex items-center justify-center">
+                  <h3 className="text-[10px] font-medium theme-text-secondary uppercase tracking-wide">{t('lifetimeEarnings')}</h3>
+                  <div className="w-9 h-9 absolute right-2 bottom-3 rounded-full bg-[#10b981]/15 flex items-center justify-center">
                     <GiTakeMyMoney className="w-4.5 h-4.5 text-[#10b981]" />
                   </div>
                 </div>
@@ -297,8 +297,8 @@ export default function Home() {
               </div>
               <div className="relative bg-gradient-to-br from-[#8b5cf6]/12 via-[#8b5cf6]/5 to-transparent border border-[#8b5cf6]/25 rounded-xl p-4 hover:border-[#8b5cf6]/40 transition-all">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('activeInvestmentsCount')}</h3>
-                  <div className="w-9 h-9 rounded-full bg-[#8b5cf6]/15 flex items-center justify-center">
+                  <h3 className="text-[10px] font-medium theme-text-secondary uppercase tracking-wide">{t('activeInvestmentsCount')}</h3>
+                  <div className="w-9 h-9 absolute right-2 bottom-3 rounded-full bg-[#8b5cf6]/15 flex items-center justify-center">
                     <FaChartLine className="w-4.5 h-4.5 text-[#8b5cf6]" />
                   </div>
                 </div>
@@ -309,20 +309,7 @@ export default function Home() {
                   {t('activeInvestmentsDetail', { count: investments.length })}
                 </p>
               </div>
-              <div className="relative bg-gradient-to-br from-[#f97316]/12 via-[#f97316]/5 to-transparent border border-[#f97316]/25 rounded-xl p-4 hover:border-[#f97316]/40 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-medium theme-text-secondary uppercase tracking-wide">{t('pendingWithdrawals')}</h3>
-                  <div className="w-9 h-9 rounded-full bg-[#f97316]/20 flex items-center justify-center">
-                    <HiMiniArrowLongUp className="w-4.5 h-4.5 text-[#f97316]" />
-                  </div>
-                </div>
-                <p className="text-2xl font-semibold text-[#f97316] mb-1">
-                  {formatCurrencyUSD(wallet?.pending_withdrawal || 0).replace(/\.\d{2}$/, '')}
-                </p>
-                <p className="text-xs text-[#f97316]/70">
-                  {formatCurrency(wallet?.pending_withdrawal || 0)}
-                </p>
-              </div>
+              
             </div>
 
             {/* Daily Rewards */}

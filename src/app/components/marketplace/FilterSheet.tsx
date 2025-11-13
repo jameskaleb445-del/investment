@@ -5,6 +5,7 @@ import { BottomSheet } from '@/app/components/ui/bottom-sheet'
 import { Button } from '@/app/components/ui/button'
 import { PROJECT_STATUS } from '@/app/constants/projects'
 import { useTranslations } from 'next-intl'
+import { useTheme } from '@/app/contexts/ThemeContext'
 
 interface FilterSheetProps {
   isOpen: boolean
@@ -26,6 +27,7 @@ export interface FilterOptions {
 
 export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset }: FilterSheetProps) {
   const t = useTranslations('marketplace')
+  const { theme } = useTheme()
   const [localFilters, setLocalFilters] = useState<FilterOptions>(filters)
 
   const statusOptions = [
@@ -99,10 +101,10 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
                 <button
                   key={option.value}
                   onClick={() => handleStatusToggle(option.value)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer !text-white ${
                     isSelected
                       ? 'bg-[#8b5cf6] theme-text-primary border border-[#8b5cf6]'
-                      : 'bg-[#1f1f24] theme-text-secondary border border-[#2d2d35] hover:theme-border-secondary'
+                      : `bg-[#1f1f24] theme-text-secondary border border-[#2d2d35] hover:theme-border-secondary ${theme === 'dark' ? 'dark:hover:bg-[#25252a]' : 'light:hover:bg-[#f8fafc]'}  `
                   }`}
                 >
                   {option.label}
@@ -259,7 +261,7 @@ export function FilterSheet({ isOpen, onClose, filters, onApplyFilters, onReset 
           </Button>
           <Button
             onClick={handleApply}
-            className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary"
+            className="flex-1 !text-white bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary"
           >
             {t('applyFilters')}
           </Button>
