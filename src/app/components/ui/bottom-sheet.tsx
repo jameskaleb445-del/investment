@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { AiOutlineClose } from 'react-icons/ai'
-import { ReactNode, useEffect, useCallback } from 'react'
+import React, { ReactNode, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 
 interface BottomSheetProps {
@@ -44,14 +44,20 @@ export function BottomSheet({
   children,
   maxHeight = '90vh'
 }: BottomSheetProps) {
+  const [mounted, setMounted] = React.useState(false)
+
+  // Set mounted state on client
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Prevent background scroll when modal is open - optimized
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen || !mounted) return
     
     // Save current scroll position
     const scrollY = window.scrollY
     const body = document.body
-    const html = document.documentElement
     
     // Apply scroll lock
     body.style.position = 'fixed'
@@ -67,7 +73,7 @@ export function BottomSheet({
       body.style.overflow = ''
       window.scrollTo(0, scrollY)
     }
-  }, [isOpen])
+  }, [isOpen, mounted])
 
   // Memoize close handler to prevent unnecessary re-renders
   const handleBackdropClick = useCallback(() => {
@@ -78,8 +84,8 @@ export function BottomSheet({
     e.stopPropagation()
   }, [])
 
-  // Render to portal for better performance and z-index management
-  if (typeof window === 'undefined') {
+  // Don't render portal until mounted
+  if (!mounted || typeof window === 'undefined') {
     return null
   }
 
@@ -89,6 +95,7 @@ export function BottomSheet({
         <>
           {/* Backdrop - Optimized with will-change */}
           <motion.div
+            key="backdrop"
             variants={backdropVariants}
             initial="hidden"
             animate="visible"
@@ -101,6 +108,7 @@ export function BottomSheet({
 
           {/* Modal - Optimized with will-change and transform */}
           <motion.div
+            key="sheet"
             variants={sheetVariants}
             initial="hidden"
             animate="visible"

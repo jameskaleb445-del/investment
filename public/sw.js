@@ -11,14 +11,24 @@ const staticAssets = [
 // Install event - cache static resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('Service Worker: Caching static files')
-      return cache.addAll(staticAssets).catch((err) => {
-        console.log('Service Worker: Some files failed to cache', err)
+    Promise.all([
+      caches.open(STATIC_CACHE).then((cache) => {
+        console.log('Service Worker: Caching static files')
+        return cache.addAll(staticAssets).catch((err) => {
+          console.log('Service Worker: Some files failed to cache', err)
+        })
+      }),
+      // Check if this is the first install (no active clients)
+      // If there are active clients, don't skip waiting (wait for user confirmation)
+      self.clients.matchAll().then((clients) => {
+        // Only skip waiting if this is the first install
+        if (clients.length === 0) {
+          return self.skipWaiting()
+        }
+        // Otherwise, the service worker will wait until SKIP_WAITING message is received
       })
-    })
+    ])
   )
-  self.skipWaiting()
 })
 
 // Activate event - clean up old caches
@@ -36,6 +46,13 @@ self.addEventListener('activate', (event) => {
     })
   )
   return self.clients.claim()
+})
+
+// Listen for skip waiting message from client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 // Fetch event - Network first, fallback to cache for offline

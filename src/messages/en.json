@@ -6,6 +6,11 @@
     "success": "Success",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "updateAvailable": "Update available",
+    "updateDescription": "A newer version of the app is ready. Update now to get the latest fixes and improvements.",
+    "updateNow": "Update now",
+    "updating": "Updating…",
+    "later": "Later",
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
@@ -22,7 +27,7 @@
   },
   "navigation": {
     "home": "Home",
-    "marketplace": "Market",
+    "marketplace": "Invest",
     "wallet": "Wallet",
     "referrals": "Referrals",
     "profile": "Profile",
@@ -34,6 +39,10 @@
     "available": "Available",
     "invested": "Invested",
     "earnings": "Earnings",
+    "lifetimeEarnings": "Lifetime earnings",
+    "activeInvestmentsCount": "Active investments",
+    "activeInvestmentsDetail": "{count, plural, =0 {No active projects} one {1 active project} other {{count} active projects}}",
+    "pendingWithdrawals": "Pending withdrawals",
     "myPortfolio": "My Portfolio",
     "recentTransactions": "Recent Transactions",
     "activeInvestments": "Active Investments",
@@ -115,7 +124,7 @@
     "enterAmount": "Enter amount..."
   },
   "marketplace": {
-    "title": "Market",
+    "title": "Invest",
     "filter": "Filter",
     "searchProjects": "Search projects...",
     "activeInvestments": "My Active Investments",
@@ -191,7 +200,15 @@
     "keyPoints": "Key Points:",
     "roiCalculatedOnInvestment": "ROI is calculated on your investment amount",
     "getBackOriginalPlusProfit": "You get back your original investment + the profit",
-    "returnsPaidAfterDays": "Returns are paid automatically after {days} days"
+    "returnsPaidAfterDays": "Returns are paid automatically after {days} days",
+    "viewInvestmentPlans": "View investment levels",
+    "hideInvestmentPlans": "Hide investment levels",
+    "levelLabel": "Level",
+    "priceLabel": "Price",
+    "hourlyReturnLabel": "Earnings per hour",
+    "investInLevel": "Invest in {level}",
+    "selectedLevelLabel": "Level {level}",
+    "selectedLevelButton": "Selected level"
   },
   "referrals": {
     "title": "Referrals",

@@ -19,11 +19,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Load theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme
-    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      setThemeState(savedTheme)
-    } else {
-      // Default to dark theme
+    // Always default to dark theme
+    // Only use saved theme if it's explicitly 'dark', otherwise default to dark
+    if (savedTheme === 'dark') {
       setThemeState('dark')
+    } else {
+      // Default to dark theme (ignore 'light' from localStorage)
+      setThemeState('dark')
+      // Clear light theme from localStorage to ensure dark is the default
+      if (savedTheme === 'light') {
+        localStorage.removeItem('theme')
+      }
     }
     setMounted(true)
   }, [])

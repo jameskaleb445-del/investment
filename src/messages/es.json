@@ -6,6 +6,11 @@
     "success": "Éxito",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
+    "updateAvailable": "Actualización disponible",
+    "updateDescription": "Hay una nueva versión de la aplicación. Actualiza ahora para obtener las últimas mejoras.",
+    "updateNow": "Actualizar ahora",
+    "updating": "Actualizando…",
+    "later": "Más tarde",
     "save": "Guardar",
     "delete": "Eliminar",
     "edit": "Editar",
@@ -22,7 +27,7 @@
   },
   "navigation": {
     "home": "Inicio",
-    "marketplace": "Mercado",
+    "marketplace": "Invertir",
     "wallet": "Billetera",
     "referrals": "Referidos",
     "profile": "Perfil",
@@ -34,6 +39,10 @@
     "available": "Disponible",
     "invested": "Invertido",
     "earnings": "Ganancias",
+    "lifetimeEarnings": "Ganancias acumuladas",
+    "activeInvestmentsCount": "Inversiones activas",
+    "activeInvestmentsDetail": "{count, plural, =0 {Sin proyectos activos} one {1 proyecto activo} other {{count} proyectos activos}}",
+    "pendingWithdrawals": "Retiros pendientes",
     "myPortfolio": "Mi Portafolio",
     "recentTransactions": "Transacciones recientes",
     "activeInvestments": "Inversiones activas",
@@ -115,7 +124,7 @@
     "enterAmount": "Ingresa el monto..."
   },
   "marketplace": {
-    "title": "Mercado",
+    "title": "Invertir",
     "filter": "Filtrar",
     "searchProjects": "Buscar proyectos...",
     "activeInvestments": "Mis inversiones activas",
@@ -191,7 +200,15 @@
     "keyPoints": "Puntos clave:",
     "roiCalculatedOnInvestment": "El ROI se calcula sobre tu monto de inversión",
     "getBackOriginalPlusProfit": "Recibes tu inversión original + el beneficio",
-    "returnsPaidAfterDays": "Los retornos se pagan automáticamente después de {days} días"
+    "returnsPaidAfterDays": "Los retornos se pagan automáticamente después de {days} días",
+    "viewInvestmentPlans": "Ver niveles de inversión",
+    "hideInvestmentPlans": "Ocultar niveles de inversión",
+    "levelLabel": "Nivel",
+    "priceLabel": "Precio",
+    "hourlyReturnLabel": "Ganancia por hora",
+    "investInLevel": "Invertir en {level}",
+    "selectedLevelLabel": "Nivel {level}",
+    "selectedLevelButton": "Nivel seleccionado"
   },
   "referrals": {
     "title": "Referidos",

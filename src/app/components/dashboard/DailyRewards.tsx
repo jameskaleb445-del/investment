@@ -77,7 +77,7 @@ export function DailyRewards({
         <Button
           onClick={handleClaim}
           disabled={claimed || isClaiming}
-          className="bg-[#8b5cf6] hover:bg-[#7c3aed] theme-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#8b5cf6] hover:bg-[#7c3aed] !text-white theme-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isClaiming ? (
             t('claiming')

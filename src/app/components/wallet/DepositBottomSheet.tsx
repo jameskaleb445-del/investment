@@ -96,7 +96,7 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
       // Reset form
       setAmount('')
       setPhone('')
-      setSelectedMethod(null)
+      setSelectedMethod(PAYMENT_METHODS.ORANGE_MONEY)
       
       if (onSuccess) {
         onSuccess()
@@ -121,16 +121,16 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
     <BottomSheet isOpen={isOpen} onClose={onClose} title={t('depositFunds')}>
       <div className="px-5 py-6 space-y-6">
         {/* Minimum Deposit Info Card */}
-        <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4">
+        <div className="border theme-bg-tertiary theme-border rounded-xl p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-[#a0a0a8]">{t('minimumDeposit')}</span>
-            <span className="text-base font-semibold text-white">{formatCurrency(MIN_DEPOSIT_AMOUNT)}</span>
+            <span className="text-sm theme-text-secondary">{t('minimumDeposit')}</span>
+            <span className="text-base font-semibold theme-text-primary">{formatCurrency(MIN_DEPOSIT_AMOUNT)}</span>
           </div>
         </div>
 
         {/* Payment Methods Selection - Profile Page Style */}
         <div>
-          <label className="text-sm font-medium text-white mb-3 block">
+          <label className="text-sm font-medium theme-text-primary mb-3 block">
             {t('selectPaymentMethod')}
           </label>
           <div className="space-y-3">
@@ -143,11 +143,11 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
                     setErrors({ ...errors, payment_method: '' })
                   }
                 }}
-                className={`w-full bg-[#1f1f24] border rounded-xl p-4 relative hover:bg-[#25252a] hover:border-[#3a3a44] transition-all text-left ${
+                className={`w-full border theme-bg-tertiary theme-border rounded-xl p-4 relative transition-all text-left ${
                   selectedMethod === method.id
                     ? 'border-[#8b5cf6] border-2'
-                    : 'border-[#2d2d35]'
-                }`}
+                    : ''
+                } dark:hover:bg-[#25252a] dark:hover:border-[#3a3a44] light:hover:bg-[#f8fafc] light:hover:border-[#e2e8f0]`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3 flex-1">
@@ -171,14 +171,14 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-semibold text-sm">{method.name}</h3>
+                        <h3 className="theme-text-primary font-semibold text-sm">{method.name}</h3>
                         {method.isDefault && (
                           <span className="px-2 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
                             {t('default', { defaultValue: 'Default' })}
                           </span>
                         )}
                       </div>
-                      <p className="text-[#a0a0a8] text-xs">
+                      <p className="theme-text-secondary text-xs">
                         {selectedMethod === method.id ? t('selected', { defaultValue: 'Selected' }) : t('tapToSelect', { defaultValue: 'Tap to select' })}
                       </p>
                     </div>
@@ -186,17 +186,17 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
                   
                   <div className="flex items-center ml-2">
                     {/* Switch indicator */}
-                    <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                      selectedMethod === method.id ? 'bg-[#8b5cf6]' : 'bg-[#2d2d35]'
+                    <div className={`relative w-11 h-6 rounded-full transition-colors border theme-border ${
+                      selectedMethod === method.id ? 'bg-[#8b5cf6]' : 'bg-transparent'
                     }`}>
-                      <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                        selectedMethod === method.id ? 'translate-x-5' : 'translate-x-0'
+                      <div className={`absolute top-0.5 left-0.5 w-5 h-5 border theme-bg-primary rounded-full transition-transform ${
+                        selectedMethod === method.id ? 'translate-x-5 bg-white dark:bg-white' : 'translate-x-0'
                       }`} />
                     </div>
                   </div>
                 </div>
                 {selectedMethod === method.id && (
-                  <div className="mt-3 pt-3 border-t border-[#2d2d35]">
+                  <div className="mt-3 pt-3 border-t theme-border">
                     <HiCheckCircle className="w-5 h-5 text-[#10b981] mx-auto" />
                   </div>
                 )}
@@ -210,7 +210,7 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
 
         {/* Amount Input */}
         <div>
-          <label className="text-sm font-medium text-white mb-2 block">
+          <label className="text-sm font-medium theme-text-primary mb-2 block">
             {t('amount')}
           </label>
           <Input
@@ -218,15 +218,13 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
             placeholder={t('enterAmount')}
             value={amount}
             onChange={(e) => handleAmountChange(e.target.value)}
-            className={`bg-[#1f1f24] border-[#2d2d35] text-white ${
-              errors.amount ? 'border-red-500' : ''
-            }`}
+            className={errors.amount ? 'border-red-500 focus-visible:ring-red-500' : ''}
           />
           {errors.amount && (
             <p className="text-xs text-red-400 mt-1">{errors.amount}</p>
           )}
           {amount && !errors.amount && (
-            <p className="text-xs text-[#a0a0a8] mt-1">
+            <p className="text-xs theme-text-secondary mt-1">
               {t('minimum', { defaultValue: 'Minimum' })}: {formatCurrency(MIN_DEPOSIT_AMOUNT)}
             </p>
           )}
@@ -234,7 +232,7 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
 
         {/* Phone Number Input */}
         <div>
-          <label className="text-sm font-medium text-white mb-2 block">
+          <label className="text-sm font-medium theme-text-primary mb-2 block">
             {t('phoneNumber')}
           </label>
           <Input
@@ -242,15 +240,13 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
             placeholder="+237XXXXXXXXX"
             value={phone}
             onChange={(e) => handlePhoneChange(e.target.value)}
-            className={`bg-[#1f1f24] border-[#2d2d35] text-white ${
-              errors.phone ? 'border-red-500' : ''
-            }`}
+            className={errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}
           />
           {errors.phone && (
             <p className="text-xs text-red-400 mt-1">{errors.phone}</p>
           )}
           {!errors.phone && (
-            <p className="text-xs text-[#a0a0a8] mt-1">
+            <p className="text-xs theme-text-secondary mt-1">
               {t('format', { defaultValue: 'Format' })}: +237XXXXXXXXX
             </p>
           )}
@@ -258,17 +254,17 @@ export function DepositBottomSheet({ isOpen, onClose, onSuccess }: DepositBottom
 
         {/* Fee Calculation */}
         {amount && Number(amount) >= MIN_DEPOSIT_AMOUNT && (
-          <div className="bg-[#1f1f24] border border-[#2d2d35] rounded-xl p-4 space-y-2">
+          <div className="border theme-bg-tertiary theme-border rounded-xl p-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-[#a0a0a8]">{t('amount')}</span>
-              <span className="text-white font-medium">{formatCurrency(Number(amount))}</span>
+              <span className="theme-text-secondary">{t('amount')}</span>
+              <span className="theme-text-primary font-medium">{formatCurrency(Number(amount))}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-[#a0a0a8]">{t('fee')} ({PLATFORM_FEES.DEPOSIT * 100}%)</span>
-              <span className="text-[#a0a0a8]">-{formatCurrency(calculateFee(Number(amount)))}</span>
+              <span className="theme-text-secondary">{t('fee')} ({PLATFORM_FEES.DEPOSIT * 100}%)</span>
+              <span className="theme-text-secondary">-{formatCurrency(calculateFee(Number(amount)))}</span>
             </div>
-            <div className="pt-2 border-t border-[#2d2d35] flex justify-between">
-              <span className="text-white font-semibold">{t('youllReceive')}</span>
+            <div className="pt-2 border-t theme-border flex justify-between">
+              <span className="theme-text-primary font-semibold">{t('youllReceive')}</span>
               <span className="text-[#10b981] font-bold">{formatCurrency(netAmount)}</span>
             </div>
           </div>

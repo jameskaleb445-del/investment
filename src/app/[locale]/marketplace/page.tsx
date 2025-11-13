@@ -5,7 +5,6 @@ import { AppLayout } from '@/app/components/layout/AppLayout'
 import { MarketHeader } from '@/app/components/marketplace/MarketHeader'
 import { CategoryFilters } from '@/app/components/marketplace/CategoryFilters'
 import { ProjectMarketCard } from '@/app/components/marketplace/ProjectMarketCard'
-import { ProjectCarousel } from '@/app/components/marketplace/ProjectCarousel'
 import { ProjectDetailsSheet } from '@/app/components/marketplace/ProjectDetailsSheet'
 import { ProjectSkeleton } from '@/app/components/marketplace/ProjectSkeleton'
 import { FilterSheet, FilterOptions } from '@/app/components/marketplace/FilterSheet'
@@ -22,6 +21,33 @@ import {
   SelectValue,
 } from '@/app/components/ui/select'
 import { useTranslations } from 'next-intl'
+import type { ProjectLevel } from '@/app/components/marketplace/ProjectMarketCard'
+import { formatCurrency, formatCurrencyUSD, formatPercentage } from '@/app/utils/format'
+import { cn } from '@/app/lib/utils'
+import { Button } from '@/app/components/ui/button'
+
+const PROJECT_LEVEL_OPTIONS: Record<string, ProjectLevel[]> = {
+  '1': [
+    { id: '1-lv1', level: 'LV1', priceXaf: 300000, hourlyReturnXaf: 10500, tag: 'New' },
+    { id: '1-lv2', level: 'LV2', priceXaf: 600000, hourlyReturnXaf: 23500 },
+    { id: '1-lv3', level: 'LV3', priceXaf: 1200000, hourlyReturnXaf: 52000 },
+  ],
+  '3': [
+    { id: '3-lv1', level: 'LV1', priceXaf: 500000, hourlyReturnXaf: 12500, tag: 'New' },
+    { id: '3-lv2', level: 'LV2', priceXaf: 1000000, hourlyReturnXaf: 27000 },
+    { id: '3-lv3', level: 'LV3', priceXaf: 2000000, hourlyReturnXaf: 62000 },
+  ],
+  '7': [
+    { id: '7-lv1', level: 'LV1', priceXaf: 1000000, hourlyReturnXaf: 41670, tag: 'New' },
+    { id: '7-lv2', level: 'LV2', priceXaf: 2000000, hourlyReturnXaf: 95000 },
+    { id: '7-lv3', level: 'LV3', priceXaf: 3500000, hourlyReturnXaf: 165000 },
+  ],
+  '8': [
+    { id: '8-lv1', level: 'LV1', priceXaf: 750000, hourlyReturnXaf: 30500, tag: 'New' },
+    { id: '8-lv2', level: 'LV2', priceXaf: 1500000, hourlyReturnXaf: 72000 },
+    { id: '8-lv3', level: 'LV3', priceXaf: 2500000, hourlyReturnXaf: 138000 },
+  ],
+}
 
 function MarketplacePageContent() {
   const t = useTranslations('marketplace')
@@ -33,8 +59,14 @@ function MarketplacePageContent() {
   const [sortBy, setSortBy] = useState('newest')
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [selectedLevel, setSelectedLevel] = useState<ProjectLevel | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [levelsSheetProject, setLevelsSheetProject] = useState<{
+    project: any
+    levels: ProjectLevel[]
+    activeLevel: ProjectLevel | null
+  } | null>(null)
   const [filters, setFilters] = useState<FilterOptions>({
     status: [],
     minRoi: null,
@@ -96,6 +128,16 @@ function MarketplacePageContent() {
           goal_amount: 5000000,
           estimated_roi: 15.5,
           status: PROJECT_STATUS.FUNDING,
+          duration_days: 14,
+        },
+        {
+          id: '7',
+          name: 'Solar Power Installation',
+          category: 'Energy',
+          funded_amount: 12000000,
+          goal_amount: 12000000,
+          estimated_roi: 22.5,
+          status: PROJECT_STATUS.ACTIVE,
           duration_days: 14,
         },
         {
@@ -243,18 +285,18 @@ function MarketplacePageContent() {
                 },
                 {
                   id: 'inv-2',
-                  project_id: '7',
+                  project_id: '1',
                   project: {
-                    id: '7',
-                    name: 'Solar Power Installation',
-                    category: 'Energy',
-                    funded_amount: 12000000,
-                    goal_amount: 12000000,
-                    estimated_roi: 22.5,
-                    status: PROJECT_STATUS.ACTIVE,
+                    id: '1',
+                    name: 'Agriculture Farm Equipment',
+                    category: 'Farm Equipment',
+                    funded_amount: 2500000,
+                    goal_amount: 5000000,
+                    estimated_roi: 15.5,
+                    status: PROJECT_STATUS.FUNDING,
                     duration_days: 14,
                   },
-                  amount: 1000000,
+                  amount: 600000,
                   status: 'active',
                   invested_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
                 },
@@ -289,13 +331,44 @@ function MarketplacePageContent() {
 
   const handleProjectClick = (project: any) => {
     setSelectedProject(project)
+    setSelectedLevel(null)
     setIsDetailsOpen(true)
   }
 
-  const handleInvest = () => {
-    // TODO: Navigate to investment page or open investment modal
-    console.log('Invest in project:', selectedProject?.id)
+  const handleLevelSelect = (project: any, level: ProjectLevel) => {
+    setLevelsSheetProject(null)
+    setSelectedProject(project)
+    setSelectedLevel(level)
+    setIsDetailsOpen(true)
   }
+
+  const handleShowLevels = (project: any) => {
+    const levels = PROJECT_LEVEL_OPTIONS[project.id] || []
+    if (levels.length === 0) {
+      handleProjectClick(project)
+      return
+    }
+    const userInvestment = userInvestments.find((inv) => inv.project.id === project.id)
+    const activeLevel = userInvestment
+      ? levels.find((level) => level.priceXaf === userInvestment.amount) || null
+      : null
+
+    setLevelsSheetProject({
+      project,
+      levels,
+      activeLevel,
+    })
+  }
+
+  const handleInvest = (options?: { level?: ProjectLevel | null; amount?: number }) => {
+    // TODO: Navigate to investment flow with selected level and amount
+    console.log('Invest in project:', selectedProject?.id, options)
+  }
+
+  const featuredProjectIds = new Set(['1', '7'])
+  const visibleProjects = projects.filter(
+    (project) => project.status === PROJECT_STATUS.ACTIVE || featuredProjectIds.has(project.id)
+  )
 
   return (
     <AppLayout>
@@ -351,99 +424,93 @@ function MarketplacePageContent() {
                 <div className="mb-6">
                   <div className="px-4 mb-3">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-white">{t('activeInvestments')}</h2>
+                      <h2 className="text-lg font-semibold theme-text-primary">{t('activeInvestments')}</h2>
                       <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
                         {userInvestments.length} {t('active')}
                       </span>
                     </div>
                   </div>
                   <div className="overflow-x-auto scrollbar-hide scroll-smooth">
-                    <div className="flex gap-4 px-4 pb-2" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
-                      {userInvestments.map((inv) => (
-                        <div key={inv.project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
-                          <ProjectMarketCard
-                            id={inv.project.id}
-                            name={inv.project.name}
-                            category={inv.project.category}
-                            fundedAmount={inv.project.funded_amount}
-                            goalAmount={inv.project.goal_amount}
-                            estimatedRoi={inv.project.estimated_roi}
-                            status={inv.project.status}
-                            durationDays={inv.project.duration_days}
-                            onClick={() => handleProjectClick(inv.project)}
-                            isUserInvestment={true}
-                            userInvestmentAmount={inv.amount}
-                          />
-                        </div>
-                      ))}
+                    <div
+                      className="flex items-start gap-4 px-4 pb-2"
+                      style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+                    >
+                      {userInvestments.map((inv) => {
+                        const investmentLevels = PROJECT_LEVEL_OPTIONS[inv.project.id] || []
+                        const activeLevel = investmentLevels.find((level) => level.priceXaf === inv.amount) || null
+
+                        return (
+                          <div key={inv.project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
+                            <ProjectMarketCard
+                              id={inv.project.id}
+                              name={inv.project.name}
+                              category={inv.project.category}
+                              fundedAmount={inv.project.funded_amount}
+                              goalAmount={inv.project.goal_amount}
+                              estimatedRoi={inv.project.estimated_roi}
+                              status={inv.project.status}
+                              durationDays={inv.project.duration_days}
+                              onClick={() => handleProjectClick(inv.project)}
+                              isUserInvestment={true}
+                              userInvestmentAmount={inv.amount}
+                              levels={investmentLevels}
+                              activeLevel={activeLevel}
+                            />
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Recommended Projects Section */}
-              {projects.filter((p) => p.status === PROJECT_STATUS.FUNDING).length > 0 && (
-                <div className="mb-6">
+              {/* All Projects Section */}
+              {visibleProjects.length > 0 && (
+                <div className="mb-6 pb-28">
                   <div className="px-4 mb-3">
-                    <h2 className="text-lg font-semibold text-white">{t('recommendedProjects')}</h2>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold theme-text-primary">{t('allProjects')}</h2>
+                      <button
+                        onClick={() => setIsSortOpen(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white text-sm hover:bg-[#25252a] hover:border-[#3a3a44] transition-colors cursor-pointer"
+                      >
+                        <HiSortAscending className="w-4 h-4" />
+                        <span>{t('sort')}</span>
+                      </button>
+                    </div>
                   </div>
                   <div className="overflow-x-auto scrollbar-hide scroll-smooth">
-                    <div className="flex gap-4 px-4 pb-2" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
-                      {projects.filter((p) => p.status === PROJECT_STATUS.FUNDING).slice(0, 4).map((project) => (
-                        <div key={project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
-                          <ProjectMarketCard
-                            id={project.id}
-                            name={project.name}
-                            category={project.category}
-                            fundedAmount={project.funded_amount}
-                            goalAmount={project.goal_amount}
-                            estimatedRoi={project.estimated_roi}
-                            status={project.status}
-                            durationDays={project.duration_days}
-                            onClick={() => handleProjectClick(project)}
-                          />
-                        </div>
-                      ))}
+                    <div
+                      className="flex items-start gap-4 px-4 pb-2"
+                      style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+                    >
+                      {visibleProjects.map((project) => {
+                        const projectLevels = PROJECT_LEVEL_OPTIONS[project.id] || []
+                        return (
+                          <div key={project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
+                            <ProjectMarketCard
+                              id={project.id}
+                              name={project.name}
+                              category={project.category}
+                              fundedAmount={project.funded_amount}
+                              goalAmount={project.goal_amount}
+                              estimatedRoi={project.estimated_roi}
+                              status={project.status}
+                              durationDays={project.duration_days}
+                              onClick={() => handleProjectClick(project)}
+                            levels={projectLevels}
+                            onShowLevels={() => handleShowLevels(project)}
+                            />
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
-              )}
-              
-              {/* All Projects Section */}
-              {projects.length > 0 && (
-              <div className="px-4 mb-6 pb-28">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-white">{t('allProjects')}</h2>
-                  <button
-                    onClick={() => setIsSortOpen(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white text-sm hover:bg-[#25252a] hover:border-[#3a3a44] transition-colors cursor-pointer"
-                  >
-                    <HiSortAscending className="w-4 h-4" />
-                    <span>{t('sort')}</span>
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {projects.map((project) => (
-                    <ProjectMarketCard
-                      key={project.id}
-                      id={project.id}
-                      name={project.name}
-                      category={project.category}
-                      fundedAmount={project.funded_amount}
-                      goalAmount={project.goal_amount}
-                      estimatedRoi={project.estimated_roi}
-                      status={project.status}
-                      durationDays={project.duration_days}
-                      onClick={() => handleProjectClick(project)}
-                    />
-                  ))}
-                </div>
-              </div>
               )}
 
               {/* Empty State */}
-              {projects.length === 0 && userInvestments.length === 0 && (
+              {visibleProjects.length === 0 && userInvestments.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-[#a0a0a8] text-lg mb-2">
                     {t('noProjectsFound')}
@@ -465,7 +532,7 @@ function MarketplacePageContent() {
         >
           <div className="px-5 py-6 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white">{t('sortBy')}</label>
+              <label className="text-sm font-medium theme-text-primary">{t('sortBy')}</label>
               <Select value={sortBy} onValueChange={(value) => {
                 setSortBy(value)
                 setIsSortOpen(false)
@@ -490,6 +557,105 @@ function MarketplacePageContent() {
             </BottomSheet>
         </div>
 
+        {/* Levels Sheet */}
+        {levelsSheetProject && (
+          <BottomSheet
+            isOpen={Boolean(levelsSheetProject)}
+            onClose={() => setLevelsSheetProject(null)}
+            title={levelsSheetProject.project.name}
+          >
+            <div className="px-5 py-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm theme-text-secondary">
+                    {levelsSheetProject.project.category}
+                  </span>
+                  {levelsSheetProject.project.status === PROJECT_STATUS.ACTIVE ? (
+                    <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
+                      {t('active')}
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
+                      {t('funding')}
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs font-semibold text-[#10b981]">
+                  ROI: {formatPercentage(levelsSheetProject.project.estimated_roi)}
+                </div>
+              </div>
+              <div className="space-y-3">
+                {levelsSheetProject.levels.map((level) => {
+                  const isActive = levelsSheetProject.activeLevel?.id === level.id
+                  return (
+                    <div
+                      key={level.id}
+                      className={cn(
+                        'relative theme-bg-secondary theme-border border rounded-xl p-4 overflow-hidden transition-colors',
+                        isActive && 'border-[#8b5cf6]/50 bg-[#8b5cf6]/10'
+                      )}
+                    >
+                      {level.tag && (
+                        <span className="absolute top-2 left-0 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-[#ff4d4f] text-white rounded-r">
+                          {level.tag}
+                        </span>
+                      )}
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide">
+                            {t('levelLabel', { defaultValue: 'Level' })}
+                          </p>
+                          <h4 className="text-lg font-bold theme-text-primary">{level.level}</h4>
+                        </div>
+                        <span className="px-2 py-1 rounded-full text-[11px] font-semibold bg-[#8b5cf6]/20 text-[#8b5cf6]">
+                          {level.level}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide mb-1">
+                            {t('priceLabel', { defaultValue: 'Price' })}
+                          </p>
+                          <p className="text-sm font-semibold theme-text-primary">
+                            {formatCurrency(level.priceXaf)}
+                          </p>
+                          <p className="text-xs theme-text-secondary">
+                            {formatCurrencyUSD(level.priceXaf)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide mb-1">
+                            {t('hourlyReturnLabel', { defaultValue: 'Earnings per hour' })}
+                          </p>
+                          <p className="text-sm font-semibold text-[#10b981]">
+                            {formatCurrency(level.hourlyReturnXaf)}
+                          </p>
+                          <p className="text-xs text-[#10b981]/70">
+                            {formatCurrencyUSD(level.hourlyReturnXaf)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => handleLevelSelect(levelsSheetProject.project, level)}
+                        className={cn(
+                          'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold mt-4',
+                          isActive && 'opacity-80 cursor-default'
+                        )}
+                        size="sm"
+                        disabled={isActive}
+                      >
+                        {isActive
+                          ? t('selectedLevelButton', { defaultValue: 'Selected level' })
+                          : t('investInLevel', { level: level.level, defaultValue: `Invest in ${level.level}` })}
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </BottomSheet>
+        )}
+
         {/* Project Details Sheet */}
         {selectedProject && (
           <ProjectDetailsSheet
@@ -511,6 +677,7 @@ function MarketplacePageContent() {
               status: selectedProject.status,
               durationDays: selectedProject.duration_days,
             }}
+            selectedLevel={selectedLevel}
             onInvest={handleInvest}
           />
         )}

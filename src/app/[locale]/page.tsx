@@ -4,18 +4,18 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatCurrencyUSD } from '@/app/utils/format'
 import { Button } from '@/app/components/ui/button'
-import { GiMoneyStack, GiTakeMyMoney } from "react-icons/gi";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { FaChartLine } from 'react-icons/fa'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { PortfolioHeader } from '@/app/components/dashboard/PortfolioHeader'
+import { LiveCreditTicker } from '@/app/components/dashboard/LiveCreditTicker'
 import { TransactionsList } from '@/app/components/transactions/TransactionsList'
-import { EarningsChart } from '@/app/components/dashboard/EarningsChart'
-import { PerformanceInsights } from '@/app/components/dashboard/PerformanceInsights'
 import { DailyRewards } from '@/app/components/dashboard/DailyRewards'
 import { HomeSkeleton } from '@/app/components/dashboard/HomeSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
-import { HiCash, HiTrendingUp, HiChartBar, HiBell } from 'react-icons/hi'
-import { FaRegBell } from 'react-icons/fa'
+import { HiTrendingUp } from 'react-icons/hi'
 import { HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
+import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 
 export default function Home() {
@@ -196,18 +196,6 @@ export default function Home() {
   const totalInvested = wallet ? Number(wallet.invested_amount) : 0
   const totalEarnings = wallet ? Number(wallet.total_earnings) : 0
 
-  // Mock earnings data for chart (last 7 days) - with variation for zigzag effect
-  // Values in USD * 100 for better chart readability (so $200 = 20000)
-  const earningsData = [
-    { date: 'Mon', earnings: 2000 }, // $200 USD = 120000 XAF
-    { date: 'Tue', earnings: 1092 }, // $292 USD = 175000 XAF
-    { date: 'Wed', earnings: 2330 }, // $233 USD = 140000 XAF
-    { date: 'Thu', earnings: 3250 }, // $325 USD = 195000 XAF
-    { date: 'Fri', earnings: 275 }, // $275 USD = 165000 XAF
-    { date: 'Sat', earnings: 367 }, // $367 USD = 220000 XAF
-    { date: 'Today', earnings: Math.round(totalEarnings / 600) }, // Convert XAF to USD
-  ]
-
   const totalAssetValue = totalBalance + totalInvested
   const calculatedPercentageChange = totalBalance > 0 
     ? parseFloat(((totalEarnings / totalBalance) * 100).toFixed(2))
@@ -289,50 +277,39 @@ export default function Home() {
           {/* Dashboard Content */}
           <div className="px-4 pb-28 pt-4 space-y-6">
 
+            <LiveCreditTicker />
+
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-1">
-              <div className="relative bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 border border-[#10b981]/20 rounded-xl p-4 hover:border-[#10b981]/30 transition-all group">
+            <div className="grid grid-cols-2 gap-1">
+              <div className="relative bg-gradient-to-br from-[#10b981]/12 via-[#10b981]/5 to-transparent border border-[#10b981]/25 rounded-xl p-4 hover:border-[#10b981]/40 transition-all">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center  transition-colors">
-                    <GiMoneyStack  className="w-5 h-5 text-[#10b981]" />
+                  <h3 className="text-[10px] font-medium theme-text-secondary uppercase tracking-wide">{t('lifetimeEarnings')}</h3>
+                  <div className="w-9 h-9 absolute right-2 bottom-3 rounded-full bg-[#10b981]/15 flex items-center justify-center">
+                    <GiTakeMyMoney className="w-4.5 h-4.5 text-[#10b981]" />
                   </div>
                 </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('available')}</h3>
-                <p className="text-2xl font-bold text-[#10b981] mb-1">
-                  {formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '')}
-                </p>
-                <p className="text-xs text-[#10b981]/70">
-                  {formatCurrency(availableBalance)}
-                </p>
-              </div>
-              <div className="relative bg-gradient-to-br from-[#8b5cf6]/10 to-[#8b5cf6]/5 border border-[#8b5cf6]/20 rounded-xl p-4 hover:border-[#8b5cf6]/30 transition-all group">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center transition-colors">
-                    <HiTrendingUp className="w-5 h-5 text-[#a78bfa]" />
-                  </div>
-                </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('invested')}</h3>
-                <p className="text-2xl font-bold text-[#a78bfa] mb-1">
-                  {formatCurrencyUSD(totalInvested).replace(/\.\d{2}$/, '')}
-                </p>
-                <p className="text-xs text-[#a78bfa]/70">
-                  {formatCurrency(totalInvested)}
-                </p>
-              </div>
-              <div className="relative bg-gradient-to-br from-[#10b981]/10 to-[#10b981]/5 border border-[#10b981]/20 rounded-xl p-4 hover:border-[#10b981]/30 transition-all group">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 absolute top-1 right-1 flex items-center justify-center transition-colors">
-                      <GiTakeMyMoney  className="w-5 h-5 text-[#10b981]" />
-                    </div>
-                </div>
-                <h3 className="text-xs font-medium theme-text-secondary mb-2 uppercase tracking-wide">{t('earnings')}</h3>
-                <p className="text-2xl font-bold text-[#10b981] mb-1">
+                <p className="text-2xl font-semibold text-[#0d9b6c] mb-1">
                   {formatCurrencyUSD(totalEarnings).replace(/\.\d{2}$/, '')}
                 </p>
                 <p className="text-xs text-[#10b981]/70">
                   {formatCurrency(totalEarnings)}
                 </p>
               </div>
+              <div className="relative bg-gradient-to-br from-[#8b5cf6]/12 via-[#8b5cf6]/5 to-transparent border border-[#8b5cf6]/25 rounded-xl p-4 hover:border-[#8b5cf6]/40 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-[10px] font-medium theme-text-secondary uppercase tracking-wide">{t('activeInvestmentsCount')}</h3>
+                  <div className="w-9 h-9 absolute right-2 bottom-3 rounded-full bg-[#8b5cf6]/15 flex items-center justify-center">
+                    <FaChartLine className="w-4.5 h-4.5 text-[#8b5cf6]" />
+                  </div>
+                </div>
+                <p className="text-2xl font-semibold text-[#7c3aed] mb-1">
+                  {investments.length}
+                </p>
+                <p className="text-xs text-[#7c3aed]/70">
+                  {t('activeInvestmentsDetail', { count: investments.length })}
+                </p>
+              </div>
+              
             </div>
 
             {/* Daily Rewards */}
@@ -343,22 +320,6 @@ export default function Home() {
             />
 
    {/* Performance Insights */}
-   <PerformanceInsights 
-              totalEarnings={totalEarnings}
-              monthlyGrowth={12.5}
-              activeProjects={investments.length}
-            />
-
-            {/* Earnings Chart */}
-            <div className="theme-bg-secondary theme-border border rounded-xl p-4">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h2 className="text-base font-semibold theme-text-primary mb-1">{t('earningsOverview')}</h2>
-                  <p className="text-xs theme-text-secondary">{t('last7Days')}</p>
-                </div>
-              </div>
-              <EarningsChart data={earningsData} />
-            </div>
             {/* Active Investments */}
             <div className="theme-bg-secondary theme-border border rounded-xl p-5">
               <div className="flex justify-between items-center mb-5">
