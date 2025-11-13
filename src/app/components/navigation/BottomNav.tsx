@@ -13,19 +13,28 @@ import { RiHome2Line } from "react-icons/ri";
 import { IoWalletOutline } from "react-icons/io5";
 import { motion } from 'framer-motion'
 import { useTheme } from '@/app/contexts/ThemeContext'
+import { useState, useEffect } from 'react'
 
 export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const locale = useLocale()
   const tNavigation = useTranslations('navigation')
+  const [mounted, setMounted] = useState(false)
 
-  let theme: 'light' | 'dark' = 'light'
+  // Get theme safely
+  let theme: 'light' | 'dark' = 'dark' // Default to dark for SSR consistency
   try {
-    theme = useTheme().theme
+    const themeContext = useTheme()
+    theme = themeContext.theme
   } catch (error) {
-    theme = 'light'
+    theme = 'dark'
   }
+
+  // Mark as mounted on client
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Helper function to remove locale prefix from pathname
   const getPathWithoutLocale = (path: string) => {
@@ -45,16 +54,6 @@ export function BottomNav() {
     pathWithoutLocale?.startsWith('/marketplace')
   )
   
-  // Hide on auth pages
-  if (!isMainPage || 
-      pathWithoutLocale?.startsWith('/login') || 
-      pathWithoutLocale?.startsWith('/register') || 
-      pathWithoutLocale?.startsWith('/forgot-password') ||
-      pathWithoutLocale?.startsWith('/verify-otp') ||
-      pathWithoutLocale?.startsWith('/reset-password')) {
-    return null
-  }
-
   // Helper function to build href with locale prefix
   const buildHref = (path: string) => {
     if (locale === 'en') {
@@ -75,10 +74,95 @@ export function BottomNav() {
     { href: buildHref('/profile'), icon: FaRegCircleUser, label: tNavigation('profile') },
   ]
 
+  // Hide on auth pages
+  if (!isMainPage || 
+      pathWithoutLocale?.startsWith('/login') || 
+      pathWithoutLocale?.startsWith('/register') || 
+      pathWithoutLocale?.startsWith('/forgot-password') ||
+      pathWithoutLocale?.startsWith('/verify-otp') ||
+      pathWithoutLocale?.startsWith('/reset-password')) {
+    return null
+  }
+
+  // Prevent hydration mismatch - render consistent structure until mounted
+  if (!mounted) {
+    // Return a static version that matches the initial client render
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] theme-bg-primary theme-border border-t transition-colors">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-around px-2 py-2">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isWallet = item.isMiddle
+              const itemPathWithoutLocale = getPathWithoutLocale(item.href)
+              const isActive = pathWithoutLocale === itemPathWithoutLocale || 
+                             (itemPathWithoutLocale === '/marketplace' && pathWithoutLocale?.startsWith('/marketplace'))
+              
+              if (isWallet) {
+                return (
+                  <div key={item.href} className="flex flex-col items-center justify-center relative">
+                    <Link
+                      href={item.href}
+                      className="flex items-center justify-center relative"
+                    >
+                      <div
+                        className={cn(
+                          "relative w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-md border",
+                          isActive 
+                            ? "bg-[#8b5cf6] border-transparent shadow-[0_0_18px_rgba(139,92,246,0.35)]" 
+                            : "theme-bg-tertiary theme-border-secondary"
+                        )}
+                      >
+                        <Icon className="w-6 h-6 transition-colors theme-text-secondary" />
+                      </div>
+                    </Link>
+                    <span className="mt-1 text-[11px] font-medium transition-colors theme-text-secondary">
+                      {item.label}
+                    </span>
+                    <button
+                      className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-border transition-colors cursor-pointer z-10 shadow-lg"
+                    >
+                      <HiPlus className="w-3.5 h-3.5 text-white" />
+                    </button>
+                  </div>
+                )
+              }
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex flex-col items-center justify-center px-3 py-1 rounded-lg relative"
+                >
+                  <div className="relative">
+                    <Icon className={cn(
+                      "w-6 h-6 transition-colors",
+                      isActive 
+                        ? "text-[#8b5cf6]" 
+                        : "theme-text-secondary"
+                    )} />
+                  </div>
+                  <span
+                    className={cn(
+                      "mt-1 text-[11px] font-medium transition-colors",
+                      isActive ? "theme-text-primary" : "theme-text-secondary"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[100] theme-bg-primary theme-border border-t transition-colors">
       <div className="max-w-md mx-auto">
-        <div className="flex items-center w-full">
+        <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const Icon = item.icon
             const isWallet = item.isMiddle
@@ -92,28 +176,18 @@ export function BottomNav() {
             // Middle item is the Wallet with plus button
             if (isWallet) {
               return (
-                <div key={item.href} className="flex flex-1 flex-col items-center justify-center relative">
+                <div key={item.href} className="flex flex-col items-center justify-center relative">
                   <Link
                     href={item.href}
-                    className="flex items-center justify-center relative py-2"
+                    className="flex items-center justify-center relative"
                   >
                     <motion.div
                       className={cn(
                         "relative w-14 h-14 rounded-full flex items-center justify-center transition-colors shadow-md border",
-                        isActive ? "shadow-[0_0_18px_rgba(139,92,246,0.35)]" : ""
+                        isActive 
+                          ? "bg-[#8b5cf6] border-transparent shadow-[0_0_18px_rgba(139,92,246,0.35)]" 
+                          : "theme-bg-tertiary theme-border-secondary"
                       )}
-                      style={{
-                        backgroundColor: isActive
-                          ? '#8b5cf6'
-                          : theme === 'dark'
-                          ? '#2d2d35'
-                          : '#ede9fe',
-                        borderColor: isActive
-                          ? 'transparent'
-                          : theme === 'dark'
-                          ? '#3a3a44'
-                          : '#d8b4fe',
-                      }}
                       animate={isActive ? {
                         scale: [1, 1.1, 1],
                         boxShadow: [
@@ -137,23 +211,16 @@ export function BottomNav() {
                         }}
                       >
                         <Icon className={cn(
-                          "w-6 h-6 transition-colors"
-                        )}
-                        style={{
-                          color: isActive
-                            ? '#ffffff'
-                            : theme === 'dark'
-                            ? '#8b5cf6'
-                            : '#6d28d9'
-                        }}
-                        />
+                          "w-6 h-6 transition-colors",
+                          isActive ? "text-white" : "theme-text-secondary"
+                        )} />
                       </motion.div>
                     </motion.div>
                   </Link>
                   <span
                     className={cn(
-                      "mt-1 text-[11px] font-medium transition-all duration-200",
-                      isActive ? "opacity-100 translate-y-0 theme-text-primary" : "opacity-0 -translate-y-1 pointer-events-none"
+                      "mt-1 text-[11px] font-medium transition-colors",
+                      isActive ? "theme-text-primary" : "theme-text-secondary"
                     )}
                   >
                     {item.label}
@@ -166,7 +233,7 @@ export function BottomNav() {
                       // Navigate to wallet with deposit action
                       router.push(`${buildHref('/wallet')}?action=deposit`)
                     }}
-                    className="absolute -top-0 right-2 w-6 h-6 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-border transition-colors cursor-pointer z-10 shadow-lg"
+                    className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] flex items-center justify-center border-2 theme-border transition-colors cursor-pointer z-10 shadow-lg"
                   >
                     <HiPlus className="w-3.5 h-3.5 text-white" />
                   </button>
@@ -178,7 +245,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-1 flex-col items-center justify-center py-2 rounded-lg relative"
+                className="flex flex-col items-center justify-center px-3 py-1 rounded-lg relative"
               >
                 <motion.div
                   animate={isActive ? {
@@ -220,8 +287,8 @@ export function BottomNav() {
                 </motion.div>
                 <span
                   className={cn(
-                    "mt-1 text-[11px] font-medium transition-all duration-200",
-                    isActive ? "opacity-100 translate-y-0 theme-text-primary" : "opacity-0 -translate-y-1 pointer-events-none"
+                    "mt-1 text-[11px] font-medium transition-colors",
+                    isActive ? "theme-text-primary" : "theme-text-secondary"
                   )}
                 >
                   {item.label}

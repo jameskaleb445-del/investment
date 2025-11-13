@@ -424,7 +424,7 @@ function MarketplacePageContent() {
                 <div className="mb-6">
                   <div className="px-4 mb-3">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-white">{t('activeInvestments')}</h2>
+                      <h2 className="text-lg font-semibold theme-text-primary">{t('activeInvestments')}</h2>
                       <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
                         {userInvestments.length} {t('active')}
                       </span>
@@ -469,7 +469,7 @@ function MarketplacePageContent() {
                 <div className="mb-6 pb-28">
                   <div className="px-4 mb-3">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-white">{t('allProjects')}</h2>
+                      <h2 className="text-lg font-semibold theme-text-primary">{t('allProjects')}</h2>
                       <button
                         onClick={() => setIsSortOpen(true)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-[#1f1f24] border border-[#2d2d35] rounded-lg text-white text-sm hover:bg-[#25252a] hover:border-[#3a3a44] transition-colors cursor-pointer"
@@ -532,7 +532,7 @@ function MarketplacePageContent() {
         >
           <div className="px-5 py-6 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white">{t('sortBy')}</label>
+              <label className="text-sm font-medium theme-text-primary">{t('sortBy')}</label>
               <Select value={sortBy} onValueChange={(value) => {
                 setSortBy(value)
                 setIsSortOpen(false)
@@ -638,7 +638,7 @@ function MarketplacePageContent() {
                       <Button
                         onClick={() => handleLevelSelect(levelsSheetProject.project, level)}
                         className={cn(
-                          'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold mt-4',
+                          'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold mt-4',
                           isActive && 'opacity-80 cursor-default'
                         )}
                         size="sm"

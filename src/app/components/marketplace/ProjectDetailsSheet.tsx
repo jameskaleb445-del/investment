@@ -187,7 +187,7 @@ export function ProjectDetailsSheet({
               onInvest?.({ level: selectedLevel, amount: investmentAmount })
               onClose()
             }}
-            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold"
+            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold"
             size="lg"
             disabled={project.status !== 'funding'}
           >

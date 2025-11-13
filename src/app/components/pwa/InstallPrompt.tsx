@@ -14,13 +14,27 @@ export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [isDev, setIsDev] = useState(false)
 
   useEffect(() => {
+    // Mark as mounted to prevent hydration mismatch
+    setMounted(true)
+
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
       return
     }
+
+    // Check if iOS
+    const iosCheck = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    setIsIOS(iosCheck)
+    
+    // Check if dev mode
+    const devCheck = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    setIsDev(devCheck)
 
     // Check if user has previously dismissed the prompt (using localStorage)
     const dismissed = localStorage.getItem('pwa-install-dismissed')
@@ -43,8 +57,7 @@ export function InstallPrompt() {
         }, 5000) // Show after 5 seconds
       } else {
         // If recently dismissed, check if we're in dev mode and show anyway (for testing)
-        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        if (isDev && dismissedTime < Date.now() - 1000 * 60 * 60) { // If dismissed more than 1 hour ago in dev
+        if (devCheck && dismissedTime < Date.now() - 1000 * 60 * 60) { // If dismissed more than 1 hour ago in dev
           setTimeout(() => {
             setShowPrompt(true)
           }, 8000)
@@ -63,13 +76,10 @@ export function InstallPrompt() {
       localStorage.removeItem('pwa-install-dismissed')
     })
 
-    // For iOS Safari or dev mode: Show prompt after delay
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     let devTimeout: NodeJS.Timeout | null = null
     
     // In dev mode, always show prompt after delay for testing (even without beforeinstallprompt)
-    if (isDev && dismissedTime < oneWeekAgo) {
+    if (devCheck && dismissedTime < oneWeekAgo) {
       devTimeout = setTimeout(() => {
         // Check again if not installed
         if (!window.matchMedia('(display-mode: standalone)').matches) {
@@ -77,7 +87,7 @@ export function InstallPrompt() {
           // In dev mode, we'll show the prompt but with a message that real install requires HTTPS
         }
       }, 3000) // Show after 3 seconds in dev mode for faster testing
-    } else if (isIOS && dismissedTime < oneWeekAgo) {
+    } else if (iosCheck && dismissedTime < oneWeekAgo) {
       devTimeout = setTimeout(() => {
         if (!window.matchMedia('(display-mode: standalone)').matches) {
           setShowPrompt(true)
@@ -119,75 +129,14 @@ export function InstallPrompt() {
     localStorage.setItem('pwa-install-dismissed', Date.now().toString())
   }
 
-  // Don't show if already installed (check in useEffect, not during render)
-  if (isInstalled) {
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted) {
     return null
   }
 
-  // For iOS Safari, show custom instructions (only render client-side)
-  if (typeof window !== 'undefined') {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    
-    if (isStandalone) {
-      return null
-    }
-
-    // For iOS Safari, show custom instructions
-    if (isIOS && !deferredPrompt) {
-      const dismissed = localStorage.getItem('pwa-install-dismissed')
-      const dismissedTime = dismissed ? parseInt(dismissed, 10) : 0
-      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
-      
-      if (dismissedTime < oneWeekAgo && showPrompt) {
-      return (
-        <BottomSheet isOpen={showPrompt} onClose={handleDismiss}>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center">
-                  <HiDownload className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Install App</h3>
-                  <p className="text-xs text-[#a0a0a8]">Add to Home Screen</p>
-                </div>
-              </div>
-              <button
-                onClick={handleDismiss}
-                className="text-[#a0a0a8] hover:text-white transition-colors cursor-pointer"
-              >
-                <HiX className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="mb-6 space-y-4">
-              <div className="theme-bg-secondary theme-border border rounded-lg p-4">
-                <p className="text-sm font-medium theme-text-primary mb-2">How to install:</p>
-                <ol className="text-xs theme-text-secondary space-y-2 list-decimal list-inside">
-                  <li>
-                    Tap the Share button
-                    <span className="inline-block w-4 h-4 theme-bg-tertiary theme-border-secondary border rounded mx-1 text-center leading-4">⎋</span>
-                    at the bottom
-                  </li>
-                  <li>Scroll down and tap "Add to Home Screen"</li>
-                  <li>Tap "Add" to confirm</li>
-                </ol>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleDismiss}
-              variant="outline"
-              className="w-full border-[#2d2d35] text-[#a0a0a8] hover:text-white hover:border-[#3a3a44]"
-            >
-              Got it
-            </Button>
-          </div>
-        </BottomSheet>
-      )
-      }
-    }
+  // Don't show if already installed
+  if (isInstalled) {
+    return null
   }
 
   // Don't show if prompt not triggered
@@ -195,9 +144,57 @@ export function InstallPrompt() {
     return null
   }
 
+  // For iOS Safari, show custom instructions
+  if (isIOS && !deferredPrompt) {
+    return (
+      <BottomSheet isOpen={showPrompt} onClose={handleDismiss}>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center">
+                <HiDownload className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Install App</h3>
+                <p className="text-xs text-[#a0a0a8]">Add to Home Screen</p>
+              </div>
+            </div>
+            <button
+              onClick={handleDismiss}
+              className="text-[#a0a0a8] hover:text-white transition-colors cursor-pointer"
+            >
+              <HiX className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="mb-6 space-y-4">
+            <div className="theme-bg-secondary theme-border border rounded-lg p-4">
+              <p className="text-sm font-medium theme-text-primary mb-2">How to install:</p>
+              <ol className="text-xs theme-text-secondary space-y-2 list-decimal list-inside">
+                <li>
+                  Tap the Share button
+                  <span className="inline-block w-4 h-4 theme-bg-tertiary theme-border-secondary border rounded mx-1 text-center leading-4">⎋</span>
+                  at the bottom
+                </li>
+                <li>Scroll down and tap "Add to Home Screen"</li>
+                <li>Tap "Add" to confirm</li>
+              </ol>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleDismiss}
+            variant="outline"
+            className="w-full border-[#2d2d35] text-[#a0a0a8] hover:text-white hover:border-[#3a3a44]"
+          >
+            Got it
+          </Button>
+        </div>
+      </BottomSheet>
+    )
+  }
+
   // Check if we're in dev mode (localhost) without a real prompt
-  const isDev = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   const isDevMode = isDev && !deferredPrompt
 
   return (
