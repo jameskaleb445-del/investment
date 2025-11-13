@@ -12,6 +12,7 @@ import { Suspense } from 'react'
 import { PWARegistration } from '../components/pwa/PWARegistration'
 import { InstallPrompt } from '../components/pwa/InstallPrompt'
 import { UpdatePrompt } from '../components/pwa/UpdatePrompt'
+import { VersionMeta } from '../components/pwa/VersionMeta'
 
 export const metadata: Metadata = {
   title: 'Investment Platform - Rapid Return Assets',
@@ -63,6 +64,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className="antialiased theme-bg-primary transition-colors">
+        <VersionMeta />
         <PWARegistration />
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
