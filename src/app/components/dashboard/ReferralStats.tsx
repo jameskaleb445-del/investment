@@ -33,8 +33,8 @@ export function ReferralStats({
     },
     {
       label: t('totalEarnings'),
-      value: formatCurrencyUSD(totalEarnings),
-      subValue: formatCurrency(totalEarnings),
+      value: formatCurrency(totalEarnings),
+      subValue: formatCurrencyUSD(totalEarnings),
       icon: GiMoneyStack,
       color: 'text-[#10b981]',
       bgColor: 'bg-[#10b981]/20',
@@ -93,8 +93,8 @@ export function ReferralStats({
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">
-              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrencyUSD(level1Earnings)}</p>
-              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrency(level1Earnings)}</p>
+              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrency(level1Earnings)}</p>
+              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrencyUSD(level1Earnings)}</p>
             </div>
           </div>
 
@@ -109,8 +109,8 @@ export function ReferralStats({
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">
-              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrencyUSD(level2Earnings)}</p>
-              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrency(level2Earnings)}</p>
+              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrency(level2Earnings)}</p>
+              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrencyUSD(level2Earnings)}</p>
             </div>
           </div>
 
@@ -125,8 +125,8 @@ export function ReferralStats({
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">
-              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrencyUSD(level3Earnings)}</p>
-              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrency(level3Earnings)}</p>
+              <p className="theme-text-primary font-semibold text-xs sm:text-sm whitespace-nowrap">{formatCurrency(level3Earnings)}</p>
+              <p className="text-xs theme-text-muted whitespace-nowrap">{formatCurrencyUSD(level3Earnings)}</p>
             </div>
           </div>
         </div>

@@ -46,6 +46,26 @@ export function ProjectDetailsSheet({
   const isPositiveRoi = project.estimatedRoi >= 0
   const remainingAmount = project.goalAmount - project.fundedAmount
   const [customAmount, setCustomAmount] = useState<string>(selectedLevel ? selectedLevel.priceXaf.toString() : '')
+  const exampleExitDays =
+    project.durationDays && project.durationDays > 0 ? Math.max(1, Math.round(project.durationDays / 2)) : null
+
+  const calculateProjectedReturn = (
+    amount: number,
+    roiPercent: number,
+    totalDays: number,
+    completedDays?: number
+  ) => {
+    if (amount <= 0) return amount
+    const roiDecimal = Math.max(0, roiPercent) / 100
+    const totalProfit = amount * roiDecimal
+
+    if (!completedDays || !totalDays || totalDays <= 0) {
+      return amount + totalProfit
+    }
+
+    const ratio = Math.min(1, Math.max(0, completedDays / totalDays))
+    return amount + totalProfit * ratio
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -100,10 +120,66 @@ export function ProjectDetailsSheet({
                   {t('levelLabel', { defaultValue: 'Level' })}
                 </p>
                 <h3 className="text-xl font-bold theme-text-primary">{selectedLevel.level}</h3>
-                <div className="mt-3">
-                  <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide mb-1">{t('priceLabel', { defaultValue: 'Price' })}</p>
-                  <p className="text-base font-semibold theme-text-primary">{formatCurrency(selectedLevel.priceXaf)}</p>
-                  <p className="text-xs theme-text-secondary">{formatCurrencyUSD(selectedLevel.priceXaf)}</p>
+                <div className="mt-3 space-y-1">
+                  <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide">
+                    {t('youInvestLabel', { defaultValue: 'You invest' })}
+                  </p>
+                  <p className="text-base font-semibold theme-text-primary">
+                    {formatCurrency(selectedLevel.priceXaf)}
+                  </p>
+                  <p className="text-xs theme-text-secondary">
+                    {formatCurrencyUSD(selectedLevel.priceXaf)}
+                  </p>
+                  <p className="text-xs theme-text-secondary">
+                    {t('youEarnPerHour', {
+                      amount: formatCurrency(selectedLevel.hourlyReturnXaf),
+                      defaultValue: `Earn ${formatCurrency(selectedLevel.hourlyReturnXaf)}/hour`,
+                    })}
+                  </p>
+                  <p className="text-xs font-semibold text-[#10b981]">
+                    {t('estimatedMaturity', {
+                      amount: formatCurrency(
+                        calculateProjectedReturn(
+                          selectedLevel.priceXaf,
+                          project.estimatedRoi,
+                          project.durationDays
+                        )
+                      ),
+                      days: project.durationDays || 0,
+                      defaultValue: `Est. ${formatCurrency(
+                        calculateProjectedReturn(
+                          selectedLevel.priceXaf,
+                          project.estimatedRoi,
+                          project.durationDays
+                        )
+                      )} in ${project.durationDays} days`,
+                    })}
+                  </p>
+                  {exampleExitDays && (
+                    <p className="text-[11px] text-[#facc15]">
+                      {t('earlyExitSample', {
+                        days: exampleExitDays ?? project.durationDays ?? 0,
+                        amount: formatCurrency(
+                          calculateProjectedReturn(
+                            selectedLevel.priceXaf,
+                            project.estimatedRoi,
+                            project.durationDays,
+                            exampleExitDays
+                          )
+                        ),
+                        defaultValue: `Exit after ${
+                          exampleExitDays ?? project.durationDays ?? 0
+                        } days → approx. ${formatCurrency(
+                          calculateProjectedReturn(
+                            selectedLevel.priceXaf,
+                            project.estimatedRoi,
+                            project.durationDays,
+                            exampleExitDays
+                          )
+                        )}`,
+                      })}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -135,15 +211,15 @@ export function ProjectDetailsSheet({
             <div className="bg-gradient-to-r from-[#10b981]/20 to-[#10b981]/10 border border-[#10b981]/30 rounded-xl p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs theme-text-secondary">{t('youInvest', { defaultValue: 'You invest' })}</span>
-                <span className="text-sm font-semibold theme-text-primary">{formatCurrencyUSD(investmentAmount)}</span>
+                <span className="text-sm font-semibold theme-text-primary">{formatCurrency(investmentAmount)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs theme-text-secondary">{t('youCouldGet', { defaultValue: 'You could get' })}</span>
-                <span className="text-sm font-semibold text-[#10b981]">{formatCurrencyUSD(totalReturn)}</span>
+                <span className="text-sm font-semibold text-[#10b981]">{formatCurrency(totalReturn)}</span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-[#10b981]/20">
                 <span className="text-xs text-[#10b981]">{t('profit', { defaultValue: 'Profit' })}</span>
-                <span className="text-xs font-medium text-[#10b981]">+{formatCurrencyUSD(potentialReturn)}</span>
+                <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(potentialReturn)}</span>
               </div>
             </div>
           )}
@@ -166,9 +242,9 @@ export function ProjectDetailsSheet({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs theme-text-secondary">
-              <span>{t('funded', { defaultValue: 'Funded' })}: {formatCurrencyUSD(project.fundedAmount)}</span>
-              <span>{t('goal', { defaultValue: 'Goal' })}: {formatCurrencyUSD(project.goalAmount)}</span>
+              <div className="flex items-center justify-between text-xs theme-text-secondary">
+              <span>{t('funded', { defaultValue: 'Funded' })}: {formatCurrency(project.fundedAmount)}</span>
+              <span>{t('goal', { defaultValue: 'Goal' })}: {formatCurrency(project.goalAmount)}</span>
             </div>
             <div className="h-2 w-full rounded-full theme-bg-tertiary overflow-hidden">
               <div
@@ -178,7 +254,7 @@ export function ProjectDetailsSheet({
             </div>
             <div className="flex items-center justify-between text-xs theme-text-muted">
               <span>{Math.round(fundingPercentage)}%</span>
-              <span>{t('remaining', { defaultValue: 'Remaining' })}: {formatCurrencyUSD(remainingAmount)}</span>
+              <span>{t('remaining', { defaultValue: 'Remaining' })}: {formatCurrency(remainingAmount)}</span>
             </div>
           </div>
 
@@ -334,7 +410,7 @@ export function ProjectDetailsSheet({
               <GiMoneyStack className="w-4 h-4 text-[#8b5cf6]" />
               <span className="text-xs theme-text-secondary">{t('remaining', { defaultValue: 'Remaining' })}</span>
             </div>
-            <p className="text-lg font-bold theme-text-primary">{formatCurrencyUSD(remainingAmount)}</p>
+            <p className="text-lg font-bold theme-text-primary">{formatCurrency(remainingAmount)}</p>
           </div>
         </div>
 
@@ -357,16 +433,16 @@ export function ProjectDetailsSheet({
                     <div>
                       <p className="text-xs theme-text-secondary mb-1">{t('ifYouInvest', { defaultValue: 'If you invest' })}</p>
                       <p className="text-base font-semibold theme-text-primary">
-                        {formatCurrencyUSD(amount)}
+                        {formatCurrency(amount)}
                       </p>
-                      <p className="text-xs text-[#6b7280]">{formatCurrency(amount)}</p>
+                      <p className="text-xs text-[#6b7280]">{formatCurrencyUSD(amount)}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs theme-text-secondary mb-1">{t('youCouldGet', { defaultValue: 'You could get' })}</p>
                       <p className="text-base font-semibold text-[#10b981]">
-                        {formatCurrencyUSD(totalReturn)}
+                        {formatCurrency(totalReturn)}
                       </p>
-                      <p className="text-xs text-[#10b981]/70">+{formatCurrencyUSD(potentialReturn)} {t('profit', { defaultValue: 'profit' })}</p>
+                      <p className="text-xs text-[#10b981]/70">+{formatCurrency(potentialReturn)} {t('profit', { defaultValue: 'profit' })}</p>
                     </div>
                   </div>
                   <div className="mt-2 pt-2 border-t border-[#2d2d35]">
@@ -383,8 +459,8 @@ export function ProjectDetailsSheet({
           {/* Total Investment Needed */}
           <div className="bg-gradient-to-br from-[#8b5cf6]/20 to-[#7c3aed]/10 border border-[#8b5cf6]/30 rounded-lg p-4">
             <p className="text-xs theme-text-secondary mb-2">{t('totalInvestmentGoal', { defaultValue: 'Total Investment Goal' })}</p>
-            <p className="text-2xl font-bold theme-text-primary mb-1">{formatCurrencyUSD(project.goalAmount)}</p>
-            <p className="text-sm text-[#6b7280]">{formatCurrency(project.goalAmount)}</p>
+            <p className="text-2xl font-bold theme-text-primary mb-1">{formatCurrency(project.goalAmount)}</p>
+            <p className="text-sm text-[#6b7280]">{formatCurrencyUSD(project.goalAmount)}</p>
           </div>
         </div>
 

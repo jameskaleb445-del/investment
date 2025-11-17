@@ -17,17 +17,49 @@ import { HiTrendingUp } from 'react-icons/hi'
 import { HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
 import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
+import { useWallet } from '@/app/hooks/useWallet'
+import { useQuery } from '@tanstack/react-query'
 
 export default function Home() {
   const t = useTranslations('home')
   const tCommon = useTranslations('common')
   const tMarketplace = useTranslations('marketplace')
-  const [loading, setLoading] = useState(true)
-  const [wallet, setWallet] = useState<any>(null)
-  const [investments, setInvestments] = useState<any[]>([])
-  const [transactions, setTransactions] = useState<any[]>([])
   const [showStickyHeader, setShowStickyHeader] = useState(false)
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
+
+  // Use TanStack Query for wallet balance
+  const { data: walletData, isLoading: walletLoading } = useWallet()
+  
+  // Fetch investments
+  const { data: investmentsData, isLoading: investmentsLoading } = useQuery({
+    queryKey: ['investments', 'active'],
+    queryFn: async () => {
+      const response = await fetch('/api/investments?status=active&limit=5')
+      if (!response.ok) {
+        throw new Error('Failed to fetch investments')
+      }
+      const data = await response.json()
+      return data.investments || []
+    },
+  })
+
+  // Fetch transactions
+  const { data: transactionsData, isLoading: transactionsLoading } = useQuery({
+    queryKey: ['transactions', 'recent'],
+    queryFn: async () => {
+      const response = await fetch('/api/transactions?limit=5')
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions')
+      }
+      const data = await response.json()
+      return data.transactions || []
+    },
+  })
+
+  const loading = walletLoading || investmentsLoading || transactionsLoading
+  const wallet = walletData
+  const investments = investmentsData || []
+  const transactions = transactionsData || []
 
   useTopLoadingBar(loading)
 
@@ -43,140 +75,6 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
-  const fetchDashboardData = async () => {
-    setLoading(true)
-    try {
-      // TODO: Replace with actual API call
-      // const walletResponse = await fetch('/api/wallet/balance')
-      // const investmentsResponse = await fetch('/api/investments')
-      // const transactionsResponse = await fetch('/api/transactions')
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // Mock data
-      const mockWallet = {
-        balance: 150000,
-        invested_amount: 85000,
-        pending_withdrawal: 0,
-        total_earnings: 25000,
-      }
-
-      const mockInvestments = [
-        {
-          id: '1',
-          projects: { 
-            name: t('investments.project1.name', { defaultValue: 'Agriculture Farm Equipment' }), 
-            category: t('investments.project1.category', { defaultValue: 'Farm Equipment' }), 
-            status: 'active' 
-          },
-          amount: 50000,
-          status: 'active',
-        },
-        {
-          id: '2',
-          projects: { 
-            name: t('investments.project2.name', { defaultValue: 'Water Purification System' }), 
-            category: t('investments.project2.category', { defaultValue: 'Water Purification' }), 
-            status: 'funding' 
-          },
-          amount: 35000,
-          status: 'pending',
-        },
-      ]
-
-      const mockTransactions = [
-        {
-          id: '1',
-          type: 'deposit' as const,
-          amount: 100000,
-          status: 'completed' as const,
-          description: 'MTN Mobile Money deposit',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          type: 'investment' as const,
-          amount: 50000,
-          status: 'completed' as const,
-          description: 'Investment in Agriculture Farm Equipment',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: '3',
-          type: 'return' as const,
-          amount: 7500,
-          status: 'completed' as const,
-          description: 'ROI from Water Purification System',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-        },
-        {
-          id: '4',
-          type: 'commission' as const,
-          amount: 2500,
-          status: 'completed' as const,
-          description: 'Referral commission - Level 1',
-          created_at: new Date(Date.now() - 259200000).toISOString(),
-        },
-        {
-          id: '5',
-          type: 'withdrawal' as const,
-          amount: 20000,
-          status: 'pending' as const,
-          description: 'Withdrawal to Orange Money',
-          created_at: new Date(Date.now() - 345600000).toISOString(),
-        },
-      ]
-
-      setWallet(mockWallet)
-      setInvestments(mockInvestments)
-      setTransactions(mockTransactions)
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-  // Mock data for now - Supabase will be connected later
-  // AUTH DISABLED - Commented out temporarily
-  // try {
-  //   const supabase = await createClient()
-  //   const {
-  //     data: { user },
-  //     error: authError,
-  //   } = await supabase.auth.getUser()
-
-  //   if (!authError && user) {
-  //     // Get wallet balance
-  //     const walletResult = await supabase
-  //       .from('wallets')
-  //       .select('*')
-  //       .eq('user_id', user.id)
-  //       .single()
-
-  //     if (walletResult.data) {
-  //       wallet = walletResult.data
-  //     }
-
-  //     // Get active investments
-  //     const investmentsResult = await supabase
-  //       .from('investments')
-  //       .select('*, projects(name, category, status)')
-  //       .eq('user_id', user.id)
-  //       .in('status', ['pending', 'active'])
-  //       .limit(5)
-
-  //     if (investmentsResult.data) {
-  //       investments = investmentsResult.data
-  //     }
-  //   }
-  // } catch (error) {
-  //   // Supabase not configured or error - use mock data
-  // }
 
   if (loading) {
     return (
@@ -186,15 +84,15 @@ export default function Home() {
     )
   }
 
+  // Available balance is balance minus pending withdrawals only
+  // invested_amount is a separate metric
   const availableBalance = wallet
-    ? Number(wallet.balance) -
-      Number(wallet.invested_amount) -
-      Number(wallet.pending_withdrawal)
+    ? Number(wallet.balance || 0) - Number(wallet.pending_withdrawal || 0)
     : 0
 
-  const totalBalance = wallet ? Number(wallet.balance) : 0
-  const totalInvested = wallet ? Number(wallet.invested_amount) : 0
-  const totalEarnings = wallet ? Number(wallet.total_earnings) : 0
+  const totalBalance = wallet ? Number(wallet.balance || 0) : 0
+  const totalInvested = wallet ? Number(wallet.invested_amount || 0) : 0
+  const totalEarnings = wallet ? Number(wallet.total_earnings || 0) : 0
 
   const totalAssetValue = totalBalance + totalInvested
   const calculatedPercentageChange = totalBalance > 0 
@@ -221,12 +119,12 @@ export default function Home() {
                 <div className="flex-shrink-0">
                   <p className="text-xs theme-text-secondary mb-0.5">{t('totalAssetValue')}</p>
                   <p className="text-lg font-bold theme-text-primary truncate">
-                    {isBalanceVisible ? formatCurrencyUSD(totalAssetValue) : '••••••'}
+                    {isBalanceVisible ? formatCurrency(totalAssetValue) : '••••••'}
                   </p>
                 </div>
                 <div className="hidden sm:block">
                   <p className="text-xs theme-text-muted">
-                    {t('available')}: {isBalanceVisible ? formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '') : '•••'}
+                    {t('available')}: {isBalanceVisible ? formatCurrency(availableBalance) : '•••'}
                   </p>
                 </div>
               </div>
@@ -288,11 +186,11 @@ export default function Home() {
                     <GiTakeMyMoney className="w-4.5 h-4.5 text-[#10b981]" />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-[#0d9b6c] mb-1">
-                  {formatCurrencyUSD(totalEarnings).replace(/\.\d{2}$/, '')}
+                <p className="font-semibold text-[#0d9b6c] mb-1 text-[clamp(1.25rem,4vw,1.5rem)]">
+                  {formatCurrency(totalEarnings)}
                 </p>
                 <p className="text-xs text-[#10b981]/70">
-                  {formatCurrency(totalEarnings)}
+                  {formatCurrencyUSD(totalEarnings).replace(/\.\d{2}$/, '')}
                 </p>
               </div>
               <div className="relative bg-gradient-to-br from-[#8b5cf6]/12 via-[#8b5cf6]/5 to-transparent border border-[#8b5cf6]/25 rounded-xl p-4 hover:border-[#8b5cf6]/40 transition-all">
@@ -302,7 +200,7 @@ export default function Home() {
                     <FaChartLine className="w-4.5 h-4.5 text-[#8b5cf6]" />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-[#7c3aed] mb-1">
+                <p className="font-semibold text-[#7c3aed] mb-1 text-[clamp(1.25rem,4vw,1.5rem)]">
                   {investments.length}
                 </p>
                 <p className="text-xs text-[#7c3aed]/70">
@@ -313,11 +211,7 @@ export default function Home() {
             </div>
 
             {/* Daily Rewards */}
-            <DailyRewards 
-              dailyReward={1000}
-              streak={3}
-              canClaim={true}
-            />
+            <DailyRewards />
 
    {/* Performance Insights */}
             {/* Active Investments */}
@@ -348,10 +242,10 @@ export default function Home() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold theme-text-primary text-sm mb-1">
-                            {formatCurrencyUSD(inv.amount)}
+                            {formatCurrency(inv.amount)}
                           </p>
                           <p className="text-xs theme-text-muted mb-0.5">
-                            {formatCurrency(inv.amount)}
+                            {formatCurrencyUSD(inv.amount)}
                           </p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
                             inv.status === 'active' 
@@ -388,7 +282,7 @@ export default function Home() {
                   </Button>
                 </Link>
               </div>
-              <TransactionsList transactions={transactions.slice(0, 5)} variant="compact" />
+              <TransactionsList transactions={transactions} variant="compact" />
             </div>
           </div>
         </div>

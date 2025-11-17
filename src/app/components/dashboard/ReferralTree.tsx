@@ -1,7 +1,7 @@
 'use client'
 
 import { HiUser, HiUserCircle } from 'react-icons/hi'
-import { formatCurrencyUSD } from '@/app/utils/format'
+import { formatCurrency } from '@/app/utils/format'
 import { useTranslations } from 'next-intl'
 
 interface ReferralUser {
@@ -72,9 +72,7 @@ export function ReferralTree({ levels }: ReferralTreeProps) {
                 </div>
                 {(user.totalInvested || user.totalDeposited) && (
                   <div className="text-right flex-shrink-0 ml-2">
-                    <p className="text-xs theme-text-primary font-medium whitespace-nowrap">
-                      {formatCurrencyUSD((user.totalInvested || 0) + (user.totalDeposited || 0))}
-                    </p>
+                    <p className="text-xs theme-text-primary font-medium whitespace-nowrap">{formatCurrency((user.totalInvested || 0) + (user.totalDeposited || 0))}</p>
                   </div>
                 )}
               </div>

@@ -2,7 +2,8 @@
 
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { formatCurrencyUSD, formatCurrency } from '@/app/utils/format'
-import { HiEye, HiEyeOff, HiBell, HiSearch, HiArrowDown, HiArrowUp } from 'react-icons/hi'
+import { HiEye, HiEyeOff, HiSearch, HiArrowDown, HiArrowUp } from 'react-icons/hi'
+import { FaRegBell } from 'react-icons/fa'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -41,68 +42,37 @@ function WalletPageContent() {
   const fetchWalletData = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API call
-      // const walletResponse = await fetch('/api/wallet/balance')
-      // const transactionsResponse = await fetch('/api/transactions')
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
-
-      // Mock data
-      const mockWallet = {
-        balance: 56890,
-        invested_amount: 20321,
-        pending_withdrawal: 0,
-        total_earnings: 16988,
+      // Fetch wallet balance
+      const walletResponse = await fetch('/api/wallet/balance')
+      if (!walletResponse.ok) {
+        throw new Error('Failed to fetch wallet balance')
       }
+      const walletData = await walletResponse.json()
 
-      const mockTransactions = [
-        {
-          id: '1',
-          type: 'deposit' as const,
-          amount: 100000,
-          status: 'completed' as const,
-          description: 'MTN Mobile Money deposit',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          type: 'investment' as const,
-          amount: 50000,
-          status: 'completed' as const,
-          description: 'Investment in Agriculture Farm Equipment',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: '3',
-          type: 'return' as const,
-          amount: 7500,
-          status: 'completed' as const,
-          description: 'ROI from Water Purification System',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-        },
-        {
-          id: '4',
-          type: 'commission' as const,
-          amount: 2500,
-          status: 'completed' as const,
-          description: 'Referral commission - Level 1',
-          created_at: new Date(Date.now() - 259200000).toISOString(),
-        },
-        {
-          id: '5',
-          type: 'withdrawal' as const,
-          amount: 20000,
-          status: 'pending' as const,
-          description: 'Withdrawal to Orange Money',
-          created_at: new Date(Date.now() - 345600000).toISOString(),
-        },
-      ]
+      // Fetch recent transactions (limit to 10 for wallet page)
+      const transactionsResponse = await fetch('/api/transactions?limit=10')
+      if (!transactionsResponse.ok) {
+        throw new Error('Failed to fetch transactions')
+      }
+      const transactionsData = await transactionsResponse.json()
 
-      setWallet(mockWallet)
-      setTransactions(mockTransactions)
+      setWallet({
+        balance: walletData.balance || 0,
+        invested_amount: walletData.invested_amount || 0,
+        pending_withdrawal: walletData.pending_withdrawal || 0,
+        total_earnings: walletData.total_earnings || 0,
+      })
+      setTransactions(transactionsData.transactions || [])
     } catch (error) {
       console.error('Error fetching wallet data:', error)
+      // Set empty data on error
+      setWallet({
+        balance: 0,
+        invested_amount: 0,
+        pending_withdrawal: 0,
+        total_earnings: 0,
+      })
+      setTransactions([])
     } finally {
       setLoading(false)
     }
@@ -156,9 +126,14 @@ function WalletPageContent() {
     )
   }
 
-  const totalAssetValue = wallet.balance + wallet.invested_amount
-  const availableBalance = wallet.balance - wallet.pending_withdrawal
-  const percentageChange = 23.0 // Mock percentage change
+  const totalAssetValue = Number(wallet.balance) + Number(wallet.invested_amount)
+  const availableBalance = Number(wallet.balance) - Number(wallet.pending_withdrawal)
+  
+  // Calculate percentage change based on total earnings
+  // This is a simple calculation - you might want to track historical values
+  const percentageChange = wallet.total_earnings > 0 && totalAssetValue > 0
+    ? ((Number(wallet.total_earnings) / totalAssetValue) * 100)
+    : 0
 
   return (
     <AppLayout>
@@ -171,7 +146,7 @@ function WalletPageContent() {
           <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
           <div className="flex-1 flex justify-end">
             <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <HiBell className="w-6 h-6" />
+              <FaRegBell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
           </div>
@@ -181,8 +156,8 @@ function WalletPageContent() {
             <div className="px-4 pt-20 pb-6 theme-bg-primary">
               <p className="text-sm theme-text-secondary mb-4">{t('totalAssetValue')}</p>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold theme-text-primary">
-              {isBalanceVisible ? formatCurrencyUSD(totalAssetValue) : '••••••'}
+            <h1 className="font-bold theme-text-primary text-[clamp(1.75rem,6vw,3rem)]">
+              {isBalanceVisible ? formatCurrency(totalAssetValue) : '••••••'}
             </h1>
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
@@ -200,7 +175,7 @@ function WalletPageContent() {
           </div>
           {isBalanceVisible && (
             <p className="text-sm theme-text-secondary">
-              {formatCurrency(totalAssetValue)}
+              {formatCurrencyUSD(totalAssetValue)}
             </p>
           )}
         </div>
@@ -232,34 +207,34 @@ function WalletPageContent() {
           <div className="grid grid-cols-3 gap-3">
                 <div className="theme-bg-secondary theme-border border rounded-xl p-3">
                   <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('available')}</p>
-              <p className="text-lg font-bold theme-text-primary">
-                {isBalanceVisible ? formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '') : '•••'}
+              <p className="font-bold theme-text-primary text-[clamp(0.875rem,2.5vw,1.125rem)]">
+                {isBalanceVisible ? formatCurrency(availableBalance) : '•••'}
               </p>
               {isBalanceVisible && (
                 <p className="text-[10px] theme-text-muted mt-0.5">
-                  {formatCurrency(availableBalance)}
+                  {formatCurrencyUSD(availableBalance).replace(/\.\d{2}$/, '')}
                 </p>
               )}
             </div>
                 <div className="theme-bg-secondary theme-border border rounded-xl p-3">
                   <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('invested')}</p>
-              <p className="text-lg font-bold text-[#a78bfa]">
-                {isBalanceVisible ? formatCurrencyUSD(wallet.invested_amount).replace(/\.\d{2}$/, '') : '•••'}
+              <p className="font-bold whitespace-nowrap text-[#a78bfa] text-[clamp(0.875rem,2.5vw,1.125rem)]">
+                {isBalanceVisible ? formatCurrency(wallet.invested_amount) : '•••'}
               </p>
               {isBalanceVisible && (
                 <p className="text-[10px] theme-text-muted mt-0.5">
-                  {formatCurrency(wallet.invested_amount)}
+                  {formatCurrencyUSD(wallet.invested_amount).replace(/\.\d{2}$/, '')}
                 </p>
               )}
             </div>
                 <div className="theme-bg-secondary theme-border border rounded-xl p-3">
                   <p className="text-xs theme-text-secondary mb-1 uppercase tracking-wide">{t('earnings')}</p>
-                  <p className="text-lg font-bold text-[#10b981]">
-                {isBalanceVisible ? formatCurrencyUSD(wallet.total_earnings).replace(/\.\d{2}$/, '') : '•••'}
+                  <p className="font-bold text-[#10b981] text-[clamp(0.875rem,2.5vw,1.125rem)]">
+                {isBalanceVisible ? formatCurrency(wallet.total_earnings) : '•••'}
               </p>
               {isBalanceVisible && (
                 <p className="text-[10px] theme-text-muted mt-0.5">
-                  {formatCurrency(wallet.total_earnings)}
+                  {formatCurrencyUSD(wallet.total_earnings).replace(/\.\d{2}$/, '')}
                 </p>
               )}
             </div>
@@ -281,8 +256,8 @@ function WalletPageContent() {
           isOpen={showDepositModal}
           onClose={handleDepositClose}
           onSuccess={() => {
-            // TODO: Refresh wallet data
-            console.log('Deposit successful')
+            // Refresh wallet data after successful deposit
+            fetchWalletData()
           }}
         />
 
@@ -292,8 +267,8 @@ function WalletPageContent() {
           onClose={handleWithdrawalClose}
           availableBalance={availableBalance}
           onSuccess={() => {
-            // TODO: Refresh wallet data
-            console.log('Withdrawal successful')
+            // Refresh wallet data after successful withdrawal
+            fetchWalletData()
           }}
         />
       </div>

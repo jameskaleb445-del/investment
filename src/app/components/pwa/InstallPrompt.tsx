@@ -36,10 +36,15 @@ export function InstallPrompt() {
     const devCheck = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     setIsDev(devCheck)
 
-    // Check if user has previously dismissed the prompt (using localStorage)
+    // Check if user has previously dismissed or clicked install on this device (using localStorage)
     const dismissed = localStorage.getItem('pwa-install-dismissed')
+    const installClicked = localStorage.getItem('pwa-install-clicked')
     const dismissedTime = dismissed ? parseInt(dismissed, 10) : 0
+    const installClickedTime = installClicked ? parseInt(installClicked, 10) : 0
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+    
+    // Check if user has already clicked install or dismissed recently
+    const hasInteracted = installClicked || (dismissedTime > oneWeekAgo)
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -49,15 +54,16 @@ export function InstallPrompt() {
       // Save the event for later use
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       
-      // Show our custom prompt if user hasn't dismissed it in the last week
-      if (dismissedTime < oneWeekAgo) {
+      // Show our custom prompt if user hasn't interacted with it before
+      if (!hasInteracted) {
         // Small delay to ensure smooth page load
         setTimeout(() => {
           setShowPrompt(true)
         }, 5000) // Show after 5 seconds
       } else {
-        // If recently dismissed, check if we're in dev mode and show anyway (for testing)
-        if (devCheck && dismissedTime < Date.now() - 1000 * 60 * 60) { // If dismissed more than 1 hour ago in dev
+        // If recently interacted, check if we're in dev mode and show anyway (for testing)
+        if (devCheck && (dismissedTime < Date.now() - 1000 * 60 * 60 || installClickedTime < Date.now() - 1000 * 60 * 60)) {
+          // If dismissed or clicked more than 1 hour ago in dev
           setTimeout(() => {
             setShowPrompt(true)
           }, 8000)
@@ -73,13 +79,17 @@ export function InstallPrompt() {
       setIsInstalled(true)
       setShowPrompt(false)
       setDeferredPrompt(null)
+      // Clear dismissal flag since app is now installed
       localStorage.removeItem('pwa-install-dismissed')
+      // Keep install-clicked flag as permanent record that install was attempted/succeeded
+      // Optionally, you can remove it too if you want to reset after installation
+      // localStorage.removeItem('pwa-install-clicked')
     })
 
     let devTimeout: NodeJS.Timeout | null = null
     
     // In dev mode, always show prompt after delay for testing (even without beforeinstallprompt)
-    if (devCheck && dismissedTime < oneWeekAgo) {
+    if (devCheck && !hasInteracted) {
       devTimeout = setTimeout(() => {
         // Check again if not installed
         if (!window.matchMedia('(display-mode: standalone)').matches) {
@@ -87,7 +97,7 @@ export function InstallPrompt() {
           // In dev mode, we'll show the prompt but with a message that real install requires HTTPS
         }
       }, 3000) // Show after 3 seconds in dev mode for faster testing
-    } else if (iosCheck && dismissedTime < oneWeekAgo) {
+    } else if (iosCheck && !hasInteracted) {
       devTimeout = setTimeout(() => {
         if (!window.matchMedia('(display-mode: standalone)').matches) {
           setShowPrompt(true)
@@ -102,7 +112,14 @@ export function InstallPrompt() {
   }, [])
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return
+    // Save that user clicked install on this device
+    localStorage.setItem('pwa-install-clicked', Date.now().toString())
+    
+    if (!deferredPrompt) {
+      // If no deferred prompt (e.g., dev mode or iOS), just close and mark as clicked
+      setShowPrompt(false)
+      return
+    }
 
     // Show the install prompt
     await deferredPrompt.prompt()
@@ -114,8 +131,10 @@ export function InstallPrompt() {
       console.log('User accepted the install prompt')
       setShowPrompt(false)
       setIsInstalled(true)
+      // Keep the install-clicked flag so prompt doesn't show again even if install fails
     } else {
       console.log('User dismissed the install prompt')
+      // Keep the install-clicked flag since user interacted with the install button
     }
 
     // Clear the deferredPrompt

@@ -39,18 +39,12 @@ export function LanguageSelector() {
     
     const pathWithoutLocale = pathname ? getPathWithoutLocale(pathname) : '/'
     
-    // Build new URL with the new locale
+    // Build new URL with the new locale (always include prefix to match middleware localePrefix: 'always')
     let newPath: string
-    if (value === 'en') {
-      // Default locale - no prefix
-      newPath = pathWithoutLocale
+    if (pathWithoutLocale === '/') {
+      newPath = `/${value}`
     } else {
-      // Non-default locale - add prefix
-      if (pathWithoutLocale === '/') {
-        newPath = `/${value}`
-      } else {
-        newPath = `/${value}${pathWithoutLocale}`
-      }
+      newPath = `/${value}${pathWithoutLocale}`
     }
     
     // Navigate to the new locale URL

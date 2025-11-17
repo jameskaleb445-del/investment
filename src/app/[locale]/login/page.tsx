@@ -3,6 +3,7 @@ import { redirect } from '@/i18n/navigation'
 import { LoginForm } from '@/app/components/auth/LoginForm'
 import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
+import { LanguageSelector } from '@/app/components/profile/LanguageSelector'
 
 export default async function LoginPage({
   params,
@@ -25,7 +26,12 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1f] p-4 sm:p-6 flex items-center justify-center">
+    <div className="min-h-screen bg-[#1a1a1f] p-4 sm:p-6 flex items-center justify-center relative">
+      {/* Language Selector at top */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+      
       <div className="w-full max-w-md space-y-6">
         <LoginForm />
         <div className="text-center">

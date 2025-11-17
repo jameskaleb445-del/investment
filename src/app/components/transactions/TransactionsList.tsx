@@ -69,7 +69,12 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
     )
   }
 
-  const getTransactionIcon = (type: Transaction['type']) => {
+  const getTransactionIcon = (type: Transaction['type'], metadata?: Record<string, any>) => {
+    // Check if it's a daily reward (gift icon)
+    if (metadata?.isDailyReward || (type === 'deposit' && metadata?.reference?.startsWith('daily_reward_'))) {
+      return <TfiGift className="w-5 h-5 text-[#8b5cf6]" />
+    }
+
     switch (type) {
       case 'deposit':
         return <HiMiniArrowLongDown className="w-5 h-5 text-[#10b981]" />
@@ -228,7 +233,7 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
                 <div className="flex items-start gap-3">
                   {/* Icon */}
                   <div className={iconClasses}>
-                    {getTransactionIcon(transaction.type)}
+                    {getTransactionIcon(transaction.type, transaction.metadata)}
                   </div>
 
                   {/* Transaction Details */}
@@ -240,10 +245,10 @@ export function TransactionsList({ transactions, filter, variant = 'full' }: Tra
                       <div className={amountContainerClasses}>
                         <div className={getAmountClasses(transaction.type)}>
                           {(transaction.type === 'deposit' || transaction.type === 'return' || transaction.type === 'commission') ? '+' : '-'}
-                          {formatCurrencyUSD(Number(transaction.amount))}
+                          {formatCurrency(Number(transaction.amount))}
                         </div>
                         <div className={xafAmountClasses}>
-                          ≈{formatCurrency(Number(transaction.amount))}
+                          ≈{formatCurrencyUSD(Number(transaction.amount))}
                         </div>
                       </div>
                     </div>

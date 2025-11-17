@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { formatCurrencyUSD } from "@/app/utils/format"
+import { formatCurrency } from "@/app/utils/format"
 import {
   ChartConfig,
   ChartContainer,
@@ -33,7 +33,7 @@ export function EarningsChart({ data }: EarningsChartProps) {
   // Format tooltip - data comes in USD, convert back to XAF for display
   const formatTooltipValue = (value: number) => {
     const xafValue = value * 600 // Convert USD to XAF
-    return formatCurrencyUSD(xafValue)
+    return formatCurrency(xafValue)
   }
 
   return (

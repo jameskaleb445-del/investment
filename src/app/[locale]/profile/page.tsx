@@ -1,25 +1,48 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from '@/i18n/navigation'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { InviteCard } from '@/app/components/profile/InviteCard'
 import { AccountDetailsList } from '@/app/components/profile/AccountDetailsList'
 import { PaymentMethods } from '@/app/components/profile/PaymentMethods'
 import { LanguageSelector } from '@/app/components/profile/LanguageSelector'
 import { ProfileSkeleton } from '@/app/components/profile/ProfileSkeleton'
-import Link from 'next/link'
-import { AiOutlineEdit } from 'react-icons/ai'
 import { HiShieldCheck, HiCheckCircle } from 'react-icons/hi'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 
+interface ProfileData {
+  id: string
+  email: string
+  phone: string
+  full_name: string
+  referral_code: string
+  role: string
+  email_verified: boolean
+  phone_verified: boolean
+  pin_set: boolean
+  registration_complete: boolean
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+  wallet: {
+    balance: number
+    invested_amount: number
+    pending_withdrawal: number
+    total_earnings: number
+    available_balance: number
+  } | null
+  referral_count: number
+}
+
 export default function ProfilePage() {
+  const router = useRouter()
   const t = useTranslations('profile')
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<any>(null)
-  const [displayName, setDisplayName] = useState('')
-  const [displayEmail, setDisplayEmail] = useState('')
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useTopLoadingBar(loading)
 
@@ -29,48 +52,34 @@ export default function ProfilePage() {
 
   const fetchProfileData = async () => {
     setLoading(true)
+    setError(null)
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/profile')
-      // const data = await response.json()
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+      const response = await fetch('/api/profile')
+      const data = await response.json()
 
-      // Mock data
-      setDisplayName('Helena Sarapova')
-      setDisplayEmail('helenasarapova@mail.com')
-      setProfile(null)
-    } catch (error) {
-      console.error('Error fetching profile data:', error)
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login')
+          return
+        }
+        throw new Error(data.error || 'Failed to fetch profile')
+      }
+
+      setProfile(data)
+    } catch (err: any) {
+      console.error('Error fetching profile data:', err)
+      setError(err.message || 'Failed to load profile')
+      if (err.message?.includes('Unauthorized')) {
+        router.push('/login')
+      }
     } finally {
       setLoading(false)
     }
   }
-  // AUTH DISABLED - Commented out temporarily
-  // // Check if Supabase is configured
-  // if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  //   redirect('/login')
-  // }
 
-  // const supabase = await createClient()
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser()
-
-  // if (!user) {
-  //   redirect('/login')
-  // }
-
-  // // Get user profile data
-  // const { data: profile } = await supabase
-  //   .from('users')
-  //   .select('*')
-  //   .eq('id', user.id)
-  //   .single()
-
-  // const displayName = profile?.full_name || user.email?.split('@')[0] || 'User'
-  // const displayEmail = user.email || profile?.email || ''
+  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'User'
+  const displayEmail = profile?.email || ''
+  const isVerified = profile?.email_verified || profile?.phone_verified || false
 
   if (loading) {
     return (
@@ -108,13 +117,15 @@ export default function ProfilePage() {
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
-                  <span>{displayName.charAt(0).toUpperCase()}</span>
+                  <span className="select-none">{displayName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
               {/* Verified badge */}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#10b981] border-4 theme-bg-primary flex items-center justify-center shadow-lg">
-                <HiCheckCircle className="w-5 h-5 text-white" />
-              </div>
+              {isVerified && (
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#10b981] border-4 theme-bg-primary flex items-center justify-center shadow-lg">
+                  <HiCheckCircle className="w-5 h-5 text-white" />
+                </div>
+              )}
             </div>
 
             {/* Name and Email */}
@@ -123,22 +134,44 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-bold theme-text-primary">{displayName}</h1>
               </div>
               <p className="theme-text-secondary text-sm mb-3">{displayEmail}</p>
-              <div className="flex items-center gap-2">
-                <HiShieldCheck className="w-4 h-4 text-[#10b981]" />
-                <span className="px-3 py-1 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
-                  {t('verifiedAccount')}
-                </span>
-              </div>
+              {profile?.phone && (
+                <p className="theme-text-secondary text-xs mb-3">{profile.phone}</p>
+              )}
+              {isVerified && (
+                <div className="flex items-center gap-2">
+                  <HiShieldCheck className="w-4 h-4 text-[#10b981]" />
+                  <span className="px-3 py-1 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
+                    {t('verifiedAccount')}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="px-4 mb-4">
+            <div className="p-4 bg-red-900/20 border border-red-800/50 rounded-xl">
+              <p className="text-sm text-red-400 text-center">{error}</p>
+              <button
+                onClick={fetchProfileData}
+                className="mt-2 w-full px-4 py-2 bg-red-900/30 hover:bg-red-900/40 text-red-400 rounded-lg text-sm font-medium transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Content area */}
         <div className="flex-1 flex flex-col">
           {/* Invite Friends Card */}
-          <div className="px-4 mb-4">
-            <InviteCard />
-          </div>
+          {profile && (
+            <div className="px-4 mb-4">
+              <InviteCard referralCode={profile.referral_code} />
+            </div>
+          )}
 
           {/* Payment Methods */}
           <div className="px-4 mb-4">
@@ -167,4 +200,5 @@ export default function ProfilePage() {
     </AppLayout>
   )
 }
+
 

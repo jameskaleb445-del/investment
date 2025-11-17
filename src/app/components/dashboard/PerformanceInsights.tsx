@@ -1,6 +1,6 @@
 'use client'
 
-import { formatCurrencyUSD } from '@/app/utils/format'
+import { formatCurrency } from '@/app/utils/format'
 import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi'
 import { useTranslations } from 'next-intl'
 
@@ -23,7 +23,7 @@ export function PerformanceInsights({
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold theme-text-primary mb-1">{t('title')}</h3>
-          <p className="text-2xl font-bold theme-text-primary">{formatCurrencyUSD(totalEarnings)}</p>
+          <p className="text-2xl font-bold theme-text-primary">{formatCurrency(totalEarnings)}</p>
         </div>
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
           isPositive 

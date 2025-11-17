@@ -19,7 +19,9 @@ export const registerSchema = z.object({
 
 export const otpSchema = z.object({
   code: z.string().length(6, 'OTP must be 6 digits'),
-  type: z.enum(['login', 'withdrawal', 'deposit']),
+  type: z.enum(['login', 'withdrawal', 'deposit', 'register', 'verification']),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
 })
 
 export const pinSchema = z.object({

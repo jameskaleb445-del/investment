@@ -78,7 +78,7 @@ export function PortfolioHeader({
           <p className="text-sm text-white/80 mb-2">{tHome('totalAssetValue')}</p>
           <div className="flex items-center gap-2 mb-3">
             <h1 className="text-4xl sm:text-5xl font-bold text-white">
-              {isBalanceVisible ? formatCurrencyUSD(totalAssetValue) : '••••••'}
+              {isBalanceVisible ? formatCurrency(totalAssetValue) : '••••••'}
             </h1>
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
@@ -97,7 +97,7 @@ export function PortfolioHeader({
               {percentageDisplay}%
             </span>
           </div>
-          {isBalanceVisible && <p className="text-xs text-white/60">{formatCurrency(totalAssetValue)}</p>}
+          {isBalanceVisible && <p className="text-xs text-white/60">{formatCurrencyUSD(totalAssetValue)}</p>}
         </div>
 
         <div className="grid grid-cols-3 gap-3">

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { FaCopy, FaWhatsapp } from 'react-icons/fa'
 import { BsInstagram } from 'react-icons/bs'
 import { HiDotsHorizontal } from 'react-icons/hi'
@@ -7,34 +8,99 @@ import { Input } from '@/app/components/ui/input'
 import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
 
-export function InviteFriendsContent() {
+interface InviteFriendsContentProps {
+  referralCode?: string
+}
+
+export function InviteFriendsContent({ referralCode: propReferralCode }: InviteFriendsContentProps) {
   const t = useTranslations('profile')
   const tReferrals = useTranslations('referrals')
-  const referralCode = '@helena02' // Replace with actual referral code
-  const earningsAmount = '$5'
-  const lessonsCompleted = '1'
-  const investmentsLearned = '4'
+  const [referralCode, setReferralCode] = useState(propReferralCode || '')
+  const [loading, setLoading] = useState(!propReferralCode)
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(referralCode)
-    toast.success(tReferrals('referralCodeCopied', { defaultValue: 'Referral code copied!' }))
+  // Fetch referral code if not provided
+  useEffect(() => {
+    if (!propReferralCode) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.referral_code) {
+            setReferralCode(data.referral_code)
+          }
+        })
+        .catch(err => console.error('Failed to fetch referral code:', err))
+        .finally(() => setLoading(false))
+    }
+  }, [propReferralCode])
+
+  const earningsAmount = '$0' // TODO: Get from actual earnings data
+  const lessonsCompleted = '0' // TODO: Get from actual data
+  const investmentsLearned = '0' // TODO: Get from actual data
+
+  const handleCopy = async () => {
+    if (!referralCode) {
+      toast.error('Referral code not available')
+      return
+    }
+    
+    // Create full share text with referral code and URL
+    const shareText = tReferrals('shareText', { referralCode, defaultValue: `Join me on Profit Bridge! Use my referral code: ${referralCode}` })
+    const shareUrl = `${window.location.origin}?ref=${referralCode}`
+    const fullText = `${shareText} ${shareUrl}`
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullText)
+        toast.success(tReferrals('referralCodeCopied', { defaultValue: 'Referral link copied!' }))
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea')
+        textArea.value = fullText
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.select()
+        try {
+          document.execCommand('copy')
+          toast.success(tReferrals('referralCodeCopied', { defaultValue: 'Referral link copied!' }))
+        } catch (err) {
+          toast.error('Failed to copy referral link')
+        } finally {
+          document.body.removeChild(textArea)
+        }
+      }
+    } catch (error) {
+      console.error('Copy failed:', error)
+      toast.error('Failed to copy referral link')
+    }
   }
 
-  const handleShare = (platform: string) => {
-    const shareText = tReferrals('shareText', { referralCode, defaultValue: `Join me on this investment platform! Use my referral code: ${referralCode}` })
+  const handleShare = async (platform: string) => {
+    if (!referralCode) {
+      toast.error('Referral code not available')
+      return
+    }
+    const shareText = tReferrals('shareText', { referralCode, defaultValue: `Join me on Profit Bridge! Use my referral code: ${referralCode}` })
     const shareUrl = `${window.location.origin}?ref=${referralCode}`
 
     switch (platform) {
       case 'whatsapp':
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank')
+        try {
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank')
+          toast.success(tReferrals('openingWhatsApp', { defaultValue: 'Opening WhatsApp...' }))
+        } catch (error) {
+          toast.error('Failed to share on WhatsApp')
+        }
         break
       case 'instagram':
-        // Instagram doesn't support direct sharing, open in new tab
-        toast.info(tReferrals('copyAndShareInstagram', { defaultValue: 'Copy the referral code and share it on Instagram!' }))
-        handleCopy()
+        // Instagram doesn't support direct sharing, copy full text
+        await handleCopy()
+        toast(tReferrals('copyAndShareInstagram', { defaultValue: 'Referral link copied! Paste it on Instagram' }), {
+          icon: '📋',
+        })
         break
       default:
-        handleCopy()
+        await handleCopy()
     }
   }
 
@@ -60,16 +126,19 @@ export function InviteFriendsContent() {
         <div className="relative">
           <Input
             type="text"
-            value={referralCode}
+            value={loading ? 'Loading...' : referralCode}
             readOnly
+            disabled={loading}
             className="theme-bg-secondary theme-border theme-text-primary text-lg font-semibold pr-14 py-3"
           />
-          <button
-            onClick={handleCopy}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b5cf6] hover:text-[#7c3aed] transition-colors cursor-pointer p-2 hover:theme-bg-tertiary rounded-lg"
-          >
-            <FaCopy className="w-5 h-5" />
-          </button>
+          {!loading && (
+            <button
+              onClick={handleCopy}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b5cf6] hover:text-[#7c3aed] transition-colors cursor-pointer p-2 hover:theme-bg-tertiary rounded-lg"
+            >
+              <FaCopy className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 

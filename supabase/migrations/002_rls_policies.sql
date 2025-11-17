@@ -35,8 +35,7 @@ CREATE POLICY "Admins can view all users"
 -- Public can view user referral codes (for registration)
 CREATE POLICY "Public can view referral codes"
   ON public.users FOR SELECT
-  USING (true)
-  WITH CHECK (true);
+  USING (true);
 
 -- Wallets policies
 -- Users can view their own wallet

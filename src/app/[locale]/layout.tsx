@@ -6,6 +6,7 @@ import { locales } from '../../i18n/config'
 import '../globals.css'
 import { AuthProvider } from '../contexts/AuthContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
+import { QueryProvider } from '../providers/QueryProvider'
 import { Toaster } from '../components/ui/toaster'
 import { TopLoadingBar } from '../components/ui/top-loading-bar'
 import { Suspense } from 'react'
@@ -15,13 +16,13 @@ import { UpdatePrompt } from '../components/pwa/UpdatePrompt'
 import { VersionMeta } from '../components/pwa/VersionMeta'
 
 export const metadata: Metadata = {
-  title: 'Investment Platform - Rapid Return Assets',
+  title: 'Profit Bridge - Rapid Return Assets',
   description: 'Invest in physical assets with rapid returns',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Investment App',
+    title: 'Profit Bridge',
   },
   icons: {
     icon: [
@@ -67,15 +68,17 @@ export default async function LocaleLayout({
         <VersionMeta />
         <PWARegistration />
         <ThemeProvider>
-          <NextIntlClientProvider messages={messages}>
-            <Suspense fallback={null}>
-              <TopLoadingBar />
-            </Suspense>
-            <AuthProvider>{children}</AuthProvider>
-            <Toaster />
-            <InstallPrompt />
-            <UpdatePrompt />
-          </NextIntlClientProvider>
+          <QueryProvider>
+            <NextIntlClientProvider messages={messages}>
+              <Suspense fallback={null}>
+                <TopLoadingBar />
+              </Suspense>
+              <AuthProvider>{children}</AuthProvider>
+              <Toaster />
+              <InstallPrompt />
+              <UpdatePrompt />
+            </NextIntlClientProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

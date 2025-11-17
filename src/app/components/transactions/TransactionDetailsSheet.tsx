@@ -35,7 +35,12 @@ interface TransactionDetailsSheetProps {
 export function TransactionDetailsSheet({ transaction, isOpen, onClose }: TransactionDetailsSheetProps) {
   if (!transaction) return null
 
-  const getTransactionIcon = (type: Transaction['type']) => {
+  const getTransactionIcon = (type: Transaction['type'], metadata?: Record<string, any>) => {
+    // Check if it's a daily reward (gift icon)
+    if (metadata?.isDailyReward || (type === 'deposit' && metadata?.reference?.startsWith('daily_reward_'))) {
+      return <FaGift className="w-6 h-6 text-[#8b5cf6]" />
+    }
+
     switch (type) {
       case 'deposit':
         return <FaArrowDown className="w-6 h-6 text-[#10b981]" />
@@ -118,7 +123,7 @@ export function TransactionDetailsSheet({ transaction, isOpen, onClose }: Transa
         {/* Transaction Header */}
         <div className="flex items-center gap-4 pb-6 border-b border-[#2d2d35]">
           <div className="w-14 h-14 rounded-full bg-[#2d2d35] flex items-center justify-center border border-[#3a3a44]">
-            {getTransactionIcon(transaction.type)}
+            {getTransactionIcon(transaction.type, transaction.metadata)}
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white mb-1">
@@ -137,10 +142,10 @@ export function TransactionDetailsSheet({ transaction, isOpen, onClose }: Transa
             <p className="text-xs text-[#a0a0a8] mb-1 uppercase tracking-wide">Amount</p>
             <div className="space-y-1">
               <p className={`text-2xl font-bold ${isPositive ? 'text-[#10b981]' : 'text-red-400'}`}>
-                {isPositive ? '+' : '-'}{formatCurrencyUSD(Number(transaction.amount))}
+                {isPositive ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
               </p>
               <p className="text-sm text-[#707079]">
-                ≈ {formatCurrency(Number(transaction.amount))}
+                ≈ {formatCurrencyUSD(Number(transaction.amount))}
               </p>
             </div>
           </div>

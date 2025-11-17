@@ -6,7 +6,11 @@ import { BottomSheet } from '@/app/components/ui/bottom-sheet'
 import { InviteFriendsContent } from './InviteFriendsContent'
 import { useTranslations } from 'next-intl'
 
-export function InviteCard() {
+interface InviteCardProps {
+  referralCode?: string
+}
+
+export function InviteCard({ referralCode }: InviteCardProps) {
   const t = useTranslations('profile')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -33,7 +37,7 @@ export function InviteCard() {
         onClose={() => setIsModalOpen(false)}
         title={t('inviteFriendsTitle', { defaultValue: 'Invite your friends' })}
       >
-        <InviteFriendsContent />
+        <InviteFriendsContent referralCode={referralCode} />
       </BottomSheet>
     </>
   )

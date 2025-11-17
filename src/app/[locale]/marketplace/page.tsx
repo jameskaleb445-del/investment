@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { AppLayout } from '@/app/components/layout/AppLayout'
-import { MarketHeader } from '@/app/components/marketplace/MarketHeader'
+import MarketHeader from '@/app/components/marketplace/MarketHeaderXAF'
 import { CategoryFilters } from '@/app/components/marketplace/CategoryFilters'
 import { ProjectMarketCard } from '@/app/components/marketplace/ProjectMarketCard'
 import { ProjectDetailsSheet } from '@/app/components/marketplace/ProjectDetailsSheet'
@@ -78,9 +78,10 @@ function MarketplacePageContent() {
   })
 
   // Calculate total invested and expected returns
-  const totalInvested = userInvestments.reduce((sum, inv) => sum + inv.amount, 0)
+  const totalInvested = userInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0)
   const totalExpected = userInvestments.reduce((sum, inv) => {
-    const expectedReturn = inv.amount + (inv.amount * inv.project.estimated_roi / 100)
+    if (!inv.project) return sum
+    const expectedReturn = (inv.amount || 0) + ((inv.amount || 0) * (inv.project.estimated_roi || 0) / 100)
     return sum + expectedReturn
   }, 0)
 
@@ -113,217 +114,123 @@ function MarketplacePageContent() {
   const fetchProjects = async () => {
     setLoading(true)
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/projects?category=${selectedCategory}&sort=${sortBy}`)
-      // const data = await response.json()
-      
-      // Mock data for now - increased delay to see loading bar
-      await new Promise(resolve => setTimeout(resolve, 800))
-      const mockProjects = [
-        {
-          id: '1',
-          name: 'Agriculture Farm Equipment',
-          category: 'Farm Equipment',
-          funded_amount: 2500000,
-          goal_amount: 5000000,
-          estimated_roi: 15.5,
-          status: PROJECT_STATUS.FUNDING,
-          duration_days: 14,
-        },
-        {
-          id: '7',
-          name: 'Solar Power Installation',
-          category: 'Energy',
-          funded_amount: 12000000,
-          goal_amount: 12000000,
-          estimated_roi: 22.5,
-          status: PROJECT_STATUS.ACTIVE,
-          duration_days: 14,
-        },
-        {
-          id: '2',
-          name: 'Water Purification System',
-          category: 'Water Purification',
-          funded_amount: 4500000,
-          goal_amount: 6000000,
-          estimated_roi: 18.2,
-          status: PROJECT_STATUS.FUNDING,
-          duration_days: 21,
-        },
-        {
-          id: '3',
-          name: 'Delivery Van Fleet',
-          category: 'Logistics Vehicles',
-          funded_amount: 8000000,
-          goal_amount: 8000000,
-          estimated_roi: 12.8,
-          status: PROJECT_STATUS.ACTIVE,
-          duration_days: 7,
-        },
-        {
-          id: '4',
-          name: 'Retail Kiosk Setup',
-          category: 'Retail Micro-Kits',
-          funded_amount: 1200000,
-          goal_amount: 3000000,
-          estimated_roi: 20.5,
-          status: PROJECT_STATUS.FUNDING,
-          duration_days: 10,
-        },
-        {
-          id: '5',
-          name: 'Event Chairs & Tables',
-          category: 'Event Furniture',
-          funded_amount: 3200000,
-          goal_amount: 4000000,
-          estimated_roi: 16.3,
-          status: PROJECT_STATUS.FUNDING,
-          duration_days: 5,
-        },
-        {
-          id: '6',
-          name: 'Smartphone Leasing',
-          category: 'Device Leasing',
-          funded_amount: 5500000,
-          goal_amount: 7000000,
-          estimated_roi: 14.7,
-          status: PROJECT_STATUS.FUNDING,
-          duration_days: 14,
-        },
-      ]
-      
-      let filtered = [...mockProjects]
+      // Build query parameters
+      const params = new URLSearchParams()
       
       // Filter by category
       if (selectedCategory) {
-        filtered = filtered.filter(p => p.category === selectedCategory)
+        params.append('category', selectedCategory)
       }
       
+      // Filter by status
+      if (filters.status.length > 0) {
+        // API supports single status, so we'll filter client-side for multiple
+        params.append('status', filters.status[0])
+      }
+      
+      // Fetch from API
+      const response = await fetch(`/api/projects?${params.toString()}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects')
+      }
+      
+      const data = await response.json()
+      let filtered = data.projects || []
+      
+      // Client-side filtering for advanced filters
       // Filter by search
       if (searchQuery) {
-        filtered = filtered.filter(p => 
+        filtered = filtered.filter((p: any) => 
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.category.toLowerCase().includes(searchQuery.toLowerCase())
         )
       }
       
-      // Filter by status
+      // Filter by status (multiple)
       if (filters.status.length > 0) {
-        filtered = filtered.filter(p => filters.status.includes(p.status))
+        filtered = filtered.filter((p: any) => filters.status.includes(p.status))
       }
       
       // Filter by ROI range
       if (filters.minRoi !== null) {
-        filtered = filtered.filter(p => p.estimated_roi >= filters.minRoi!)
+        filtered = filtered.filter((p: any) => Number(p.estimated_roi) >= filters.minRoi!)
       }
       if (filters.maxRoi !== null) {
-        filtered = filtered.filter(p => p.estimated_roi <= filters.maxRoi!)
+        filtered = filtered.filter((p: any) => Number(p.estimated_roi) <= filters.maxRoi!)
       }
       
       // Filter by duration range
       if (filters.minDuration !== null) {
-        filtered = filtered.filter(p => p.duration_days >= filters.minDuration!)
+        filtered = filtered.filter((p: any) => Number(p.duration_days) >= filters.minDuration!)
       }
       if (filters.maxDuration !== null) {
-        filtered = filtered.filter(p => p.duration_days <= filters.maxDuration!)
+        filtered = filtered.filter((p: any) => Number(p.duration_days) <= filters.maxDuration!)
       }
       
       // Filter by goal amount range
       if (filters.minGoal !== null) {
-        filtered = filtered.filter(p => p.goal_amount >= filters.minGoal!)
+        filtered = filtered.filter((p: any) => Number(p.goal_amount) >= filters.minGoal!)
       }
       if (filters.maxGoal !== null) {
-        filtered = filtered.filter(p => p.goal_amount <= filters.maxGoal!)
+        filtered = filtered.filter((p: any) => Number(p.goal_amount) <= filters.maxGoal!)
       }
       
       // Sort
       if (sortBy === 'roi') {
-        filtered.sort((a, b) => b.estimated_roi - a.estimated_roi)
+        filtered.sort((a: any, b: any) => Number(b.estimated_roi) - Number(a.estimated_roi))
       } else if (sortBy === 'progress') {
-        filtered.sort((a, b) => {
-          const progressA = (a.funded_amount / a.goal_amount) * 100
-          const progressB = (b.funded_amount / b.goal_amount) * 100
+        filtered.sort((a: any, b: any) => {
+          const progressA = (Number(a.funded_amount) / Number(a.goal_amount)) * 100
+          const progressB = (Number(b.funded_amount) / Number(b.goal_amount)) * 100
           return progressB - progressA
         })
       } else {
-        filtered.reverse() // newest first
+        // Already sorted by created_at DESC from API, so no need to reverse
       }
       
       setProjects(filtered)
     } catch (error) {
       console.error('Error fetching projects:', error)
+      setProjects([])
     } finally {
       setLoading(false)
     }
   }
 
-          const fetchUserInvestments = async () => {
-            try {
-              // TODO: Replace with actual API call
-              // const response = await fetch('/api/investments/my-investments')
-              // const data = await response.json()
-              
-              // Mock data for user's active investments
-              await new Promise(resolve => setTimeout(resolve, 200))
-              const mockUserInvestments = [
-                {
-                  id: 'inv-1',
-                  project_id: '3',
-                  project: {
-                    id: '3',
-                    name: 'Delivery Van Fleet',
-                    category: 'Logistics Vehicles',
-                    funded_amount: 8000000,
-                    goal_amount: 8000000,
-                    estimated_roi: 12.8,
-                    status: PROJECT_STATUS.ACTIVE,
-                    duration_days: 7,
-                  },
-                  amount: 500000,
-                  status: 'active',
-                  invested_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-                {
-                  id: 'inv-2',
-                  project_id: '1',
-                  project: {
-                    id: '1',
-                    name: 'Agriculture Farm Equipment',
-                    category: 'Farm Equipment',
-                    funded_amount: 2500000,
-                    goal_amount: 5000000,
-                    estimated_roi: 15.5,
-                    status: PROJECT_STATUS.FUNDING,
-                    duration_days: 14,
-                  },
-                  amount: 600000,
-                  status: 'active',
-                  invested_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-                {
-                  id: 'inv-3',
-                  project_id: '8',
-                  project: {
-                    id: '8',
-                    name: 'Mobile App Development',
-                    category: 'Technology',
-                    funded_amount: 9500000,
-                    goal_amount: 9500000,
-                    estimated_roi: 28.3,
-                    status: PROJECT_STATUS.ACTIVE,
-                    duration_days: 21,
-                  },
-                  amount: 750000,
-                  status: 'active',
-                  invested_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-              ]
-              
-              setUserInvestments(mockUserInvestments)
-            } catch (error) {
-              console.error('Error fetching user investments:', error)
-            }
-          }
+  const fetchUserInvestments = async () => {
+    try {
+      // Fetch user's active investments
+      const response = await fetch('/api/investments?status=active')
+      if (!response.ok) {
+        throw new Error('Failed to fetch user investments')
+      }
+      
+      const data = await response.json()
+      // Format investments to match expected structure
+      const formattedInvestments = (data.investments || []).map((inv: any) => ({
+        id: inv.id,
+        project_id: inv.project_id,
+        project: inv.projects ? {
+          id: inv.projects.id,
+          name: inv.projects.name,
+          category: inv.projects.category,
+          funded_amount: inv.projects.funded_amount || 0,
+          goal_amount: inv.projects.goal_amount || 0,
+          estimated_roi: inv.projects.estimated_roi || 0,
+          status: inv.projects.status,
+          duration_days: inv.projects.duration_days || 0,
+        } : null,
+        amount: Number(inv.amount),
+        status: inv.status,
+        invested_at: inv.invested_date || inv.created_at,
+      })).filter((inv: any) => inv.project !== null) // Filter out investments without project data
+      
+      setUserInvestments(formattedInvestments)
+    } catch (error) {
+      console.error('Error fetching user investments:', error)
+      setUserInvestments([])
+    }
+  }
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -343,14 +250,19 @@ function MarketplacePageContent() {
   }
 
   const handleShowLevels = (project: any) => {
-    const levels = PROJECT_LEVEL_OPTIONS[project.id] || []
+    // Use levels from database (project.levels) if available, otherwise fallback to hardcoded PROJECT_LEVEL_OPTIONS
+    const levels = project.levels && project.levels.length > 0 
+      ? project.levels 
+      : PROJECT_LEVEL_OPTIONS[project.id] || []
+    
     if (levels.length === 0) {
       handleProjectClick(project)
       return
     }
-    const userInvestment = userInvestments.find((inv) => inv.project.id === project.id)
+    
+    const userInvestment = userInvestments.find((inv) => inv.project && inv.project.id === project.id)
     const activeLevel = userInvestment
-      ? levels.find((level) => level.priceXaf === userInvestment.amount) || null
+      ? levels.find((level: ProjectLevel) => level.priceXaf === userInvestment.amount) || null
       : null
 
     setLevelsSheetProject({
@@ -365,10 +277,8 @@ function MarketplacePageContent() {
     console.log('Invest in project:', selectedProject?.id, options)
   }
 
-  const featuredProjectIds = new Set(['1', '7'])
-  const visibleProjects = projects.filter(
-    (project) => project.status === PROJECT_STATUS.ACTIVE || featuredProjectIds.has(project.id)
-  )
+  // Show all projects (filtering is done server-side and client-side)
+  const visibleProjects = projects
 
   return (
     <AppLayout>
@@ -436,20 +346,24 @@ function MarketplacePageContent() {
                       style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
                     >
                       {userInvestments.map((inv) => {
-                        const investmentLevels = PROJECT_LEVEL_OPTIONS[inv.project.id] || []
-                        const activeLevel = investmentLevels.find((level) => level.priceXaf === inv.amount) || null
+                        if (!inv.project) return null
+                        // Use levels from database if available, otherwise fallback to hardcoded
+                        const investmentLevels = inv.project.levels && inv.project.levels.length > 0
+                          ? inv.project.levels
+                          : PROJECT_LEVEL_OPTIONS[inv.project.id] || []
+                        const activeLevel = investmentLevels.find((level: ProjectLevel) => level.priceXaf === inv.amount) || null
 
                         return (
-                          <div key={inv.project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
+                          <div key={inv.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
                             <ProjectMarketCard
                               id={inv.project.id}
                               name={inv.project.name}
                               category={inv.project.category}
-                              fundedAmount={inv.project.funded_amount}
-                              goalAmount={inv.project.goal_amount}
-                              estimatedRoi={inv.project.estimated_roi}
+                              fundedAmount={Number(inv.project.funded_amount || 0)}
+                              goalAmount={Number(inv.project.goal_amount || 0)}
+                              estimatedRoi={Number(inv.project.estimated_roi || 0)}
                               status={inv.project.status}
-                              durationDays={inv.project.duration_days}
+                              durationDays={Number(inv.project.duration_days || 0)}
                               onClick={() => handleProjectClick(inv.project)}
                               isUserInvestment={true}
                               userInvestmentAmount={inv.amount}
@@ -479,29 +393,28 @@ function MarketplacePageContent() {
                       </button>
                     </div>
                   </div>
-                  <div className="overflow-x-auto scrollbar-hide scroll-smooth">
-                    <div
-                      className="flex items-start gap-4 px-4 pb-2"
-                      style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
-                    >
+                  <div className="px-4">
+                    <div className="grid grid-cols-2 gap-3 pb-2">
                       {visibleProjects.map((project) => {
-                        const projectLevels = PROJECT_LEVEL_OPTIONS[project.id] || []
+                        // Use levels from database if available, otherwise fallback to hardcoded PROJECT_LEVEL_OPTIONS
+                        const projectLevels = project.levels && project.levels.length > 0
+                          ? project.levels
+                          : PROJECT_LEVEL_OPTIONS[project.id] || []
                         return (
-                          <div key={project.id} className="flex-shrink-0 w-[280px]" style={{ scrollSnapAlign: 'start' }}>
-                            <ProjectMarketCard
-                              id={project.id}
-                              name={project.name}
-                              category={project.category}
-                              fundedAmount={project.funded_amount}
-                              goalAmount={project.goal_amount}
-                              estimatedRoi={project.estimated_roi}
-                              status={project.status}
-                              durationDays={project.duration_days}
-                              onClick={() => handleProjectClick(project)}
+                          <ProjectMarketCard
+                            key={project.id}
+                            id={project.id}
+                            name={project.name}
+                            category={project.category}
+                            fundedAmount={Number(project.funded_amount || 0)}
+                            goalAmount={Number(project.goal_amount || 0)}
+                            estimatedRoi={Number(project.estimated_roi || 0)}
+                            status={project.status}
+                            durationDays={Number(project.duration_days || 0)}
+                            onClick={() => handleProjectClick(project)}
                             levels={projectLevels}
                             onShowLevels={() => handleShowLevels(project)}
-                            />
-                          </div>
+                          />
                         )
                       })}
                     </div>
@@ -611,43 +524,78 @@ function MarketplacePageContent() {
                           {level.level}
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide mb-1">
-                            {t('priceLabel', { defaultValue: 'Price' })}
-                          </p>
-                          <p className="text-sm font-semibold theme-text-primary">
+                      {/* Investment Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs theme-text-secondary">
+                            {t('youInvestLabel', { defaultValue: 'You invest' })}
+                          </span>
+                          <span className="text-sm font-semibold theme-text-primary">
                             {formatCurrency(level.priceXaf)}
-                          </p>
-                          <p className="text-xs theme-text-secondary">
-                            {formatCurrencyUSD(level.priceXaf)}
-                          </p>
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-[11px] uppercase font-semibold theme-text-muted tracking-wide mb-1">
-                            {t('hourlyReturnLabel', { defaultValue: 'Earnings per hour' })}
-                          </p>
-                          <p className="text-sm font-semibold text-[#10b981]">
-                            {formatCurrency(level.hourlyReturnXaf)}
-                          </p>
-                          <p className="text-xs text-[#10b981]/70">
-                            {formatCurrencyUSD(level.hourlyReturnXaf)}
-                          </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs theme-text-secondary">
+                            {t('youEarnPerHour', {
+                              amount: formatCurrency(level.hourlyReturnXaf),
+                              defaultValue: `Earn ${formatCurrency(level.hourlyReturnXaf)}/hour`,
+                            })}
+                          </span>
                         </div>
-                      </div>
-                      <Button
-                        onClick={() => handleLevelSelect(levelsSheetProject.project, level)}
-                        className={cn(
-                          'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold mt-4',
-                          isActive && 'opacity-80 cursor-default'
+                        <div className="flex items-center justify-between text-[#10b981] font-medium">
+                          <span className="text-xs">
+                            {t('estimatedMaturity', {
+                              amount: formatCurrency(
+                                level.priceXaf + (level.priceXaf * levelsSheetProject.project.estimated_roi / 100)
+                              ),
+                              days: levelsSheetProject.project.duration_days || 0,
+                              defaultValue: `Est. ${formatCurrency(
+                                level.priceXaf + (level.priceXaf * levelsSheetProject.project.estimated_roi / 100)
+                              )} in ${levelsSheetProject.project.duration_days || 0} days`,
+                            })}
+                          </span>
+                        </div>
+                        {levelsSheetProject.project.duration_days && levelsSheetProject.project.duration_days > 0 && (
+                          <div className="text-[11px] text-[#facc15]">
+                            {t('earlyExitSample', {
+                              days: Math.max(1, Math.round((levelsSheetProject.project.duration_days || 0) / 2)),
+                              amount: formatCurrency(
+                                level.priceXaf + 
+                                (level.priceXaf * levelsSheetProject.project.estimated_roi / 100) * 
+                                (Math.max(1, Math.round((levelsSheetProject.project.duration_days || 0) / 2)) / (levelsSheetProject.project.duration_days || 1))
+                              ),
+                              defaultValue: `Exit after ${Math.max(1, Math.round((levelsSheetProject.project.duration_days || 0) / 2))} days → approx. ${formatCurrency(
+                                level.priceXaf + 
+                                (level.priceXaf * levelsSheetProject.project.estimated_roi / 100) * 
+                                (Math.max(1, Math.round((levelsSheetProject.project.duration_days || 0) / 2)) / (levelsSheetProject.project.duration_days || 1))
+                              )}`,
+                            })}
+                          </div>
                         )}
-                        size="sm"
-                        disabled={isActive}
-                      >
-                        {isActive
-                          ? t('selectedLevelButton', { defaultValue: 'Selected level' })
-                          : t('investInLevel', { level: level.level, defaultValue: `Invest in ${level.level}` })}
-                      </Button>
+                      </div>
+                      <div className="pt-3 border-t border-[#2d2d35]">
+                        <div className="mb-3">
+                          <p className="text-[11px] text-[#facc15] mb-2">
+                            {t('earlyExitNote', {
+                              defaultValue:
+                                'If you exit early, profit is prorated and only the worked hours count.',
+                            })}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => handleLevelSelect(levelsSheetProject.project, level)}
+                          className={cn(
+                            'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold',
+                            isActive && 'opacity-80 cursor-default'
+                          )}
+                          size="sm"
+                          disabled={isActive}
+                        >
+                          {isActive
+                            ? t('selectedLevelButton', { defaultValue: 'Selected level' })
+                            : t('investAmount', { amount: formatCurrency(level.priceXaf), defaultValue: `Invest ${formatCurrency(level.priceXaf)}` })}
+                        </Button>
+                      </div>
                     </div>
                   )
                 })}
@@ -671,11 +619,12 @@ function MarketplacePageContent() {
               id: selectedProject.id,
               name: selectedProject.name,
               category: selectedProject.category,
-              fundedAmount: selectedProject.funded_amount,
-              goalAmount: selectedProject.goal_amount,
-              estimatedRoi: selectedProject.estimated_roi,
+              fundedAmount: Number(selectedProject.funded_amount || 0),
+              goalAmount: Number(selectedProject.goal_amount || 0),
+              estimatedRoi: Number(selectedProject.estimated_roi || 0),
               status: selectedProject.status,
-              durationDays: selectedProject.duration_days,
+              durationDays: Number(selectedProject.duration_days || 0),
+              description: selectedProject.description,
             }}
             selectedLevel={selectedLevel}
             onInvest={handleInvest}

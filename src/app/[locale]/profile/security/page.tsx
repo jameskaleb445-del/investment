@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { Link } from '@/i18n/navigation'
 import { AiOutlineArrowLeft } from 'react-icons/ai'
@@ -8,17 +8,15 @@ import {
   HiShieldCheck, 
   HiKey, 
   HiLockClosed,
-  HiFingerPrint,
-  HiDeviceMobile,
   HiBell,
   HiMail,
   HiCheckCircle
 } from 'react-icons/hi'
 import { Switch } from '@/app/components/ui/switch'
-import { Label } from '@/app/components/ui/label'
 import { Button } from '@/app/components/ui/button'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 interface SecuritySetting {
   id: string
@@ -27,78 +25,116 @@ interface SecuritySetting {
   icon: React.ComponentType<{ className?: string }>
   enabled: boolean
   type: 'toggle' | 'button'
+  key: string
+}
+
+interface SecuritySettingsData {
+  two_factor_enabled: boolean
+  transaction_pin_required: boolean
+  security_notifications_enabled: boolean
+  email_verification_required: boolean
 }
 
 export default function SecurityPage() {
+  const t = useTranslations('profile')
   const [loading, setLoading] = useState(false)
-  const [settings, setSettings] = useState<SecuritySetting[]>([
+  const [fetchLoading, setFetchLoading] = useState(true)
+  const [settingsData, setSettingsData] = useState<SecuritySettingsData | null>(null)
+
+  // Trigger top loading bar when loading
+  useTopLoadingBar(loading || fetchLoading)
+
+  useEffect(() => {
+    fetchSecuritySettings()
+  }, [])
+
+  const fetchSecuritySettings = async () => {
+    setFetchLoading(true)
+    try {
+      const response = await fetch('/api/security-settings')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch security settings')
+      }
+
+      setSettingsData(data.settings)
+    } catch (error: any) {
+      console.error('Error fetching security settings:', error)
+      toast.error(error.message || 'Failed to load security settings')
+    } finally {
+      setFetchLoading(false)
+    }
+  }
+
+  const settings: SecuritySetting[] = settingsData ? [
     {
       id: 'two-factor',
+      key: 'two_factor_enabled',
       title: 'Two-Factor Authentication',
-      description: 'Add an extra layer of security to your account',
+      description: 'Add an extra layer of security when logging in (optional)',
       icon: HiShieldCheck,
-      enabled: false,
+      enabled: settingsData.two_factor_enabled,
       type: 'toggle',
     },
     {
       id: 'transaction-pin',
+      key: 'transaction_pin_required',
       title: 'Transaction PIN',
       description: 'Require PIN for all transactions',
       icon: HiKey,
-      enabled: true,
-      type: 'toggle',
-    },
-    {
-      id: 'biometric',
-      title: 'Biometric Authentication',
-      description: 'Use fingerprint or face ID to login',
-      icon: HiFingerPrint,
-      enabled: false,
-      type: 'toggle',
-    },
-    {
-      id: 'device-lock',
-      title: 'Device Lock',
-      description: 'Lock account when accessed from new devices',
-      icon: HiDeviceMobile,
-      enabled: true,
+      enabled: settingsData.transaction_pin_required,
       type: 'toggle',
     },
     {
       id: 'notifications',
+      key: 'security_notifications_enabled',
       title: 'Security Notifications',
       description: 'Get notified about security events',
       icon: HiBell,
-      enabled: true,
+      enabled: settingsData.security_notifications_enabled,
       type: 'toggle',
     },
     {
       id: 'email-verification',
+      key: 'email_verification_required',
       title: 'Email Verification',
       description: 'Require email verification for sensitive operations',
       icon: HiMail,
-      enabled: true,
+      enabled: settingsData.email_verification_required,
       type: 'toggle',
     },
-  ])
+  ] : []
 
-  // Trigger top loading bar when loading
-  useTopLoadingBar(loading)
+  const toggleSetting = async (id: string, key: string, currentValue: boolean) => {
+    if (!settingsData) return
 
-  const toggleSetting = async (id: string) => {
     setLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      setSettings(settings.map(setting => 
-        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
-      ))
+      const response = await fetch('/api/security-settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          [key]: !currentValue,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update setting')
+      }
+
+      // Update local state
+      setSettingsData({
+        ...settingsData,
+        [key]: !currentValue,
+      })
       
       toast.success('Setting updated successfully')
-    } catch (error) {
-      toast.error('Failed to update setting')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update setting')
     } finally {
       setLoading(false)
     }
@@ -108,25 +144,38 @@ export default function SecurityPage() {
     setLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Password change link sent to your email')
-    } catch (error) {
-      toast.error('Failed to send password change link')
-    } finally {
-      setLoading(false)
-    }
-  }
+      // Get user profile to get email
+      const profileResponse = await fetch('/api/profile')
+      const profileData = await profileResponse.json()
 
-  const handleRevokeSession = async (sessionId: string) => {
-    setLoading(true)
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      toast.success('Session revoked successfully')
-    } catch (error) {
-      toast.error('Failed to revoke session')
+      if (!profileResponse.ok) {
+        throw new Error(profileData.error || 'Failed to get user profile')
+      }
+
+      const email = profileData.email
+
+      if (!email) {
+        throw new Error('Email not found')
+      }
+
+      // Send password reset email
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send password reset link')
+      }
+
+      toast.success('Password reset link sent to your email')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send password reset link')
     } finally {
       setLoading(false)
     }
@@ -166,37 +215,47 @@ export default function SecurityPage() {
         <div className="px-4 space-y-3 pb-6">
           <h2 className="text-base font-semibold theme-text-primary mb-3 px-1">Security Settings</h2>
           
-          {settings.map((setting) => {
-            const Icon = setting.icon
-            return (
-              <div
-                key={setting.id}
-                className="theme-bg-secondary theme-border border rounded-xl p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6]/20 to-[#7c3aed]/10 flex items-center justify-center border border-[#8b5cf6]/20 flex-shrink-0">
-                      <Icon className="w-6 h-6 text-[#8b5cf6]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="theme-text-primary font-semibold text-sm mb-1">{setting.title}</h3>
-                      <p className="theme-text-muted text-xs leading-relaxed">{setting.description}</p>
-                    </div>
-                  </div>
-                  {setting.type === 'toggle' && (
-                    <div className="flex items-center flex-shrink-0">
-                      <Switch
-                        checked={setting.enabled}
-                        onCheckedChange={() => toggleSetting(setting.id)}
-                        className="cursor-pointer"
-                        disabled={loading}
-                      />
-                    </div>
-                  )}
+          {fetchLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="theme-bg-secondary theme-border border rounded-xl p-4 animate-pulse">
+                  <div className="h-12 bg-[#2d2d35] rounded-xl"></div>
                 </div>
-              </div>
-            )
-          })}
+              ))}
+            </div>
+          ) : (
+            settings.map((setting) => {
+              const Icon = setting.icon
+              return (
+                <div
+                  key={setting.id}
+                  className="theme-bg-secondary theme-border border rounded-xl p-4 hover:theme-bg-tertiary hover:theme-border-secondary transition-all"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6]/20 to-[#7c3aed]/10 flex items-center justify-center border border-[#8b5cf6]/20 flex-shrink-0">
+                        <Icon className="w-6 h-6 text-[#8b5cf6]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="theme-text-primary font-semibold text-sm mb-1">{setting.title}</h3>
+                        <p className="theme-text-muted text-xs leading-relaxed">{setting.description}</p>
+                      </div>
+                    </div>
+                    {setting.type === 'toggle' && (
+                      <div className="flex items-center flex-shrink-0">
+                        <Switch
+                          checked={setting.enabled}
+                          onCheckedChange={() => toggleSetting(setting.id, setting.key, setting.enabled)}
+                          className="cursor-pointer"
+                          disabled={loading || fetchLoading}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
 
         {/* Change Password Section */}
@@ -214,43 +273,10 @@ export default function SecurityPage() {
                   size="sm"
                   className="w-full sm:w-auto cursor-pointer"
                   onClick={handleChangePassword}
-                  disabled={loading}
+                  disabled={loading || fetchLoading}
                 >
                   {loading ? 'Loading...' : 'Change Password'}
                 </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Active Sessions */}
-        <div className="px-4 pb-6">
-          <div className="theme-bg-secondary theme-border border rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="theme-text-primary font-semibold text-sm mb-1">Active Sessions</h3>
-                <p className="theme-text-muted text-xs">Manage devices that have access to your account</p>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-[#8b5cf6] hover:text-[#7c3aed] cursor-pointer"
-              >
-                View All
-              </Button>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 theme-bg-tertiary rounded-lg">
-                <div className="flex items-center gap-3">
-                  <HiDeviceMobile className="w-5 h-5 theme-text-secondary" />
-                  <div>
-                    <p className="theme-text-primary text-sm font-medium">iPhone 14 Pro</p>
-                    <p className="theme-text-muted text-xs">Current session • iOS</p>
-                  </div>
-                </div>
-                <span className="px-2 py-1 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-md border border-[#10b981]/30">
-                  Active
-                </span>
               </div>
             </div>
           </div>

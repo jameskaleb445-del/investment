@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from '@/i18n/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Checkbox } from '../ui/checkbox'
@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl'
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const t = useTranslations('auth')
   const [formData, setFormData] = useState({
     phone: '',
@@ -25,6 +26,17 @@ export function RegisterForm() {
 
   // Trigger top loading bar when loading
   useTopLoadingBar(loading)
+
+  // Get referral code from URL parameter (?ref=...)
+  useEffect(() => {
+    const refCode = searchParams?.get('ref')
+    if (refCode) {
+      setFormData(prev => ({
+        ...prev,
+        referral_code: refCode.toUpperCase(),
+      }))
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,7 +67,7 @@ export function RegisterForm() {
   const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5 mt-10">
       <div className="text- sm:text-left">
         <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('createAccount')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
@@ -157,6 +169,14 @@ export function RegisterForm() {
         </button>
         <button
           type="button"
+          onClick={async () => {
+            try {
+              const { signInWithGoogle } = await import('@/app/lib/supabase/authClient')
+              await signInWithGoogle(formData.referral_code || undefined)
+            } catch (error: any) {
+              setError(error.message || 'Failed to sign in with Google')
+            }
+          }}
           className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg text-white hover:bg-[#35353d] transition-colors cursor-pointer"
         >
           <FcGoogle className="w-5 h-5" />

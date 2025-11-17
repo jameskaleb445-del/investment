@@ -205,7 +205,9 @@ export function ProjectMarketCard({
                   >
                     {t('youInvest', { defaultValue: 'You invest' })}
                   </span>
-                  <span className="text-xs font-medium theme-text-primary">{formatCurrencyUSD(investmentAmount)}</span>
+
+
+                  <span className="text-xs font-medium theme-text-primary">{formatCurrency(investmentAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span
@@ -214,11 +216,11 @@ export function ProjectMarketCard({
                   >
                     {t('youCouldGet', { defaultValue: 'You could get' })}
                   </span>
-                  <span className="text-sm font-semibold text-[#10b981]">{formatCurrencyUSD(totalReturn)}</span>
+                  <span className="text-sm font-semibold text-[#10b981]">{formatCurrency(totalReturn)}</span>
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-[#10b981]/20">
                   <span className="text-xs text-[#10b981]">{t('profit', { defaultValue: 'Profit' })}</span>
-                  <span className="text-xs font-medium text-[#10b981]">+{formatCurrencyUSD(potentialReturn)}</span>
+                  <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(potentialReturn)}</span>
                 </div>
               </div>
             )}
@@ -245,7 +247,7 @@ export function ProjectMarketCard({
           <span>{durationDays} {t('days', { defaultValue: 'days' })}</span>
         </div>
 
-        {/* Investment Levels */}
+        {/* Investment Levels Button */}
         {levels.length > 0 && !isUserInvestment && (
           <div className="mt-3">
             <button
@@ -274,12 +276,12 @@ export function ProjectMarketCard({
                 >
                   {t('yourInvestment', { defaultValue: 'Your Investment' })}
                 </p>
-                <p className="text-sm font-semibold theme-text-primary">{formatCurrencyUSD(userInvestmentAmount)}</p>
+                <p className="text-sm font-semibold theme-text-primary">{formatCurrency(userInvestmentAmount)}</p>
                 <p
                   className="text-xs theme-text-secondary opacity-80"
                   style={{ color: isDark ? undefined : '#64748b' }}
                 >
-                  {formatCurrency(userInvestmentAmount)}
+                  {formatCurrencyUSD(userInvestmentAmount)}
                 </p>
               </div>
               <div className="text-right">
@@ -289,8 +291,8 @@ export function ProjectMarketCard({
                 >
                   {t('expectedReturn', { defaultValue: 'Expected Return' })}
                 </p>
-                <p className="text-sm font-semibold text-[#10b981]">{formatCurrencyUSD(userInvestmentAmount + (userInvestmentAmount * estimatedRoi / 100))}</p>
-                <p className="text-xs text-[#10b981]/70">+{formatCurrencyUSD(userInvestmentAmount * estimatedRoi / 100)} {t('profit', { defaultValue: 'profit' })}</p>
+                <p className="text-sm font-semibold text-[#10b981]">{formatCurrency(userInvestmentAmount + (userInvestmentAmount * estimatedRoi / 100))}</p>
+                <p className="text-xs text-[#10b981]/70">+{formatCurrency(userInvestmentAmount * estimatedRoi / 100)} {t('profit', { defaultValue: 'profit' })}</p>
               </div>
             </div>
           </div>

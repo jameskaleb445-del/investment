@@ -14,7 +14,17 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from('projects')
-      .select('*')
+      .select(`
+        *,
+        levels:project_levels(
+          id,
+          level_name,
+          price_xaf,
+          hourly_return_xaf,
+          tag,
+          display_order
+        )
+      `)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -44,12 +54,29 @@ export async function GET(request: Request) {
       )
     }
 
-    // Calculate funding percentage for each project
-    const projectsWithPercentage = projects?.map((project) => ({
-      ...project,
-      funding_percentage:
-        (Number(project.funded_amount) / Number(project.goal_amount)) * 100,
-    }))
+    // Calculate funding percentage and format levels for each project
+    const projectsWithPercentage = projects?.map((project: any) => {
+      // Format levels to match client structure (camelCase)
+      const levels = project.levels?.map((level: any) => ({
+        id: `${project.id}-${level.level_name.toLowerCase()}`,
+        level: level.level_name,
+        priceXaf: Number(level.price_xaf),
+        hourlyReturnXaf: Number(level.hourly_return_xaf),
+        tag: level.tag || undefined,
+      })).sort((a: any, b: any) => {
+        // Sort by level order (LV1, LV2, LV3)
+        const orderA = parseInt(a.level.replace('LV', ''))
+        const orderB = parseInt(b.level.replace('LV', ''))
+        return orderA - orderB
+      }) || []
+
+      return {
+        ...project,
+        levels, // Add formatted levels
+        funding_percentage:
+          (Number(project.funded_amount) / Number(project.goal_amount)) * 100,
+      }
+    })
 
     return NextResponse.json({
       projects: projectsWithPercentage,

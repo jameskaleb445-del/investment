@@ -1,8 +1,17 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { registerSchema } from '@/app/validation/auth'
 import { NextResponse } from 'next/server'
-import { REFERRAL_LEVELS } from '@/app/constants/projects'
+import { sendOTPviaEmail } from '@/app/lib/services/email'
+import { sendOTPviaWhatsApp } from '@/app/lib/services/whatsapp'
 
+/**
+ * Step 1: Registration Initiation
+ * - Validates registration data
+ * - Generates 6-digit OTP
+ * - Sends OTP via WhatsApp (for phone) or Email (for email)
+ * - Stores OTP in database with expiration (10 minutes)
+ * - Returns success message (does NOT create user yet)
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -10,110 +19,109 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
-    // Check if referral code exists
-    let referrerId: string | null = null
-    if (validated.referral_code) {
-      const { data: referrer } = await supabase
+    // Check if user already exists
+    if (validated.email) {
+      const { data: existingEmailUser } = await supabase
         .from('users')
         .select('id')
-        .eq('referral_code', validated.referral_code)
+        .eq('email', validated.email)
         .single()
 
-      if (referrer) {
-        referrerId = referrer.id
+      if (existingEmailUser) {
+        return NextResponse.json(
+          { error: 'Email already registered' },
+          { status: 400 }
+        )
       }
     }
 
-    // Create auth user
-    const signUpCredentials: { email: string; password: string; phone?: string } = {
-      email: validated.email || '',
-      password: validated.password || `temp_${Date.now()}`,
-    }
     if (validated.phone) {
-      signUpCredentials.phone = validated.phone
-    }
-    const { data: authData, error: authError } = await supabase.auth.signUp(signUpCredentials as any)
+      const { data: existingPhoneUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('phone', validated.phone)
+        .single()
 
-    if (authError) {
+      if (existingPhoneUser) {
+        return NextResponse.json(
+          { error: 'Phone number already registered' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+
+    // Store registration data and OTP temporarily
+    // We'll store it in otp_codes table with identifier (email/phone) instead of user_id
+    const identifier = validated.email || validated.phone || ''
+
+    // Store OTP in database (without user_id since user doesn't exist yet)
+    // Store referral_code if provided for use during verification
+    const { data: otpData, error: otpError } = await supabase
+      .from('otp_codes')
+      .insert({
+        code: otpCode,
+        type: 'register',
+        identifier,
+        referral_code: validated.referral_code || null,
+        expires_at: expiresAt.toISOString(),
+        verified: false,
+      })
+      .select()
+      .single()
+
+    if (otpError) {
       return NextResponse.json(
-        { error: authError.message },
+        { error: 'Failed to generate OTP. Please try again.' },
+        { status: 500 }
+      )
+    }
+
+    // Send OTP via appropriate channel
+    let sendResult: { success: boolean; error?: string }
+
+    if (validated.email) {
+      // Send via Email
+      sendResult = await sendOTPviaEmail(validated.email, otpCode)
+    } else if (validated.phone) {
+      // Send via WhatsApp
+      sendResult = await sendOTPviaWhatsApp(validated.phone, otpCode)
+    } else {
+      return NextResponse.json(
+        { error: 'Email or phone is required' },
         { status: 400 }
       )
     }
 
-    if (!authData.user) {
+    if (!sendResult.success) {
+      // Clean up OTP record if sending failed
+      await supabase.from('otp_codes').delete().eq('id', otpData.id)
       return NextResponse.json(
-        { error: 'Failed to create user' },
+        {
+          error:
+            sendResult.error || 'Failed to send verification code. Please try again.',
+        },
         { status: 500 }
       )
     }
 
-    // Create user profile
-    const { error: profileError } = await supabase.from('users').insert({
-      id: authData.user.id,
-      email: validated.email,
-      ...(validated.phone && { phone: validated.phone }),
-      full_name: validated.full_name,
-      referrer_id: referrerId,
-    })
-
-    if (profileError) {
-      // Rollback auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(authData.user.id)
-      return NextResponse.json(
-        { error: profileError.message },
-        { status: 500 }
-      )
+    // Return success with OTP ID for verification (in development, you might include OTP for testing)
+    const response: any = {
+      message: 'Verification code sent successfully',
+      otp_id: otpData.id,
+      identifier: identifier, // Return for verification step
+      expires_in: 600, // 10 minutes in seconds
     }
 
-    // Create referral relationships if referrer exists
-    if (referrerId) {
-      // Create level 1 referral
-      await supabase.from('referrals').insert({
-        referrer_id: referrerId,
-        referred_id: authData.user.id,
-        level: REFERRAL_LEVELS.LEVEL_1,
-      })
-
-      // Find level 2 referrer (referrer of referrer)
-      const { data: level2Referrer } = await supabase
-        .from('users')
-        .select('referrer_id')
-        .eq('id', referrerId)
-        .single()
-
-      if (level2Referrer?.referrer_id) {
-        await supabase.from('referrals').insert({
-          referrer_id: level2Referrer.referrer_id,
-          referred_id: authData.user.id,
-          level: REFERRAL_LEVELS.LEVEL_2,
-        })
-
-        // Find level 3 referrer
-        const { data: level3Referrer } = await supabase
-          .from('users')
-          .select('referrer_id')
-          .eq('id', level2Referrer.referrer_id)
-          .single()
-
-        if (level3Referrer?.referrer_id) {
-          await supabase.from('referrals').insert({
-            referrer_id: level3Referrer.referrer_id,
-            referred_id: authData.user.id,
-            level: REFERRAL_LEVELS.LEVEL_3,
-          })
-        }
-      }
+    // In development, include OTP code for testing (remove in production)
+    if (process.env.NODE_ENV === 'development') {
+      response.dev_otp = otpCode
     }
 
-    return NextResponse.json({
-      message: 'User registered successfully',
-      user: {
-        id: authData.user.id,
-        email: validated.email,
-        ...(validated.phone && { phone: validated.phone }),
-      },
-    })
+    return NextResponse.json(response)
   } catch (error: any) {
     if (error.issues) {
       // Zod validation error
@@ -128,4 +136,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

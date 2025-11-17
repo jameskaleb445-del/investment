@@ -209,7 +209,7 @@ export async function POST(
           // Create referral earnings record
           await supabase.from('referral_earnings').insert({
             user_id: referral.referrer_id,
-            referral_id: referral.referrer_id,
+            referral_id: referral.id, // Use referral relationship ID, not referrer_id
             amount: commissionAmount,
             level: referral.level,
             transaction_id: transaction?.id,

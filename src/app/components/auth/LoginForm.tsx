@@ -12,48 +12,40 @@ import { HiEye, HiEyeOff } from 'react-icons/hi'
 import { Checkbox } from '../ui/checkbox'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { useTranslations } from 'next-intl'
+import { useSupabaseAuth } from '@/app/hooks/useSupabaseAuth'
 
 export function LoginForm() {
   const router = useRouter()
   const t = useTranslations('auth')
+  const { login, loginLoading, googleLoading, loginWithGoogle } = useSupabaseAuth()
   const [identifier, setIdentifier] = useState('') // email or phone
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
 
+  // Determine input mode based on identifier content
+  const getInputMode = () => {
+    if (identifier.includes('@')) return 'email'
+    // If starts with + or only numbers, treat as phone
+    if (identifier.match(/^\+?\d+$/)) return 'tel'
+    // Default to email keyboard (has @ symbol) when empty or mixed
+    return 'email'
+  }
+
   // Trigger top loading bar when loading
-  useTopLoadingBar(loading)
+  useTopLoadingBar(loginLoading || googleLoading)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: identifier.includes('@') ? identifier : undefined,
-          phone: identifier.includes('@') ? undefined : identifier,
-          password 
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
-      }
-
+      await login({ identifier, password })
       router.push('/')
       router.refresh()
     } catch (err: any) {
       setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -78,8 +70,8 @@ export function LoginForm() {
               setError('')
             }}
             placeholder={t('emailOrPhonePlaceholder')}
-            inputMode={identifier.includes('@') ? 'email' : 'tel'}
-            autoComplete={identifier.includes('@') ? 'email' : 'tel'}
+            inputMode={getInputMode()}
+            autoComplete={identifier.includes('@') ? 'email' : identifier.match(/^\+?\d+$/) ? 'tel' : 'off'}
             required
           />
         </div>
@@ -147,9 +139,9 @@ export function LoginForm() {
         type="submit" 
         className="w-full"
         size="lg"
-        disabled={loading}
+        disabled={loginLoading}
       >
-        {loading ? t('signingIn') : t('signIn')}
+        {loginLoading ? t('signingIn') : t('signIn')}
       </Button>
 
       <div className="relative my-6">
@@ -164,17 +156,27 @@ export function LoginForm() {
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg text-white hover:bg-[#35353d] transition-colors cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg text-white hover:bg-[#35353d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={googleLoading}
         >
           <FaApple className="w-5 h-5" />
           <span className="font-medium">Apple</span>
         </button>
         <button
           type="button"
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg text-white hover:bg-[#35353d] transition-colors cursor-pointer"
+          onClick={async () => {
+            setError('')
+            try {
+              await loginWithGoogle()
+            } catch (err: any) {
+              setError(err.message || 'Failed to sign in with Google')
+            }
+          }}
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-[#2d2d35] border border-[#3a3a44] rounded-lg text-white hover:bg-[#35353d] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={googleLoading}
         >
           <FcGoogle className="w-5 h-5" />
-          <span className="font-medium">Google</span>
+          <span className="font-medium">{googleLoading ? t('signingIn') : 'Google'}</span>
         </button>
       </div>
     </form>

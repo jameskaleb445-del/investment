@@ -1,7 +1,7 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { depositSchema } from '@/app/validation/wallet'
 import { NextResponse } from 'next/server'
-import { PLATFORM_FEES } from '@/app/constants/projects'
+import { PLATFORM_FEES, REFERRAL_COMMISSION_RATES } from '@/app/constants/projects'
 
 export async function POST(request: Request) {
   try {
@@ -46,10 +46,69 @@ export async function POST(request: Request) {
       )
     }
 
+    // Calculate and distribute referral commissions (only when deposit is completed)
+    // For now, commissions will be calculated when deposit status changes to 'completed'
+    // This will be handled by a webhook or when updating transaction status
+    // For immediate calculation on pending deposits, uncomment below:
+    /*
+    const { data: referrals } = await supabase
+      .from('referrals')
+      .select('id, referrer_id, level')
+      .eq('referred_id', user.id)
+
+    if (referrals && referrals.length > 0) {
+      for (const referral of referrals) {
+        const commissionRate =
+          REFERRAL_COMMISSION_RATES[
+            referral.level as keyof typeof REFERRAL_COMMISSION_RATES
+          ]
+        // Calculate commission on net amount (after fee)
+        const commissionAmount = netAmount * commissionRate
+
+        // Get referrer wallet
+        const { data: referrerWallet } = await supabase
+          .from('wallets')
+          .select('balance, total_earnings')
+          .eq('user_id', referral.referrer_id)
+          .single()
+
+        if (referrerWallet) {
+          // Update referrer wallet
+          await supabase
+            .from('wallets')
+            .update({
+              balance: Number(referrerWallet.balance) + commissionAmount,
+              total_earnings:
+                Number(referrerWallet.total_earnings) + commissionAmount,
+            })
+            .eq('user_id', referral.referrer_id)
+
+          // Create referral earnings record
+          await supabase.from('referral_earnings').insert({
+            user_id: referral.referrer_id,
+            referral_id: referral.id,
+            amount: commissionAmount,
+            level: referral.level,
+            transaction_id: transaction.id,
+          })
+
+          // Create transaction for referral commission
+          await supabase.from('transactions').insert({
+            user_id: referral.referrer_id,
+            type: 'referral_commission',
+            amount: commissionAmount,
+            status: 'completed',
+          })
+        }
+      }
+    }
+    */
+
     // TODO: Integrate with Mobile Money API
     // For now, return pending status
     // In production, initiate payment with Orange Money/MTN API
     // and update transaction status based on webhook callback
+    // When deposit status changes to 'completed', calculate referral commissions
 
     return NextResponse.json({
       message: 'Deposit initiated successfully',

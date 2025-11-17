@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { HiCreditCard, HiOutlinePlus } from 'react-icons/hi'
-import { FaMobileAlt } from 'react-icons/fa'
-import { AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai'
+import { AiOutlineDelete } from 'react-icons/ai'
 import { BottomSheet } from '@/app/components/ui/bottom-sheet'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
@@ -16,9 +15,11 @@ import { useTranslations } from 'next-intl'
 interface PaymentMethod {
   id: string
   type: 'orange_money' | 'mtn_mobile_money' | 'bank_account'
-  name: string
-  accountNumber: string
-  isDefault: boolean
+  account_name: string | null
+  account_number: string
+  is_default: boolean
+  created_at: string
+  updated_at: string
 }
 
 const PAYMENT_METHOD_TYPES = {
@@ -42,31 +43,14 @@ const PAYMENT_METHOD_TYPES = {
   },
 } as const
 
-// Mock data - replace with actual data from API
-const mockPaymentMethods: PaymentMethod[] = [
-  {
-    id: '1',
-    type: 'orange_money',
-    name: 'Orange Money',
-    accountNumber: '697123456',
-    isDefault: true,
-  },
-  {
-    id: '2',
-    type: 'mtn_mobile_money',
-    name: 'MTN Mobile Money',
-    accountNumber: '679876543',
-    isDefault: false,
-  },
-]
-
 export function PaymentMethods() {
   const t = useTranslations('profile')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [paymentMethodToDelete, setPaymentMethodToDelete] = useState<string | null>(null)
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [loading, setLoading] = useState(false)
+  const [fetchLoading, setFetchLoading] = useState(true)
   const [formData, setFormData] = useState({
     type: 'orange_money' as 'orange_money' | 'mtn_mobile_money' | 'bank_account',
     accountNumber: '',
@@ -74,7 +58,31 @@ export function PaymentMethods() {
   })
 
   // Trigger top loading bar when loading
-  useTopLoadingBar(loading)
+  useTopLoadingBar(loading || fetchLoading)
+
+  // Fetch payment methods on mount
+  useEffect(() => {
+    fetchPaymentMethods()
+  }, [])
+
+  const fetchPaymentMethods = async () => {
+    setFetchLoading(true)
+    try {
+      const response = await fetch('/api/payment-methods')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch payment methods')
+      }
+
+      setPaymentMethods(data.paymentMethods || [])
+    } catch (error: any) {
+      console.error('Error fetching payment methods:', error)
+      toast.error(error.message || 'Failed to load payment methods')
+    } finally {
+      setFetchLoading(false)
+    }
+  }
 
   const handleAddPaymentMethod = async () => {
     if (!formData.accountNumber.trim()) {
@@ -85,23 +93,30 @@ export function PaymentMethods() {
     setLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/payment-methods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: formData.type,
+          account_number: formData.accountNumber,
+          account_name: formData.accountName || null,
+          is_default: paymentMethods.length === 0, // Set as default if it's the first one
+        }),
+      })
 
-      const newMethod: PaymentMethod = {
-        id: Date.now().toString(),
-        type: formData.type,
-        name: PAYMENT_METHOD_TYPES[formData.type].label,
-        accountNumber: formData.accountNumber,
-        isDefault: paymentMethods.length === 0,
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add payment method')
       }
 
-      setPaymentMethods([...paymentMethods, newMethod])
+      // Refresh payment methods list
+      await fetchPaymentMethods()
       setFormData({ type: 'orange_money', accountNumber: '', accountName: '' })
       setIsAddModalOpen(false)
       toast.success(t('paymentMethodAddedSuccess', { defaultValue: 'Payment method added successfully!' }))
-    } catch (error) {
-      toast.error(t('failedToAddPaymentMethod', { defaultValue: 'Failed to add payment method' }))
+    } catch (error: any) {
+      toast.error(error.message || t('failedToAddPaymentMethod', { defaultValue: 'Failed to add payment method' }))
     } finally {
       setLoading(false)
     }
@@ -119,13 +134,21 @@ export function PaymentMethods() {
     setIsDeleteModalOpen(false)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      setPaymentMethods(paymentMethods.filter(method => method.id !== paymentMethodToDelete))
+      const response = await fetch(`/api/payment-methods/${paymentMethodToDelete}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete payment method')
+      }
+
+      // Refresh payment methods list
+      await fetchPaymentMethods()
       toast.success(t('paymentMethodRemoved', { defaultValue: 'Payment method removed' }))
-    } catch (error) {
-      toast.error(t('failedToRemovePaymentMethod', { defaultValue: 'Failed to remove payment method' }))
+    } catch (error: any) {
+      toast.error(error.message || t('failedToRemovePaymentMethod', { defaultValue: 'Failed to remove payment method' }))
     } finally {
       setLoading(false)
       setPaymentMethodToDelete(null)
@@ -141,18 +164,23 @@ export function PaymentMethods() {
     setLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      setPaymentMethods(
-        paymentMethods.map(method => ({
-          ...method,
-          isDefault: method.id === id,
-        }))
-      )
+      const response = await fetch(`/api/payment-methods/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_default: true }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update default payment method')
+      }
+
+      // Refresh payment methods list
+      await fetchPaymentMethods()
       toast.success(t('defaultPaymentMethodUpdated', { defaultValue: 'Default payment method updated' }))
-    } catch (error) {
-      toast.error(t('failedToUpdateDefaultPaymentMethod', { defaultValue: 'Failed to update default payment method' }))
+    } catch (error: any) {
+      toast.error(error.message || t('failedToUpdateDefaultPaymentMethod', { defaultValue: 'Failed to update default payment method' }))
     } finally {
       setLoading(false)
     }
@@ -183,7 +211,15 @@ export function PaymentMethods() {
           </button>
         </div>
 
-        {paymentMethods.length === 0 ? (
+        {fetchLoading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="theme-bg-secondary theme-border border rounded-xl p-4 animate-pulse">
+                <div className="h-16 bg-[#2d2d35] rounded-lg"></div>
+              </div>
+            ))}
+          </div>
+        ) : paymentMethods.length === 0 ? (
           <div className="theme-bg-secondary theme-border border rounded-xl p-8 text-center">
             <div className="w-16 h-16 rounded-full theme-bg-tertiary flex items-center justify-center mx-auto mb-4">
               <HiCreditCard className="w-8 h-8 theme-text-muted" />
@@ -202,6 +238,7 @@ export function PaymentMethods() {
           <div className="space-y-3">
             {paymentMethods.map((method) => {
               const methodType = PAYMENT_METHOD_TYPES[method.type]
+              const displayName = method.account_name || methodType.label
               return (
                 <div
                   key={method.id}
@@ -222,21 +259,21 @@ export function PaymentMethods() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="theme-text-primary font-semibold text-sm">{method.name}</h3>
-                          {method.isDefault && (
+                          <h3 className="theme-text-primary font-semibold text-sm">{displayName}</h3>
+                          {method.is_default && (
                             <span className="px-2 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
                               {t('default', { defaultValue: 'Default' })}
                             </span>
                           )}
                         </div>
                         <p className="theme-text-secondary text-sm font-mono">
-                          {formatAccountNumber(method.accountNumber)}
+                          {formatAccountNumber(method.account_number)}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 ml-2">
-                      {!method.isDefault && (
+                      {!method.is_default && (
                         <button
                           onClick={() => handleSetDefault(method.id)}
                           className="w-8 h-8 rounded-lg theme-bg-tertiary hover:theme-bg-secondary flex items-center justify-center theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"

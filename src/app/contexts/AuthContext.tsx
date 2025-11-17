@@ -2,12 +2,14 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/app/lib/supabase/client'
+import { signInWithGoogle, signOut as authSignOut } from '@/app/lib/auth'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
   signOut: () => Promise<void>
+  signInWithGoogle: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -47,13 +49,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
+  const handleSignOut = async () => {
+    await authSignOut()
     setUser(null)
   }
 
+  const handleSignInWithGoogle = async () => {
+    try {
+      await signInWithGoogle()
+      // The redirect will happen automatically
+    } catch (error) {
+      console.error('Error signing in with Google:', error)
+      throw error
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signOut: handleSignOut, signInWithGoogle: handleSignInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   )

@@ -40,99 +40,46 @@ export default function ReferralsPage() {
   useTopLoadingBar(loading)
 
   useEffect(() => {
-    // Simulate API call
     const fetchReferralData = async () => {
       setLoading(true)
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch('/api/referrals/tree')
-        // const data = await response.json()
-        
-        // Mock data
-        await new Promise(resolve => setTimeout(resolve, 500))
-        const mockData: ReferralData = {
-          referralCode: '@helena02',
-          totalReferrals: 12,
-          totalEarnings: 180000, // XAF
-          level1Earnings: 120000, // XAF
-          level2Earnings: 45000, // XAF
-          level3Earnings: 15000, // XAF
-          levels: [
-            {
-              level: 1,
-              users: [
-                {
-                  id: '1',
-                  name: 'John Doe',
-                  email: 'john@example.com',
-                  referralCode: '@john01',
-                  totalInvested: 300000,
-                  totalDeposited: 200000,
-                  joinedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-                {
-                  id: '2',
-                  name: 'Jane Smith',
-                  email: 'jane@example.com',
-                  referralCode: '@jane01',
-                  totalInvested: 150000,
-                  totalDeposited: 100000,
-                  joinedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-                {
-                  id: '3',
-                  name: 'Mike Johnson',
-                  email: 'mike@example.com',
-                  referralCode: '@mike01',
-                  totalInvested: 50000,
-                  totalDeposited: 80000,
-                  joinedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-              ],
-            },
-            {
-              level: 2,
-              users: [
-                {
-                  id: '4',
-                  name: 'Sarah Williams',
-                  email: 'sarah@example.com',
-                  referralCode: '@sarah01',
-                  totalInvested: 200000,
-                  totalDeposited: 150000,
-                  joinedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-                {
-                  id: '5',
-                  name: 'David Brown',
-                  email: 'david@example.com',
-                  referralCode: '@david01',
-                  totalInvested: 100000,
-                  totalDeposited: 120000,
-                  joinedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-              ],
-            },
-            {
-              level: 3,
-              users: [
-                {
-                  id: '6',
-                  name: 'Emily Davis',
-                  email: 'emily@example.com',
-                  referralCode: '@emily01',
-                  totalInvested: 80000,
-                  totalDeposited: 60000,
-                  joinedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                },
-              ],
-            },
-          ],
+        // Fetch referral earnings and stats
+        const earningsResponse = await fetch('/api/referrals/earnings')
+        if (!earningsResponse.ok) {
+          throw new Error('Failed to fetch referral earnings')
+        }
+        const earningsData = await earningsResponse.json()
+
+        // Fetch referral tree
+        const treeResponse = await fetch('/api/referrals/tree')
+        if (!treeResponse.ok) {
+          throw new Error('Failed to fetch referral tree')
+        }
+        const treeData = await treeResponse.json()
+
+        const referralData: ReferralData = {
+          referralCode: earningsData.referral_code || '',
+          totalReferrals: earningsData.totalReferrals || 0,
+          totalEarnings: Number(earningsData.totalEarnings) || 0,
+          level1Earnings: Number(earningsData.level1Earnings) || 0,
+          level2Earnings: Number(earningsData.level2Earnings) || 0,
+          level3Earnings: Number(earningsData.level3Earnings) || 0,
+          levels: treeData.levels || [],
         }
         
-        setReferralData(mockData)
+        setReferralData(referralData)
       } catch (error) {
         console.error('Error fetching referral data:', error)
+        // Set empty data on error
+        setReferralData({
+          referralCode: '',
+          totalReferrals: 0,
+          totalEarnings: 0,
+          level1Earnings: 0,
+          level2Earnings: 0,
+          level3Earnings: 0,
+          levels: [],
+        })
       } finally {
         setLoading(false)
       }
@@ -158,7 +105,7 @@ export default function ReferralsPage() {
           <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
           <div className="flex-1 flex justify-end">
             <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell className="w-6 h-6" />
+              <FaRegBell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
           </div>

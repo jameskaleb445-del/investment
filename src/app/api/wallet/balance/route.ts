@@ -37,10 +37,10 @@ export async function GET() {
       )
     }
 
+    // Available balance is the balance minus pending withdrawals only
+    // invested_amount is a separate metric and should not be subtracted
     const availableBalance =
-      Number(wallet.balance) -
-      Number(wallet.invested_amount) -
-      Number(wallet.pending_withdrawal)
+      Number(wallet.balance) - Number(wallet.pending_withdrawal)
 
     return NextResponse.json({
       balance: Number(wallet.balance),

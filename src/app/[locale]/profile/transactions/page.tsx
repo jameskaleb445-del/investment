@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { TransactionsList } from '@/app/components/transactions/TransactionsList'
 import { Link } from '@/i18n/navigation'
@@ -15,104 +15,58 @@ import {
 } from '@/app/components/ui/select'
 import { BottomSheet } from '@/app/components/ui/bottom-sheet'
 import { FaSlidersH } from 'react-icons/fa'
+import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
+import { TransactionsSkeleton } from '@/app/components/transactions/TransactionsSkeleton'
+
+interface Transaction {
+  id: string
+  type: 'deposit' | 'withdrawal' | 'investment' | 'return' | 'commission' | 'refund'
+  amount: number
+  status: 'pending' | 'completed' | 'failed' | 'cancelled'
+  description?: string
+  created_at: string
+  metadata?: Record<string, any>
+}
 
 export default function TransactionsPage() {
   const [filter, setFilter] = useState<string>('all')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Mock data for testing
-  const transactions = [
-    {
-      id: '1',
-      type: 'deposit' as const,
-      amount: '50000',
-      status: 'completed' as const,
-      description: 'Deposit via Orange Money',
-      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-      metadata: { method: 'orange_money' },
-    },
-    {
-      id: '2',
-      type: 'investment' as const,
-      amount: '25000',
-      status: 'completed' as const,
-      description: 'Investment in Agriculture Project',
-      created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-      metadata: { project_id: 'proj_1' },
-    },
-    {
-      id: '3',
-      type: 'return' as const,
-      amount: '27500',
-      status: 'completed' as const,
-      description: 'Return from Real Estate Investment',
-      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-      metadata: { project_id: 'proj_2' },
-    },
-    {
-      id: '4',
-      type: 'commission' as const,
-      amount: '5000',
-      status: 'completed' as const,
-      description: 'Referral Commission - Level 1',
-      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-      metadata: { referral_level: 1 },
-    },
-    {
-      id: '5',
-      type: 'withdrawal' as const,
-      amount: '30000',
-      status: 'pending' as const,
-      description: 'Withdrawal to MTN Mobile Money',
-      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-      metadata: { method: 'mtn_mobile_money' },
-    },
-    {
-      id: '6',
-      type: 'deposit' as const,
-      amount: '100000',
-      status: 'completed' as const,
-      description: 'Deposit via Bank Transfer',
-      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
-      metadata: { method: 'bank_transfer' },
-    },
-    {
-      id: '7',
-      type: 'investment' as const,
-      amount: '50000',
-      status: 'completed' as const,
-      description: 'Investment in Tech Startup',
-      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-      metadata: { project_id: 'proj_3' },
-    },
-    {
-      id: '8',
-      type: 'return' as const,
-      amount: '55000',
-      status: 'completed' as const,
-      description: 'Return from Agriculture Project',
-      created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
-      metadata: { project_id: 'proj_1' },
-    },
-    {
-      id: '9',
-      type: 'commission' as const,
-      amount: '2500',
-      status: 'completed' as const,
-      description: 'Referral Commission - Level 2',
-      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-      metadata: { referral_level: 2 },
-    },
-    {
-      id: '10',
-      type: 'withdrawal' as const,
-      amount: '20000',
-      status: 'failed' as const,
-      description: 'Withdrawal to Orange Money',
-      created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
-      metadata: { method: 'orange_money', reason: 'Insufficient balance' },
-    },
-  ]
+  useTopLoadingBar(loading)
+
+  useEffect(() => {
+    fetchTransactions()
+  }, [filter])
+
+  const fetchTransactions = async () => {
+    setLoading(true)
+    try {
+      // Build query params
+      const params = new URLSearchParams()
+      if (filter && filter !== 'all') {
+        // Map filter to query params
+        if (['deposit', 'withdrawal', 'investment', 'return', 'commission'].includes(filter)) {
+          params.append('type', filter)
+        } else if (['pending', 'completed', 'failed', 'cancelled'].includes(filter)) {
+          params.append('status', filter)
+        }
+      }
+
+      const response = await fetch(`/api/transactions?${params.toString()}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions')
+      }
+      const data = await response.json()
+      setTransactions(data.transactions || [])
+    } catch (error) {
+      console.error('Error fetching transactions:', error)
+      setTransactions([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <AppLayout>
@@ -136,7 +90,11 @@ export default function TransactionsPage() {
 
         {/* Transactions List */}
         <div className="pt-20">
-          <TransactionsList transactions={transactions} filter={filter} />
+          {loading ? (
+            <TransactionsSkeleton />
+          ) : (
+            <TransactionsList transactions={transactions} filter={filter} />
+          )}
         </div>
 
         {/* Filter Bottom Sheet */}

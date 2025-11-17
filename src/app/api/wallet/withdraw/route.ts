@@ -80,6 +80,8 @@ export async function POST(request: Request) {
         amount: validated.amount,
         status: 'pending',
         pin_verified: true,
+        payment_method: validated.payment_method,
+        phone: validated.phone,
       })
       .select()
       .single()
