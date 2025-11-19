@@ -7,21 +7,26 @@ import { Label } from '../ui/label'
 import { Link } from '@/i18n/navigation'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
+import { HiEye, HiEyeOff } from 'react-icons/hi'
 import { Button } from '../ui'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { useTranslations } from 'next-intl'
+import { createClient } from '@/app/lib/supabase/client'
+import toast from 'react-hot-toast'
 
 export function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const t = useTranslations('auth')
   const [formData, setFormData] = useState({
-    phone: '',
+    email: '',
+    password: '',
     full_name: '',
     referral_code: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   // Trigger top loading bar when loading
   useTopLoadingBar(loading)
@@ -55,7 +60,31 @@ export function RegisterForm() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      router.push('/login')
+      // If requires_login is true, redirect to login
+      if (data.requires_login) {
+        toast.success(data.message || 'Account created successfully! Please login.')
+        router.push('/login')
+        return
+      }
+
+      // Sign in the user to establish session
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      })
+
+      if (signInError) {
+        // User created but sign in failed - redirect to login
+        toast.success('Account created successfully! Please login.')
+        router.push('/login')
+        return
+      }
+
+      // Success - redirect to setup PIN page
+      toast.success(t('registrationSuccess') || 'Account created successfully!')
+      router.push('/setup-pin')
+      router.refresh()
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -89,20 +118,49 @@ export function RegisterForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">{t('phoneNumber')}</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
-            id="phone"
-            type="tel"
-            value={formData.phone}
+            id="email"
+            type="email"
+            value={formData.email}
             onChange={(e) => {
-              setFormData({ ...formData, phone: e.target.value })
+              setFormData({ ...formData, email: e.target.value })
               setError('')
             }}
-            placeholder={t('phonePlaceholder')}
-            inputMode="tel"
-            autoComplete="tel"
+            placeholder={t('emailPlaceholder')}
+            inputMode="email"
+            autoComplete="email"
             required
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">{t('password')}</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={(e) => {
+                setFormData({ ...formData, password: e.target.value })
+                setError('')
+              }}
+              placeholder={t('passwordPlaceholder')}
+              autoComplete="new-password"
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a0a0a8] hover:text-white transition-colors"
+            >
+              {showPassword ? (
+                <HiEyeOff className="w-5 h-5" />
+              ) : (
+                <HiEye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="referral_code">{t('referralCode')}</Label>

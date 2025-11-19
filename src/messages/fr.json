@@ -328,6 +328,8 @@
   "auth": {
     "welcomeBack": "Bon retour!",
     "signInToAccount": "Connectez-vous à votre compte",
+    "email": "E-mail",
+    "emailPlaceholder": "votre.email@exemple.com",
     "emailOrPhone": "E-mail ou numéro de téléphone",
     "emailOrPhonePlaceholder": "E-mail ou numéro de téléphone",
     "password": "Mot de passe",

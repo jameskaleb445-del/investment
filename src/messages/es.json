@@ -315,6 +315,8 @@
   "auth": {
     "welcomeBack": "¡Bienvenido de nuevo!",
     "signInToAccount": "Inicia sesión en tu cuenta",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "tu.correo@ejemplo.com",
     "emailOrPhone": "Correo electrónico o número de teléfono",
     "emailOrPhonePlaceholder": "Correo electrónico o número de teléfono",
     "password": "Contraseña",

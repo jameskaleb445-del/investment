@@ -1,25 +1,23 @@
-import { createClient } from '@/app/lib/supabase/server'
+import { createClient, createAdminClient } from '@/app/lib/supabase/server'
 import { registerSchema } from '@/app/validation/auth'
 import { NextResponse } from 'next/server'
-import { sendOTPviaEmail } from '@/app/lib/services/email'
-import { sendOTPviaWhatsApp } from '@/app/lib/services/whatsapp'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/app/lib/rate-limit'
 
 /**
- * Step 1: Registration Initiation
- * - Validates registration data
- * - Generates 6-digit OTP
- * - Sends OTP via WhatsApp (for phone) or Email (for email)
- * - Stores OTP in database with expiration (10 minutes)
- * - Returns success message (does NOT create user yet)
+ * Registration - Creates user immediately with auto-confirmed email
+ * - Validates registration data (email, password, full_name)
+ * - Creates user with auto-confirmed email
+ * - Creates user profile and wallet
+ * - Handles referral code
+ * - Returns session for user to setup PIN
  */
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const validated = registerSchema.parse(body)
 
-    // Rate limit by email/phone and IP
-    const identifier = validated.email || validated.phone || ''
+    // Rate limit by email and IP
+    const identifier = validated.email
     const ip = getClientIdentifier(request)
 
     const identifierLimit = checkRateLimit(
@@ -71,110 +69,181 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
+    const adminClient = createAdminClient()
 
     // Check if user already exists
-    if (validated.email) {
-      const { data: existingEmailUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', validated.email)
-        .single()
-
-      if (existingEmailUser) {
-        return NextResponse.json(
-          { error: 'Email already registered' },
-          { status: 400 }
-        )
-      }
-    }
-
-    if (validated.phone) {
-      const { data: existingPhoneUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('phone', validated.phone)
-        .single()
-
-      if (existingPhoneUser) {
-        return NextResponse.json(
-          { error: 'Phone number already registered' },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
-
-    // Store registration data and OTP temporarily
-    // We'll store it in otp_codes table with identifier (email/phone) instead of user_id
-    // (identifier is already defined above for rate limiting)
-
-    // Store OTP in database (without user_id since user doesn't exist yet)
-    // Store referral_code if provided for use during verification
-    const { data: otpData, error: otpError } = await supabase
-      .from('otp_codes')
-      .insert({
-        code: otpCode,
-        type: 'register',
-        identifier,
-        referral_code: validated.referral_code || null,
-        expires_at: expiresAt.toISOString(),
-        verified: false,
-      })
-      .select()
+    const { data: existingEmailUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', validated.email)
       .single()
 
-    if (otpError) {
+    if (existingEmailUser) {
       return NextResponse.json(
-        { error: 'Failed to generate OTP. Please try again.' },
-        { status: 500 }
-      )
-    }
-
-    // Send OTP via appropriate channel
-    let sendResult: { success: boolean; error?: string }
-
-    if (validated.email) {
-      // Send via Email
-      sendResult = await sendOTPviaEmail(validated.email, otpCode)
-    } else if (validated.phone) {
-      // Send via WhatsApp
-      sendResult = await sendOTPviaWhatsApp(validated.phone, otpCode)
-    } else {
-      return NextResponse.json(
-        { error: 'Email or phone is required' },
+        { error: 'Email already registered' },
         { status: 400 }
       )
     }
 
-    if (!sendResult.success) {
-      // Clean up OTP record if sending failed
-      await supabase.from('otp_codes').delete().eq('id', otpData.id)
+    // Find referrer if referral code exists - validate that it's a valid code
+    let referrerId: string | null = null
+    if (validated.referral_code) {
+      const { data: referrer, error: referrerError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('referral_code', validated.referral_code.toUpperCase())
+        .single()
+
+      if (referrerError || !referrer) {
+        return NextResponse.json(
+          { error: 'Invalid referral code. Please check and try again.' },
+          { status: 400 }
+        )
+      }
+
+      referrerId = referrer.id
+    }
+
+    // Create user with admin client to auto-confirm email
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+      email: validated.email,
+      password: validated.password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        full_name: validated.full_name,
+        referral_code: validated.referral_code || null,
+      },
+    })
+
+    if (authError || !authData.user) {
+      console.error('Error creating user:', authError)
       return NextResponse.json(
-        {
-          error:
-            sendResult.error || 'Failed to send verification code. Please try again.',
-        },
+        { error: authError?.message || 'Failed to create user. Please try again.' },
         { status: 500 }
       )
     }
 
-    // Return success with OTP ID for verification (in development, you might include OTP for testing)
-    const response: any = {
-      message: 'Verification code sent successfully',
-      otp_id: otpData.id,
-      identifier: identifier, // Return for verification step
-      expires_in: 600, // 10 minutes in seconds
+    // Wait a moment for the trigger to create the user profile
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Check if profile was created by trigger, if not create it manually
+    let { data: userProfile, error: profileError } = await supabase
+      .from('users')
+      .select('id, email_verified')
+      .eq('id', authData.user.id)
+      .single()
+
+    if (profileError || !userProfile) {
+      // Create user profile manually
+      const { error: createProfileError } = await supabase.from('users').insert({
+        id: authData.user.id,
+        email: validated.email,
+        full_name: validated.full_name,
+        referrer_id: referrerId,
+        email_verified: true, // Email is auto-confirmed
+        phone_verified: false,
+        pin_set: false,
+        registration_complete: false,
+      })
+
+      if (createProfileError) {
+        console.error('Error creating user profile:', createProfileError)
+        // Rollback auth user if profile creation fails
+        try {
+          await adminClient.auth.admin.deleteUser(authData.user.id)
+        } catch (deleteError) {
+          console.error('Failed to rollback auth user:', deleteError)
+        }
+        return NextResponse.json(
+          { error: 'Failed to create user profile. Please try again.' },
+          { status: 500 }
+        )
+      }
+
+      // Update referrer_id if needed (trigger might have created profile without referrer_id)
+      if (referrerId) {
+        await supabase
+          .from('users')
+          .update({ referrer_id: referrerId })
+          .eq('id', authData.user.id)
+      }
+    } else if (referrerId) {
+      // Profile exists, update referrer_id if needed
+      await supabase
+        .from('users')
+        .update({ referrer_id: referrerId })
+        .eq('id', authData.user.id)
     }
 
-    // In development, include OTP code for testing (remove in production)
-    if (process.env.NODE_ENV === 'development') {
-      response.dev_otp = otpCode
+    // Create wallet if it doesn't exist (trigger should have created it, but check anyway)
+    const { error: walletError } = await supabase
+      .from('wallets')
+      .insert({
+        user_id: authData.user.id,
+        balance: 0,
+        invested_amount: 0,
+        pending_withdrawal: 0,
+        total_earnings: 0,
+      })
+      .select()
+      .single()
+
+    // Ignore wallet error if it already exists (trigger might have created it)
+    if (walletError && walletError.code !== '23505') {
+      console.error('Error creating wallet:', walletError)
     }
 
-    return NextResponse.json(response)
+    // Create referral relationships if referrer exists
+    if (referrerId) {
+      const { REFERRAL_LEVELS } = await import('@/app/constants/projects')
+      
+      // Create level 1 referral
+      await supabase.from('referrals').insert({
+        referrer_id: referrerId,
+        referred_id: authData.user.id,
+        level: REFERRAL_LEVELS.LEVEL_1,
+      })
+
+      // Find level 2 referrer (referrer of referrer)
+      const { data: level2Referrer } = await supabase
+        .from('users')
+        .select('referrer_id')
+        .eq('id', referrerId)
+        .single()
+
+      if (level2Referrer?.referrer_id) {
+        await supabase.from('referrals').insert({
+          referrer_id: level2Referrer.referrer_id,
+          referred_id: authData.user.id,
+          level: REFERRAL_LEVELS.LEVEL_2,
+        })
+
+        // Find level 3 referrer
+        const { data: level3Referrer } = await supabase
+          .from('users')
+          .select('referrer_id')
+          .eq('id', level2Referrer.referrer_id)
+          .single()
+
+        if (level3Referrer?.referrer_id) {
+          await supabase.from('referrals').insert({
+            referrer_id: level3Referrer.referrer_id,
+            referred_id: authData.user.id,
+            level: REFERRAL_LEVELS.LEVEL_3,
+          })
+        }
+      }
+    }
+
+    // Return success - client will sign in to establish session
+    return NextResponse.json({
+      message: 'Account created successfully',
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        full_name: validated.full_name,
+      },
+    })
   } catch (error: any) {
     if (error.issues) {
       // Zod validation error
