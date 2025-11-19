@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
         throw new Error(data.error || 'Failed to send reset code')
       }
 
-      toast.success(t('codeResent'))
+      toast.success(data.message || t('codeResent'))
       router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=reset`)
     } catch (err: any) {
       setError(err.message)

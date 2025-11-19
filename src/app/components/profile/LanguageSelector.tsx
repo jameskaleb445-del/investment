@@ -55,7 +55,6 @@ export function LanguageSelector() {
 
   return (
     <div className="flex items-center gap-2">
-      <HiTranslate className="w-5 h-5 theme-text-secondary" />
       <Select value={locale} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-[140px] theme-bg-tertiary theme-border-secondary theme-text-primary h-9">
           <SelectValue>

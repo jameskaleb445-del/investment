@@ -3,6 +3,7 @@ import { investmentSchema } from '@/app/validation/investments'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { REFERRAL_COMMISSION_RATES, REFERRAL_LEVELS } from '@/app/constants/projects'
+import { notifyInvestment, notifyReferralCommission } from '@/app/lib/notifications'
 
 export async function POST(
   request: Request,
@@ -222,9 +223,25 @@ export async function POST(
             amount: commissionAmount,
             status: 'completed',
           })
+
+          // Create notification for referrer
+          await notifyReferralCommission(
+            referral.referrer_id,
+            commissionAmount,
+            referral.level
+          )
         }
       }
     }
+
+    // Create notification for investment
+    await notifyInvestment(
+      user.id,
+      validated.amount,
+      project.name,
+      projectId,
+      investment.id
+    )
 
     return NextResponse.json({
       message: 'Investment created successfully',

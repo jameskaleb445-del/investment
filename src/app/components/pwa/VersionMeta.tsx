@@ -4,23 +4,24 @@ import { useEffect } from 'react'
 
 export function VersionMeta() {
   useEffect(() => {
-    // Generate or get version
-    const appVersion = process.env.NEXT_PUBLIC_BUILD_TIME || Date.now().toString()
+    // Set version in meta tag for client-side reference
+    // Uses build-time version or generates one
+    const version = process.env.NEXT_PUBLIC_APP_VERSION || 
+                   process.env.NEXT_PUBLIC_BUILD_TIME || 
+                   Date.now().toString()
     
-    // Check if meta tag already exists
-    let metaTag = document.querySelector('meta[name="app-version"]')
-    
-    if (!metaTag) {
-      // Create and inject meta tag
-      metaTag = document.createElement('meta')
-      metaTag.setAttribute('name', 'app-version')
-      document.head.appendChild(metaTag)
+    // Remove existing version meta tag if any
+    const existingMeta = document.querySelector('meta[name="app-version"]')
+    if (existingMeta) {
+      existingMeta.remove()
     }
     
-    // Update content
-    metaTag.setAttribute('content', appVersion)
+    // Create and add new meta tag
+    const metaTag = document.createElement('meta')
+    metaTag.name = 'app-version'
+    metaTag.content = version
+    document.head.appendChild(metaTag)
   }, [])
 
   return null
 }
-

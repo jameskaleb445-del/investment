@@ -3,6 +3,7 @@ import { withdrawalSchema } from '@/app/validation/wallet'
 import { NextResponse } from 'next/server'
 import { PLATFORM_FEES } from '@/app/constants/projects'
 import crypto from 'crypto'
+import { notifyWithdrawal } from '@/app/lib/notifications'
 
 export async function POST(request: Request) {
   try {
@@ -119,6 +120,11 @@ export async function POST(request: Request) {
         { error: txError.message },
         { status: 500 }
       )
+    }
+
+    // Create notification for withdrawal
+    if (transaction) {
+      await notifyWithdrawal(user.id, validated.amount, 'pending', transaction.id)
     }
 
     return NextResponse.json({

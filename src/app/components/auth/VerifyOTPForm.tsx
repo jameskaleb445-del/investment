@@ -57,10 +57,11 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
         throw new Error(data.error || 'Invalid verification code')
       }
 
-      toast.success(t('codeResent'))
+      // Show success toast for successful verification
+      toast.success(t('codeVerified'))
 
       if (type === 'reset') {
-        router.push(`/reset-password?token=${data.token}`)
+        router.push(`/reset-password?token=${data.reset_token || data.token}`)
       } else if (type === 'login') {
         router.push('/')
         router.refresh()
@@ -68,8 +69,9 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
         router.push('/login')
       }
     } catch (err: any) {
-      setError(err.message)
-      toast.error(err.message || 'Invalid code')
+      const errorMessage = err.message || 'Invalid code'
+      setError(errorMessage)
+      // Don't show toast error - error is already displayed in the UI
     } finally {
       setLoading(false)
     }
@@ -126,11 +128,7 @@ export function VerifyOTPForm({ email, phone, type = 'reset' }: VerifyOTPFormPro
           />
         </div>
 
-        {error && (
-          <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
-            <p className="text-sm text-red-400 text-center">{error}</p>
-          </div>
-        )}
+      
 
         <div className="text-center">
           <p className="text-sm text-[#a0a0a8] mb-2">

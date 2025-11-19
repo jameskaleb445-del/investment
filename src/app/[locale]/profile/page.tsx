@@ -12,6 +12,7 @@ import { HiShieldCheck, HiCheckCircle } from 'react-icons/hi'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 
 interface ProfileData {
   id: string
@@ -109,12 +110,16 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center mb-6">
             {/* Profile Avatar */}
             <div className="relative mb-4">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-[#8b5cf6]/30">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-[#8b5cf6]/30 overflow-hidden">
                 {profile?.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
+                  <Image 
+                    src={profile.avatar_url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
                     alt={displayName}
+                    width={96}
+                    height={96}
                     className="w-full h-full rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                    unoptimized={profile.avatar_url?.includes('googleusercontent.com')}
                   />
                 ) : (
                   <span className="select-none">{displayName.charAt(0).toUpperCase()}</span>

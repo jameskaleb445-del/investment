@@ -1,5 +1,6 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { notifyDailyReward } from '@/app/lib/notifications'
 
 const DAILY_REWARD_AMOUNT = 1000 // Default daily reward in FCFA
 
@@ -223,6 +224,9 @@ export async function POST() {
       status: 'completed',
       reference: `daily_reward_${reward.id}`,
     })
+
+    // Create notification
+    await notifyDailyReward(user.id, DAILY_REWARD_AMOUNT, newStreak)
 
     return NextResponse.json({
       success: true,

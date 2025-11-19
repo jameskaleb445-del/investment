@@ -323,6 +323,7 @@
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "signingIn": "Iniciando sesión...",
     "signIn": "Iniciar sesión",
+    "loginSuccess": "¡Inicio de sesión exitoso! ¡Bienvenido de nuevo!",
     "orSignInWith": "O inicia sesión con",
     "noAccount": "¿No tienes una cuenta?",
     "signUp": "Registrarse",
@@ -360,6 +361,7 @@
     "resending": "Reenviando...",
     "didntReceiveCode": "¿No recibiste el código?",
     "codeResent": "¡Código reenviado con éxito!",
+    "codeVerified": "¡Código verificado con éxito!",
     "enterNewPassword": "Ingresa tu nueva contraseña a continuación.",
     "newPasswordPlaceholder": "Ingresa la nueva contraseña",
     "confirmPasswordPlaceholder": "Confirma la nueva contraseña",
@@ -374,6 +376,54 @@
     "completeSetup": "Completar configuración",
     "pinSecurityNote": "Tu PIN está encriptado y se usa para asegurar transacciones y acciones sensibles. Manténlo privado y no lo compartas con nadie.",
     "failedToSetupPin": "Error al configurar el PIN"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "loading": "Cargando notificaciones...",
+    "noNotifications": "No hay notificaciones aún",
+    "markAllAsRead": "Marcar todas como leídas",
+    "viewAll": "Ver todas las notificaciones",
+    "enablePushNotifications": "Habilitar notificaciones push",
+    "pushPermissionDenied": "Permiso de notificación push denegado",
+    "pushSubscribeFailed": "Error al suscribirse a las notificaciones push",
+    "pushEnabled": "¡Notificaciones push habilitadas!",
+    "pushEnableFailed": "Error al habilitar las notificaciones push",
+    "deposit": {
+      "title": "Depósito recibido",
+      "message": "Tu depósito de {amount} ha sido recibido y está siendo procesado."
+    },
+    "withdrawal": {
+      "title": "Actualización de retiro",
+      "message": "Tu retiro de {amount} ha sido {status}."
+    },
+    "investment": {
+      "title": "Inversión confirmada",
+      "message": "Tu inversión de {amount} en {projectName} ha sido confirmada."
+    },
+    "investment_completed": {
+      "title": "Inversión completada",
+      "message": "Tu inversión en {projectName} ha madurado. Los rendimientos se han agregado a tu billetera."
+    },
+    "roi_payout": {
+      "title": "Pago de ROI",
+      "message": "Has recibido {amount} en rendimientos de tu inversión."
+    },
+    "referral_commission": {
+      "title": "Comisión de referido",
+      "message": "Has ganado {amount} en comisión de referido."
+    },
+    "daily_reward": {
+      "title": "Recompensa diaria reclamada",
+      "message": "Has reclamado {amount} como recompensa diaria. ¡{streak} días seguidos!"
+    },
+    "transaction_completed": {
+      "title": "Transacción completada",
+      "message": "Tu transacción de {amount} se ha completado exitosamente."
+    },
+    "transaction_failed": {
+      "title": "Transacción fallida",
+      "message": "Tu transacción de {amount} ha fallado. Por favor, inténtalo de nuevo."
+    }
   }
 }
 

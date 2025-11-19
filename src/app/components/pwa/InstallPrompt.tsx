@@ -37,14 +37,13 @@ export function InstallPrompt() {
     setIsDev(devCheck)
 
     // Check if user has previously dismissed or clicked install on this device (using localStorage)
+    // These are PERMANENT - once dismissed or clicked, never show again
     const dismissed = localStorage.getItem('pwa-install-dismissed')
     const installClicked = localStorage.getItem('pwa-install-clicked')
-    const dismissedTime = dismissed ? parseInt(dismissed, 10) : 0
-    const installClickedTime = installClicked ? parseInt(installClicked, 10) : 0
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
     
-    // Check if user has already clicked install or dismissed recently
-    const hasInteracted = installClicked || (dismissedTime > oneWeekAgo)
+    // If user has ever dismissed or clicked install, don't show again
+    // This prevents showing on every update
+    const hasInteracted = dismissed === 'true' || installClicked === 'true'
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -58,16 +57,11 @@ export function InstallPrompt() {
       if (!hasInteracted) {
         // Small delay to ensure smooth page load
         setTimeout(() => {
-          setShowPrompt(true)
-        }, 5000) // Show after 5 seconds
-      } else {
-        // If recently interacted, check if we're in dev mode and show anyway (for testing)
-        if (devCheck && (dismissedTime < Date.now() - 1000 * 60 * 60 || installClickedTime < Date.now() - 1000 * 60 * 60)) {
-          // If dismissed or clicked more than 1 hour ago in dev
-          setTimeout(() => {
+          // Double check we're still not installed before showing
+          if (!window.matchMedia('(display-mode: standalone)').matches) {
             setShowPrompt(true)
-          }, 8000)
-        }
+          }
+        }, 5000) // Show after 5 seconds
       }
     }
 
@@ -79,16 +73,15 @@ export function InstallPrompt() {
       setIsInstalled(true)
       setShowPrompt(false)
       setDeferredPrompt(null)
-      // Clear dismissal flag since app is now installed
-      localStorage.removeItem('pwa-install-dismissed')
-      // Keep install-clicked flag as permanent record that install was attempted/succeeded
-      // Optionally, you can remove it too if you want to reset after installation
-      // localStorage.removeItem('pwa-install-clicked')
+      // Mark as installed permanently so prompt never shows again
+      localStorage.setItem('pwa-install-clicked', 'true')
+      localStorage.setItem('pwa-install-dismissed', 'true')
     })
 
     let devTimeout: NodeJS.Timeout | null = null
     
     // In dev mode, always show prompt after delay for testing (even without beforeinstallprompt)
+    // Only if user hasn't interacted before
     if (devCheck && !hasInteracted) {
       devTimeout = setTimeout(() => {
         // Check again if not installed
@@ -97,7 +90,9 @@ export function InstallPrompt() {
           // In dev mode, we'll show the prompt but with a message that real install requires HTTPS
         }
       }, 3000) // Show after 3 seconds in dev mode for faster testing
-    } else if (iosCheck && !hasInteracted) {
+    } else if (iosCheck && !hasInteracted && !deferredPrompt) {
+      // iOS: Show manual install instructions if no beforeinstallprompt event
+      // Only if user hasn't interacted before
       devTimeout = setTimeout(() => {
         if (!window.matchMedia('(display-mode: standalone)').matches) {
           setShowPrompt(true)
@@ -112,8 +107,8 @@ export function InstallPrompt() {
   }, [])
 
   const handleInstallClick = async () => {
-    // Save that user clicked install on this device
-    localStorage.setItem('pwa-install-clicked', Date.now().toString())
+    // Mark as permanently interacted - never show again
+    localStorage.setItem('pwa-install-clicked', 'true')
     
     if (!deferredPrompt) {
       // If no deferred prompt (e.g., dev mode or iOS), just close and mark as clicked
@@ -129,12 +124,13 @@ export function InstallPrompt() {
 
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt')
-      setShowPrompt(false)
       setIsInstalled(true)
-      // Keep the install-clicked flag so prompt doesn't show again even if install fails
+      // Already set above, but ensure it's permanent
+      localStorage.setItem('pwa-install-dismissed', 'true')
     } else {
       console.log('User dismissed the install prompt')
-      // Keep the install-clicked flag since user interacted with the install button
+      // Still mark as dismissed permanently so it doesn't show again
+      localStorage.setItem('pwa-install-dismissed', 'true')
     }
 
     // Clear the deferredPrompt
@@ -144,8 +140,8 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false)
-    // Save dismissal timestamp
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString())
+    // Mark as permanently dismissed - never show again
+    localStorage.setItem('pwa-install-dismissed', 'true')
   }
 
   // Prevent hydration mismatch - don't render until mounted

@@ -13,6 +13,7 @@ import { Checkbox } from '../ui/checkbox'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { useTranslations } from 'next-intl'
 import { useSupabaseAuth } from '@/app/hooks/useSupabaseAuth'
+import toast from 'react-hot-toast'
 
 export function LoginForm() {
   const router = useRouter()
@@ -42,6 +43,7 @@ export function LoginForm() {
 
     try {
       await login({ identifier, password })
+      toast.success(t('loginSuccess'))
       router.push('/')
       router.refresh()
     } catch (err: any) {
@@ -51,7 +53,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="text-center sm:text-left">
+      <div className="text-start sm:text-left">
         <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{t('welcomeBack')}</h2>
         <p className="text-[#a0a0a8] text-sm sm:text-base">
           {t('signInToAccount')}
@@ -168,6 +170,7 @@ export function LoginForm() {
             setError('')
             try {
               await loginWithGoogle()
+              toast.success(t('loginSuccess'))
             } catch (err: any) {
               setError(err.message || 'Failed to sign in with Google')
             }

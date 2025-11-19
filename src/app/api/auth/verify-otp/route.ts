@@ -1,8 +1,9 @@
-import { createClient } from '@/app/lib/supabase/server'
+import { createClient, createAdminClient } from '@/app/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { registerSchema } from '@/app/validation/auth'
 import { REFERRAL_LEVELS } from '@/app/constants/projects'
 import crypto from 'crypto'
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/app/lib/rate-limit'
 
 /**
  * Step 2: OTP Verification and User Creation
@@ -29,15 +30,69 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createClient()
+    // Rate limit by email/phone and IP
     const identifier = email || phone || ''
+    const ip = getClientIdentifier(request)
+
+    const identifierLimit = checkRateLimit(
+      `verify-otp:${identifier}:${type}`,
+      RATE_LIMITS.AUTH_VERIFY_OTP
+    )
+
+    const ipLimit = checkRateLimit(
+      `verify-otp-ip:${ip}`,
+      RATE_LIMITS.AUTH_VERIFY_OTP
+    )
+
+    if (!identifierLimit.allowed) {
+      const retryAfter = Math.ceil(
+        (identifierLimit.resetTime - Date.now()) / 1000
+      )
+      return NextResponse.json(
+        {
+          error: 'Too many OTP verification attempts. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_VERIFY_OTP.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(identifierLimit.resetTime).toISOString(),
+          },
+        }
+      )
+    }
+
+    if (!ipLimit.allowed) {
+      const retryAfter = Math.ceil((ipLimit.resetTime - Date.now()) / 1000)
+      return NextResponse.json(
+        {
+          error: 'Too many requests from this IP. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_VERIFY_OTP.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(ipLimit.resetTime).toISOString(),
+          },
+        }
+      )
+    }
+
+    const supabase = await createClient()
 
     // Find and verify OTP
+    // For reset type, use 'reset', for register use 'register', otherwise 'verification'
+    const otpType = type === 'register' ? 'register' : type === 'reset' ? 'reset' : 'verification'
+    
     let otpQuery = supabase
       .from('otp_codes')
       .select('*')
       .eq('identifier', identifier)
-      .eq('type', type === 'register' ? 'register' : 'verification')
+      .eq('type', otpType)
       .eq('verified', false)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -46,9 +101,32 @@ export async function POST(request: Request) {
       otpQuery = otpQuery.eq('id', otp_id)
     }
 
+    console.log('[Verify OTP] Querying OTP:', {
+      identifier,
+      otpType,
+      otp_id,
+      providedOtp: otp,
+    })
+
     const { data: otpRecords, error: otpQueryError } = await otpQuery
 
-    if (otpQueryError || !otpRecords || otpRecords.length === 0) {
+    console.log('[Verify OTP] Query result:', {
+      found: !!otpRecords && otpRecords.length > 0,
+      count: otpRecords?.length || 0,
+      error: otpQueryError?.message,
+      errorCode: otpQueryError?.code,
+    })
+
+    if (otpQueryError) {
+      console.error('[Verify OTP] Query error:', otpQueryError)
+      return NextResponse.json(
+        { error: 'Invalid or expired OTP code' },
+        { status: 400 }
+      )
+    }
+
+    if (!otpRecords || otpRecords.length === 0) {
+      console.log('[Verify OTP] No OTP records found for:', { identifier, otpType })
       return NextResponse.json(
         { error: 'Invalid or expired OTP code' },
         { status: 400 }
@@ -57,8 +135,26 @@ export async function POST(request: Request) {
 
     const otpRecord = otpRecords[0]
 
+    console.log('[Verify OTP] Found OTP record:', {
+      id: otpRecord.id,
+      code: otpRecord.code,
+      providedCode: otp,
+      type: otpRecord.type,
+      identifier: otpRecord.identifier,
+      expires_at: otpRecord.expires_at,
+      verified: otpRecord.verified,
+      match: otpRecord.code === otp,
+    })
+
     // Check if OTP is expired
-    if (new Date(otpRecord.expires_at) < new Date()) {
+    const expiresAt = new Date(otpRecord.expires_at)
+    const now = new Date()
+    if (expiresAt < now) {
+      console.log('[Verify OTP] OTP expired:', {
+        expires_at: expiresAt.toISOString(),
+        now: now.toISOString(),
+        diff: now.getTime() - expiresAt.getTime(),
+      })
       return NextResponse.json(
         { error: 'OTP code has expired. Please request a new one.' },
         { status: 400 }
@@ -67,6 +163,11 @@ export async function POST(request: Request) {
 
     // Verify OTP code
     if (otpRecord.code !== otp) {
+      console.log('[Verify OTP] Code mismatch:', {
+        stored: otpRecord.code,
+        provided: otp,
+        match: false,
+      })
       return NextResponse.json(
         { error: 'Invalid OTP code' },
         { status: 400 }
@@ -148,7 +249,8 @@ export async function POST(request: Request) {
       if (profileError) {
         // Rollback auth user if profile creation fails
         try {
-          await supabase.auth.admin.deleteUser(authData.user.id)
+          const adminClient = createAdminClient()
+          await adminClient.auth.admin.deleteUser(authData.user.id)
         } catch (deleteError) {
           console.error('Failed to rollback auth user:', deleteError)
         }
@@ -218,12 +320,51 @@ export async function POST(request: Request) {
         requires_pin_setup: true,
       })
     } else if (type === 'reset') {
-      // Password reset flow
+      // Password reset flow - get user from identifier
+      const { data: user } = await supabase
+        .from('users')
+        .select('id, email, phone')
+        .or(`${email ? `email.eq.${email}` : ''}${email && phone ? ',' : ''}${phone ? `phone.eq.${phone}` : ''}`)
+        .single()
+
+      if (!user) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        )
+      }
+
+      // Mark OTP as verified
+      await supabase
+        .from('otp_codes')
+        .update({ verified: true })
+        .eq('id', otpRecord.id)
+
+      // Generate reset token (64 character hex string)
       const resetToken = crypto.randomBytes(32).toString('hex')
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
-      // Store reset token in database (you might want to create a password_reset_tokens table)
-      // For now, we'll return it
+      // Store reset token using SECURITY DEFINER function to bypass RLS
+      // Use user.id as identifier to link the token to the user
+      const { data: tokenIdData, error: tokenError } = await supabase.rpc(
+        'insert_reset_token',
+        {
+          p_code: resetToken,
+          p_type: 'reset_token',
+          p_identifier: user.id.toString(), // Use user ID as identifier for reset token
+          p_expires_at: expiresAt.toISOString(),
+          p_user_id: user.id,
+        }
+      )
+
+      if (tokenError) {
+        console.error('Failed to store reset token:', tokenError)
+        return NextResponse.json(
+          { error: 'Failed to generate reset token' },
+          { status: 500 }
+        )
+      }
+
       return NextResponse.json({
         message: 'OTP verified successfully',
         reset_token: resetToken,

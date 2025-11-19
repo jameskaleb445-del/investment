@@ -10,6 +10,9 @@ import { useTranslations } from 'next-intl'
 import { LanguageSelector } from '@/app/components/ui/language-selector'
 import { ThemeToggle } from '@/app/components/ui/theme-toggle'
 import { useTheme } from '@/app/contexts/ThemeContext'
+import Image from 'next/image'
+import { useQuery } from '@tanstack/react-query'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsDropdown'
 
 interface PortfolioHeaderProps {
   totalBalance: number
@@ -28,6 +31,22 @@ export function PortfolioHeader({
   const tHome = useTranslations('home')
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
   const { theme } = useTheme()
+
+  // Fetch user profile for avatar
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const response = await fetch('/api/profile')
+      if (!response.ok) {
+        return null
+      }
+      const data = await response.json()
+      return data
+    },
+  })
+
+  const avatarUrl = profile?.avatar_url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'U'
 
   const totalAssetValue = totalBalance + totalInvested
   const calculatedPercentageChange =
@@ -59,17 +78,40 @@ export function PortfolioHeader({
 
       <div className="relative px-4 pt-6 pb-6">
         <div className="flex items-center justify-between mb-6">
+          {/* Left side - Logo */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logos/PORFIT_B.png"
+                alt="Profit Bridge"
+                width={80}
+                height={80}
+                className="h-16 w-16 object-contain"
+                priority
+              />
+            </Link>
+          </div>
+
+          {/* Right side - Language, Theme, Notifications, Profile */}
           <div className="flex items-center gap-3">
             <LanguageSelector variant="compact" />
             <ThemeToggle variant="compact" />
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="text-white/80 hover:text-white transition-colors relative">
-              <FaRegBell className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <Link href="/profile" className="text-white/80 hover:text-white transition-colors">
-              <FaRegUserCircle className="w-7 h-7" />
+            <NotificationsDropdown />
+            <Link 
+              href="/profile" 
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30">
+                <Image
+                  src={avatarUrl}
+                  alt={displayName}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  unoptimized={avatarUrl.includes('googleusercontent.com')}
+                />
+              </div>
             </Link>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { registerSchema } from '@/app/validation/auth'
 import { NextResponse } from 'next/server'
 import { sendOTPviaEmail } from '@/app/lib/services/email'
 import { sendOTPviaWhatsApp } from '@/app/lib/services/whatsapp'
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/app/lib/rate-limit'
 
 /**
  * Step 1: Registration Initiation
@@ -16,6 +17,58 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const validated = registerSchema.parse(body)
+
+    // Rate limit by email/phone and IP
+    const identifier = validated.email || validated.phone || ''
+    const ip = getClientIdentifier(request)
+
+    const identifierLimit = checkRateLimit(
+      `register:${identifier}`,
+      RATE_LIMITS.AUTH_REGISTER
+    )
+
+    const ipLimit = checkRateLimit(
+      `register-ip:${ip}`,
+      RATE_LIMITS.AUTH_REGISTER
+    )
+
+    if (!identifierLimit.allowed) {
+      const retryAfter = Math.ceil(
+        (identifierLimit.resetTime - Date.now()) / 1000
+      )
+      return NextResponse.json(
+        {
+          error: 'Too many registration attempts. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_REGISTER.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(identifierLimit.resetTime).toISOString(),
+          },
+        }
+      )
+    }
+
+    if (!ipLimit.allowed) {
+      const retryAfter = Math.ceil((ipLimit.resetTime - Date.now()) / 1000)
+      return NextResponse.json(
+        {
+          error: 'Too many requests from this IP. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_REGISTER.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(ipLimit.resetTime).toISOString(),
+          },
+        }
+      )
+    }
 
     const supabase = await createClient()
 

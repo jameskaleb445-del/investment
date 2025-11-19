@@ -1,5 +1,6 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/app/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +18,58 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Email or phone is required' },
         { status: 400 }
+      )
+    }
+
+    // Rate limit by email/phone and IP
+    const identifier = email || phone || ''
+    const ip = getClientIdentifier(request)
+
+    const identifierLimit = checkRateLimit(
+      `login:${identifier}`,
+      RATE_LIMITS.AUTH_LOGIN
+    )
+
+    const ipLimit = checkRateLimit(
+      `login-ip:${ip}`,
+      RATE_LIMITS.AUTH_LOGIN
+    )
+
+    if (!identifierLimit.allowed) {
+      const retryAfter = Math.ceil(
+        (identifierLimit.resetTime - Date.now()) / 1000
+      )
+      return NextResponse.json(
+        {
+          error: 'Too many login attempts. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_LOGIN.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(identifierLimit.resetTime).toISOString(),
+          },
+        }
+      )
+    }
+
+    if (!ipLimit.allowed) {
+      const retryAfter = Math.ceil((ipLimit.resetTime - Date.now()) / 1000)
+      return NextResponse.json(
+        {
+          error: 'Too many requests from this IP. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': retryAfter.toString(),
+            'X-RateLimit-Limit': RATE_LIMITS.AUTH_LOGIN.maxRequests.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(ipLimit.resetTime).toISOString(),
+          },
+        }
       )
     }
 

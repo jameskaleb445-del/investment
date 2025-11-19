@@ -2,6 +2,7 @@ import { createClient } from '@/app/lib/supabase/server'
 import { depositSchema } from '@/app/validation/wallet'
 import { NextResponse } from 'next/server'
 import { PLATFORM_FEES, REFERRAL_COMMISSION_RATES } from '@/app/constants/projects'
+import { notifyDeposit } from '@/app/lib/notifications'
 
 export async function POST(request: Request) {
   try {
@@ -45,6 +46,9 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    // Create notification for deposit
+    await notifyDeposit(user.id, validated.amount, transaction.id)
 
     // Calculate and distribute referral commissions (only when deposit is completed)
     // For now, commissions will be calculated when deposit status changes to 'completed'

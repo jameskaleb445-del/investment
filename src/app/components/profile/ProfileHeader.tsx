@@ -1,3 +1,7 @@
+'use client'
+
+import Image from 'next/image'
+
 interface ProfileHeaderProps {
   name: string
   email: string
@@ -5,16 +9,23 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ name, email, avatarUrl }: ProfileHeaderProps) {
+  const defaultAvatar = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+  const displayAvatar = avatarUrl || defaultAvatar
+
   return (
     <div className="flex flex-col items-center py-6">
       {/* Profile Picture */}
       <div className="relative mb-4">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white text-2xl font-bold">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
           {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
+            <Image 
+              src={displayAvatar} 
               alt={name}
+              width={96}
+              height={96}
               className="w-full h-full rounded-full object-cover"
+              referrerPolicy="no-referrer"
+              unoptimized={displayAvatar.includes('googleusercontent.com')}
             />
           ) : (
             <span>{name.charAt(0).toUpperCase()}</span>

@@ -5,6 +5,7 @@ import { locales, defaultLocale } from './i18n/config'
 
 // Protected routes that require authentication
 const protectedRoutes = [
+  '/', // Homepage
   '/wallet',
   '/profile',
   '/referrals',
@@ -48,55 +49,58 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Check authentication for protected routes
-  if (isProtectedRoute) {
-    try {
-      // Create Supabase client for middleware
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return request.cookies.getAll()
-            },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                request.cookies.set(name, value)
-                response.cookies.set(name, value, options)
-              })
-            },
+  // All other routes require authentication (default deny)
+  // This protects all routes except public auth pages and API routes
+  try {
+    // Create Supabase client for middleware
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
           },
-        }
-      )
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      // If no user and trying to access protected route, redirect to login
-      if (!user) {
-        const locale = pathname.split('/')[1] || defaultLocale
-        const loginUrl = new URL(`/${locale}/login`, request.url)
-        loginUrl.searchParams.set('redirect', pathname)
-        return NextResponse.redirect(loginUrl)
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
       }
-    } catch (error) {
-      console.error('Auth middleware error:', error)
-      // If Supabase is not configured, allow access (for development)
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        return response
-      }
+    )
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    // If no user and trying to access protected route, redirect to login
+    if (!user) {
+      const locale = pathname.split('/')[1] || defaultLocale
+      const loginUrl = new URL(`/${locale}/login`, request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
     }
+  } catch (error) {
+    console.error('Auth middleware error:', error)
+    // If Supabase is not configured, allow access (for development)
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      return response
+    }
+    // Otherwise, redirect to login on error
+    const locale = pathname.split('/')[1] || defaultLocale
+    const loginUrl = new URL(`/${locale}/login`, request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return response
 }
 
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/_next` or `/_vercel`
-  // - … the ones containing a file extension (e.g. `.jpg`)
+
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+
 }
 
