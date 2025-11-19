@@ -169,8 +169,9 @@ export function LoginForm() {
           onClick={async () => {
             setError('')
             try {
+              // loginWithGoogle redirects to OAuth flow - don't show toast yet
               await loginWithGoogle()
-              toast.success(t('loginSuccess'))
+              // Toast will be shown after OAuth callback completes
             } catch (err: any) {
               setError(err.message || 'Failed to sign in with Google')
             }

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Checkbox } from '../ui/checkbox'
 import { Link } from '@/i18n/navigation'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
@@ -63,8 +62,6 @@ export function RegisterForm() {
       setLoading(false)
     }
   }
-
-  const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 mt-10">
@@ -126,26 +123,11 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="flex items-start space-x-2">
-        <Checkbox
-          id="terms"
-          checked={agreeToTerms}
-          onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
-          className="mt-1"
-        />
-        <Label htmlFor="terms" className="text-xs font-normal leading-relaxed cursor-pointer">
-          {t('certifyAge')}{' '}
-          <Link href="/terms" className="text-[#8b5cf6] hover:underline cursor-pointer">{t('userAgreement')}</Link>
-          {' '}{t('and')}{' '}
-          <Link href="/privacy" className="text-[#8b5cf6] hover:underline cursor-pointer">{t('privacyPolicy')}</Link>.
-        </Label>
-      </div>
-
       <Button 
         type="submit" 
         className="w-full"
         size="lg"
-        disabled={!agreeToTerms || loading}
+        disabled={loading}
       >
         {loading ? t('creatingAccount') : t('signUp')}
       </Button>

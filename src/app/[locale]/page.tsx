@@ -19,11 +19,17 @@ import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import { useWallet } from '@/app/hooks/useWallet'
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import toast from 'react-hot-toast'
 
 export default function Home() {
   const t = useTranslations('home')
   const tCommon = useTranslations('common')
   const tMarketplace = useTranslations('marketplace')
+  const tAuth = useTranslations('auth')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [showStickyHeader, setShowStickyHeader] = useState(false)
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
 
@@ -62,6 +68,18 @@ export default function Home() {
   const transactions = transactionsData || []
 
   useTopLoadingBar(loading)
+
+  // Show login success toast if redirected from OAuth callback
+  useEffect(() => {
+    const loginSuccess = searchParams.get('loginSuccess')
+    if (loginSuccess === 'true') {
+      toast.success(tAuth('loginSuccess'))
+      // Remove query parameter from URL
+      const currentPath = window.location.pathname
+      router.replace(currentPath, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount
 
   // Handle scroll to show/hide sticky header
   useEffect(() => {

@@ -84,9 +84,20 @@ export async function GET(request: Request) {
           .select('pin_set, registration_complete, referrer_id')
           .single()
 
-        if (!createError && newProfile) {
+        if (createError) {
+          console.error('Error creating user profile:', createError)
+          // If profile creation failed, redirect to login with error
+          return NextResponse.redirect(
+            new URL(
+              `/${locale}/login?error=${encodeURIComponent('Failed to create user profile. Please try again.')}`,
+              requestUrl.origin
+            )
+          )
+        }
+
+        if (newProfile) {
           // Create wallet if it doesn't exist
-          await supabase
+          const { error: walletError } = await supabase
             .from('wallets')
             .insert({
               user_id: data.user.id,
@@ -97,8 +108,30 @@ export async function GET(request: Request) {
             })
             .select()
             .single()
-          
-          userProfile = newProfile
+
+          if (walletError) {
+            console.error('Error creating wallet:', walletError)
+            // Wallet might already exist, try to get existing profile
+            const { data: existingProfile } = await supabase
+              .from('users')
+              .select('pin_set, registration_complete, referrer_id')
+              .eq('id', data.user.id)
+              .single()
+            
+            if (existingProfile) {
+              userProfile = existingProfile
+            } else {
+              // If we can't get profile, redirect with error
+              return NextResponse.redirect(
+                new URL(
+                  `/${locale}/login?error=${encodeURIComponent('Failed to setup wallet. Please try again.')}`,
+                  requestUrl.origin
+                )
+              )
+            }
+          } else {
+            userProfile = newProfile
+          }
 
           // Create referral relationships if referrer exists and user is new
           if (referrerId) {
@@ -141,8 +174,50 @@ export async function GET(request: Request) {
               }
             }
           }
+        } else {
+          // If newProfile is null/undefined but no error, try to fetch existing
+          const { data: existingProfile } = await supabase
+            .from('users')
+            .select('pin_set, registration_complete, referrer_id')
+            .eq('id', data.user.id)
+            .single()
+          
+          if (existingProfile) {
+            userProfile = existingProfile
+          } else {
+            // If we still can't get profile, redirect with error
+            return NextResponse.redirect(
+              new URL(
+                `/${locale}/login?error=${encodeURIComponent('Failed to setup user profile. Please try again.')}`,
+                requestUrl.origin
+              )
+            )
+          }
         }
-      } else if (userProfile && referrerId && !userProfile.referrer_id) {
+      } else if (profileError && profileError.code !== 'PGRST116') {
+        // If there's an error other than "not found", log and redirect
+        console.error('Error fetching user profile:', profileError)
+        return NextResponse.redirect(
+          new URL(
+            `/${locale}/login?error=${encodeURIComponent('Failed to load user profile. Please try again.')}`,
+            requestUrl.origin
+          )
+        )
+      }
+
+      // If userProfile is still null/undefined at this point, something went wrong
+      if (!userProfile) {
+        console.error('User profile is null after all attempts', { userId: data.user.id })
+        return NextResponse.redirect(
+          new URL(
+            `/${locale}/login?error=${encodeURIComponent('Failed to setup user profile. Please try again.')}`,
+            requestUrl.origin
+          )
+        )
+      }
+
+      // Update referrer_id if needed
+      if (referrerId && !userProfile.referrer_id) {
         // If profile exists but doesn't have referrer_id, update it
         await supabase
           .from('users')
@@ -151,7 +226,7 @@ export async function GET(request: Request) {
       }
 
       // If PIN is not set, redirect to PIN setup page (preserve referral code if exists)
-      if (!userProfile?.pin_set || !userProfile?.registration_complete) {
+      if (!userProfile.pin_set || !userProfile.registration_complete) {
         let pinSetupUrl = `/${locale}/setup-pin`
         if (refCode) {
           pinSetupUrl += `?ref=${encodeURIComponent(refCode)}`
@@ -160,6 +235,13 @@ export async function GET(request: Request) {
           new URL(pinSetupUrl, requestUrl.origin)
         )
       }
+
+      // User is fully registered, add success flag to show toast after redirect
+      const redirectUrl = next 
+        ? new URL(next, requestUrl.origin)
+        : new URL(`/${locale}?loginSuccess=true`, requestUrl.origin)
+      
+      return NextResponse.redirect(redirectUrl)
     }
   }
 

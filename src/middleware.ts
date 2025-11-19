@@ -19,6 +19,7 @@ const publicRoutes = [
   '/forgot-password',
   '/reset-password',
   '/verify-otp',
+  '/setup-pin', // Allow access to PIN setup for new OAuth users
 ]
 
 const intlMiddleware = createMiddleware({
