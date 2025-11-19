@@ -3,10 +3,11 @@
 import { HiSearch, HiTrendingUp, HiCash, HiBell, HiFilter } from 'react-icons/hi'
 import { useState } from 'react'
 import { formatCurrencyUSD } from '@/app/utils/format'
-import { FaRegBell, FaSlidersH } from 'react-icons/fa'
+import { FaSlidersH } from 'react-icons/fa'
 import { GiMoneyStack } from 'react-icons/gi'
 import { GiTakeMyMoney } from 'react-icons/gi'
 import { useTranslations } from 'next-intl'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 // Removed LanguageSelector and ThemeToggle to keep them only on Home
 
 interface MarketHeaderProps {
@@ -47,10 +48,7 @@ export function MarketHeader({ onSearch, onFilterClick, totalInvested = 0, total
                 </div>
               </>
             )}
-            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell size={16} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationsDropdown />
           </div>
         </div>
       </div>

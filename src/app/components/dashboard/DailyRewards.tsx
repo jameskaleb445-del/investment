@@ -105,7 +105,7 @@ export function DailyRewards({
           <TfiGift className="w-5 h-5 text-[#8b5cf6]" />
           <h3 className="text-base font-semibold theme-text-primary">{t('title')}</h3>
         </div>
-        {streak > 0 && (
+        {streak >= 1 && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#8b5cf6]/20 border border-[#8b5cf6]/30">
             <HiFire className="w-4 h-4 text-[#8b5cf6]" />
             <span className="text-xs font-medium text-[#8b5cf6]">

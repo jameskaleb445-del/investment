@@ -10,9 +10,9 @@ import { LanguageSelector } from '@/app/components/profile/LanguageSelector'
 import { ProfileSkeleton } from '@/app/components/profile/ProfileSkeleton'
 import { HiShieldCheck, HiCheckCircle } from 'react-icons/hi'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
-import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 
 interface ProfileData {
   id: string
@@ -97,11 +97,7 @@ export default function ProfilePage() {
         <div className="fixed top-0 left-0 right-0 z-50 theme-bg-primary px-4 py-3 flex items-center justify-between theme-border border-b backdrop-blur-sm">
           <span className="theme-text-primary font-semibold text-base">{t('title')}</span>
           <div className="flex items-center gap-4">
-            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-        
+            <NotificationsDropdown />
           </div>
         </div>
 

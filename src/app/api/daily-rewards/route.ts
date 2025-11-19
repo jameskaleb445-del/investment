@@ -42,19 +42,22 @@ export async function GET() {
     // Calculate current streak
     let currentStreak = 0
     if (lastClaim) {
-      const lastClaimDate = new Date(lastClaim.claim_date)
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      yesterday.setHours(0, 0, 0, 0)
-      lastClaimDate.setHours(0, 0, 0, 0)
+      const lastClaimDateStr = lastClaim.claim_date // Already in YYYY-MM-DD format
+      const todayDateStr = today // Already in YYYY-MM-DD format
+      
+      // Get yesterday's date string
+      const yesterdayDate = new Date()
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+      yesterdayDate.setHours(0, 0, 0, 0)
+      const year = yesterdayDate.getFullYear()
+      const month = String(yesterdayDate.getMonth() + 1).padStart(2, '0')
+      const day = String(yesterdayDate.getDate()).padStart(2, '0')
+      const yesterdayDateStr = `${year}-${month}-${day}`
 
-      // If last claim was yesterday, continue streak
-      // If last claim was today, use today's streak
+      // If last claim was yesterday or today, continue streak
       // If last claim was before yesterday, streak is broken
-      if (lastClaimDate.getTime() === yesterday.getTime() || lastClaimDate.getTime() === new Date(today).getTime()) {
-        currentStreak = lastClaim.streak
-      } else if (lastClaimDate.getTime() === new Date(today).getTime()) {
-        currentStreak = lastClaim.streak
+      if (lastClaimDateStr === todayDateStr || lastClaimDateStr === yesterdayDateStr) {
+        currentStreak = Number(lastClaim.streak) || 0
       } else {
         currentStreak = 0 // Streak broken
       }

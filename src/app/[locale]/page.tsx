@@ -15,13 +15,13 @@ import { HomeSkeleton } from '@/app/components/dashboard/HomeSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { HiTrendingUp } from 'react-icons/hi'
 import { HiMiniArrowLongDown, HiMiniArrowLongUp } from 'react-icons/hi2'
-import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
 import { useWallet } from '@/app/hooks/useWallet'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from '@/i18n/navigation'
 import toast from 'react-hot-toast'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 
 export default function Home() {
   const t = useTranslations('home')
@@ -172,10 +172,7 @@ export default function Home() {
                 >
                   <HiTrendingUp className="w-6 h-6" />
                 </Link>
-                <button className="theme-text-secondary hover:theme-text-primary transition-all duration-200 cursor-pointer relative hover:scale-110 active:scale-95">
-                  <FaRegBell className="w-6 h-6" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                </button>
+                <NotificationsDropdown />
               </div>
             </div>
           </div>

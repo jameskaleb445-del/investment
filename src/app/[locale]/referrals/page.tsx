@@ -7,8 +7,8 @@ import { ReferralStats } from '@/app/components/dashboard/ReferralStats'
 import { ReferralTree } from '@/app/components/dashboard/ReferralTree'
 import { ReferralsSkeleton } from '@/app/components/referrals/ReferralsSkeleton'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
-import { FaRegBell } from 'react-icons/fa'
 import { useTranslations } from 'next-intl'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 
 // Mock data - replace with actual API calls
 interface ReferralData {
@@ -104,10 +104,7 @@ export default function ReferralsPage() {
           <div className="flex-1" /> {/* Spacer */}
           <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
           <div className="flex-1 flex justify-end">
-            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationsDropdown />
           </div>
         </div>
 

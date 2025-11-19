@@ -12,7 +12,7 @@ import { ThemeToggle } from '@/app/components/ui/theme-toggle'
 import { useTheme } from '@/app/contexts/ThemeContext'
 import Image from 'next/image'
 import { useQuery } from '@tanstack/react-query'
-import { NotificationsDropdown } from '@/app/components/notifications/NotificationsDropdown'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 
 interface PortfolioHeaderProps {
   totalBalance: number

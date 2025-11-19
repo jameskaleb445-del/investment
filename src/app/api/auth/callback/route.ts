@@ -21,9 +21,18 @@ export async function GET(request: Request) {
     
     if (error) {
       console.error('Error exchanging code for session:', error)
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        name: error.name,
+      })
+      
+      // Check if the error is related to user creation
+      const errorMessage = error.message || 'Authentication failed. Please try again.'
       return NextResponse.redirect(
         new URL(
-          `/${locale}/login?error=${encodeURIComponent(error.message)}`, 
+          `/${locale}/login?error=${encodeURIComponent(errorMessage)}&error_code=${error.code || 'unknown'}`, 
           requestUrl.origin
         )
       )
@@ -31,8 +40,14 @@ export async function GET(request: Request) {
 
     // After successful OAuth login, check if user needs to set up PIN
     if (data?.user) {
+      console.log('OAuth login successful, user:', {
+        id: data.user.id,
+        email: data.user.email,
+        provider: data.user.app_metadata?.provider,
+      })
+      
       // Wait a moment for the trigger to create the user profile
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Get referral code from URL param or from user metadata (OAuth)
       const referralCode = refCode || data.user.user_metadata?.referral_code
@@ -59,7 +74,11 @@ export async function GET(request: Request) {
 
       // If user profile doesn't exist, create it (trigger might have failed)
       if (profileError && profileError.code === 'PGRST116') {
-        console.log('Profile not found for user, creating it...', { userId: data.user.id })
+        console.log('Profile not found for user, creating it manually...', { 
+          userId: data.user.id,
+          email: data.user.email,
+          error: profileError.message,
+        })
         
         const fullName = data.user.user_metadata?.full_name || 
                          data.user.user_metadata?.name || 
@@ -85,14 +104,34 @@ export async function GET(request: Request) {
           .single()
 
         if (createError) {
-          console.error('Error creating user profile:', createError)
-          // If profile creation failed, redirect to login with error
-          return NextResponse.redirect(
-            new URL(
-              `/${locale}/login?error=${encodeURIComponent('Failed to create user profile. Please try again.')}`,
-              requestUrl.origin
+          console.error('Error creating user profile:', {
+            code: createError.code,
+            message: createError.message,
+            details: createError.details,
+            hint: createError.hint,
+            userId: data.user.id,
+          })
+          
+          // If profile creation failed, try to continue anyway - user might have been created by trigger
+          // Wait a bit more and try to fetch again
+          await new Promise(resolve => setTimeout(resolve, 500))
+          const { data: retryProfile } = await supabase
+            .from('users')
+            .select('pin_set, registration_complete, referrer_id')
+            .eq('id', data.user.id)
+            .single()
+          
+          if (!retryProfile) {
+            // If we still can't get the profile, redirect with error
+            return NextResponse.redirect(
+              new URL(
+                `/${locale}/login?error=${encodeURIComponent('Failed to create user profile. Please contact support.')}&error_code=${createError.code || 'profile_creation_failed'}`,
+                requestUrl.origin
+              )
             )
-          )
+          }
+          
+          userProfile = retryProfile
         }
 
         if (newProfile) {

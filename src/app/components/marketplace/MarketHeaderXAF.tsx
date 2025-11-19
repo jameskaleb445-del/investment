@@ -2,9 +2,10 @@
 
 import { HiSearch } from 'react-icons/hi'
 import { useState } from 'react'
-import { FaRegBell, FaSlidersH } from 'react-icons/fa'
+import { FaSlidersH } from 'react-icons/fa'
 import { GiMoneyStack, GiTakeMyMoney } from 'react-icons/gi'
 import { useTranslations } from 'next-intl'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 
 interface MarketHeaderProps {
   onSearch?: (query: string) => void
@@ -47,10 +48,7 @@ export function MarketHeader({ onSearch, onFilterClick, totalInvested = 0, total
                 </div>
               </>
             )}
-            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationsDropdown />
           </div>
         </div>
       </div>

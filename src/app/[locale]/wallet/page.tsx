@@ -3,8 +3,8 @@
 import { AppLayout } from '@/app/components/layout/AppLayout'
 import { formatCurrencyUSD, formatCurrency } from '@/app/utils/format'
 import { HiEye, HiEyeOff, HiSearch, HiArrowDown, HiArrowUp } from 'react-icons/hi'
-import { FaRegBell } from 'react-icons/fa'
 import { useState, useEffect, Suspense } from 'react'
+import { NotificationsDropdown } from '@/app/components/notifications/NotificationsBottomSheet'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/app/components/ui/button'
@@ -145,10 +145,7 @@ function WalletPageContent() {
           <div className="flex-1" /> {/* Spacer */}
           <h1 className="text-lg font-semibold theme-text-primary">{t('title')}</h1>
           <div className="flex-1 flex justify-end">
-            <button className="theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer relative">
-              <FaRegBell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationsDropdown />
           </div>
         </div>
 

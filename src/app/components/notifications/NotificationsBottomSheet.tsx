@@ -7,14 +7,8 @@ import { useTranslations } from 'next-intl'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from '@/i18n/navigation'
 import { formatCurrency } from '@/app/utils/format'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/app/components/ui/dropdown-menu'
+import { BottomSheet } from '@/app/components/ui/bottom-sheet'
+import { Button } from '@/app/components/ui/button'
 import {
   subscribeToPushNotifications,
   requestPushPermission,
@@ -32,19 +26,23 @@ interface Notification {
   created_at: string
 }
 
-interface NotificationsResponse {
+export interface NotificationsResponse {
   notifications: Notification[]
   unreadCount: number
 }
 
-export function NotificationsDropdown() {
-  const [open, setOpen] = useState(false)
+interface NotificationsBottomSheetProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function NotificationsBottomSheet({ isOpen, onClose }: NotificationsBottomSheetProps) {
   const [pushEnabled, setPushEnabled] = useState(false)
   const router = useRouter()
   const t = useTranslations('notifications')
   const queryClient = useQueryClient()
 
-  // Fetch notifications
+  // Fetch notifications - always enabled to auto-fetch
   const { data, isLoading } = useQuery<NotificationsResponse>({
     queryKey: ['notifications'],
     queryFn: async () => {
@@ -55,15 +53,15 @@ export function NotificationsDropdown() {
       return response.json()
     },
     refetchInterval: 30000, // Refetch every 30 seconds
-    enabled: open, // Only fetch when dropdown is open
+    enabled: true, // Always fetch
   })
 
   // Check push notification subscription status
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       checkPushSubscription()
     }
-  }, [open])
+  }, [isOpen])
 
   const checkPushSubscription = async () => {
     const subscribed = await isSubscribedToPushNotifications()
@@ -113,7 +111,7 @@ export function NotificationsDropdown() {
       router.push(`/`)
     }
 
-    setOpen(false)
+    onClose()
   }
 
   const handleEnablePush = async () => {
@@ -177,104 +175,90 @@ export function NotificationsDropdown() {
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <button className="text-white/80 hover:text-white transition-colors relative">
-          <FaRegBell className="w-6 h-6" />
+    <BottomSheet isOpen={isOpen} onClose={onClose} title={t('title')} maxHeight="90vh">
+      <div className="flex flex-col h-full">
+        {/* Header Actions */}
+        <div className="px-5 py-3 border-b theme-border flex items-center justify-between flex-shrink-0">
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1.5 bg-red-500 rounded-full flex items-center justify-center text-xs font-semibold text-white">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        align="end"
-        className="w-[360px] sm:w-[400px] max-h-[500px] bg-[#1a1a1f] border-[#3a3a44] text-white p-0"
-      >
-        {/* Header */}
-        <div className="px-4 py-3 border-b border-[#3a3a44] flex items-center justify-between">
-          <DropdownMenuLabel className="text-lg font-semibold text-white p-0">
-            {t('title')}
-          </DropdownMenuLabel>
-          {unreadCount > 0 && (
-            <button
+            <Button
               onClick={markAllAsRead}
-              className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] transition-colors"
+              variant="ghost"
+              className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] hover:bg-[#2d2d35] h-auto px-3 py-1.5"
             >
               {t('markAllAsRead')}
-            </button>
+            </Button>
+          )}
+          <div className="flex-1" />
+          {unreadCount > 0 && (
+            <span className="text-sm theme-text-secondary">
+              {unreadCount} {unreadCount === 1 ? 'unread' : 'unread'}
+            </span>
           )}
         </div>
 
         {/* Push Notifications Toggle */}
         {!pushEnabled && 'Notification' in window && (
-          <>
-            <div className="px-4 py-2 border-b border-[#3a3a44]">
-              <DropdownMenuItem
-                onClick={handleEnablePush}
-                className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] hover:bg-[#2d2d35] cursor-pointer"
-              >
-                🔔 {t('enablePushNotifications') || 'Enable Push Notifications'}
-              </DropdownMenuItem>
-            </div>
-            <DropdownMenuSeparator className="bg-[#3a3a44]" />
-          </>
+          <div className="px-5 py-3 border-b theme-border flex-shrink-0">
+            <Button
+              onClick={handleEnablePush}
+              variant="ghost"
+              className="w-full text-sm text-[#8b5cf6] hover:text-[#7c3aed] hover:bg-[#2d2d35] justify-start h-auto px-3 py-2"
+            >
+              🔔 {t('enablePushNotifications') || 'Enable Push Notifications'}
+            </Button>
+          </div>
         )}
 
         {/* Notifications List */}
-        <div className="overflow-y-auto max-h-[400px]">
+        <div className="flex-1 overflow-y-auto overscroll-contain">
           {isLoading ? (
-            <div className="p-4 text-center text-[#a0a0a8]">
+            <div className="p-8 text-center theme-text-secondary">
               {t('loading')}
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-8 text-center text-[#a0a0a8]">
+            <div className="p-8 text-center theme-text-secondary">
               <FaRegBell className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p>{t('noNotifications')}</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#3a3a44]">
+            <div className="divide-y theme-border">
               {notifications.map((notification) => (
-                <DropdownMenuItem
+                <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`focus:bg-[#2d2d35] focus:text-white p-0 ${
-                    !notification.read ? 'bg-[#2d2d35]/50' : ''
+                  className={`w-full px-5 py-4 text-left hover:bg-[#2d2d35]/50 transition-colors ${
+                    !notification.read ? 'bg-[#2d2d35]/30' : ''
                   }`}
                 >
-                  <div className="w-full px-4 py-3">
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl flex-shrink-0">
-                        {getNotificationIcon(notification.type)}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-sm font-semibold text-white">
-                            {notification.title}
-                          </h4>
-                          {!notification.read && (
-                            <span className="w-2 h-2 bg-[#8b5cf6] rounded-full flex-shrink-0 mt-1.5" />
-                          )}
-                        </div>
-                        <p className="text-xs text-[#a0a0a8] mt-1 line-clamp-2">
-                          {notification.message}
-                        </p>
-                        {notification.data?.amount && (
-                          <p className="text-xs font-semibold text-[#8b5cf6] mt-1">
-                            {formatCurrency(notification.data.amount)}
-                          </p>
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-semibold theme-text-primary">
+                          {notification.title}
+                        </h4>
+                        {!notification.read && (
+                          <span className="w-2 h-2 bg-[#8b5cf6] rounded-full flex-shrink-0 mt-1.5" />
                         )}
-                        <p className="text-xs text-[#6b7280] mt-1">
-                          {formatDistanceToNow(new Date(notification.created_at), {
-                            addSuffix: true,
-                          })}
-                        </p>
                       </div>
+                      <p className="text-xs theme-text-secondary mt-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+                      {notification.data?.amount && (
+                        <p className="text-xs font-semibold text-[#8b5cf6] mt-1">
+                          {formatCurrency(notification.data.amount)}
+                        </p>
+                      )}
+                      <p className="text-xs text-[#6b7280] mt-1">
+                        {formatDistanceToNow(new Date(notification.created_at), {
+                          addSuffix: true,
+                        })}
+                      </p>
                     </div>
                   </div>
-                </DropdownMenuItem>
+                </button>
               ))}
             </div>
           )}
@@ -282,22 +266,63 @@ export function NotificationsDropdown() {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <>
-            <DropdownMenuSeparator className="bg-[#3a3a44]" />
-            <div className="px-4 py-2 text-center">
-              <DropdownMenuItem
-                onClick={() => {
-                  router.push('/notifications')
-                  setOpen(false)
-                }}
-                className="text-sm text-[#8b5cf6] hover:text-[#7c3aed] hover:bg-[#2d2d35] cursor-pointer justify-center"
-              >
-                {t('viewAll')}
-              </DropdownMenuItem>
-            </div>
-          </>
+          <div className="px-5 py-3 border-t theme-border flex-shrink-0">
+            <Button
+              onClick={() => {
+                router.push('/notifications')
+                onClose()
+              }}
+              variant="ghost"
+              className="w-full text-sm text-[#8b5cf6] hover:text-[#7c3aed] hover:bg-[#2d2d35] h-auto px-3 py-2"
+            >
+              {t('viewAll')}
+            </Button>
+          </div>
         )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </div>
+    </BottomSheet>
   )
 }
+
+// Export as NotificationsDropdown for backwards compatibility
+export { NotificationsButton as NotificationsDropdown }
+
+// Button component to trigger the bottom sheet
+function NotificationsButton() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Fetch unread count - always enabled to auto-fetch
+  const { data } = useQuery<NotificationsResponse>({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const response = await fetch('/api/notifications')
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications')
+      }
+      return response.json()
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+    enabled: true, // Always fetch
+    select: (data) => ({ unreadCount: data.unreadCount }), // Only get unread count
+  })
+
+  const unreadCount = data?.unreadCount || 0
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="theme-text-secondary hover:theme-text-primary transition-colors relative"
+      >
+        <FaRegBell className="w-6 h-6" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1.5 bg-red-500 rounded-full flex items-center justify-center text-xs font-semibold text-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+      <NotificationsBottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </>
+  )
+}
+
