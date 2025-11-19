@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
     // Store registration data and OTP temporarily
     // We'll store it in otp_codes table with identifier (email/phone) instead of user_id
-    const identifier = validated.email || validated.phone || ''
+    // (identifier is already defined above for rate limiting)
 
     // Store OTP in database (without user_id since user doesn't exist yet)
     // Store referral_code if provided for use during verification
