@@ -185,14 +185,6 @@ export function UpdatePrompt() {
               </>
             )}
           </button>
-
-          <button
-            onClick={handleLater}
-            disabled={isUpdating}
-            className="w-full px-4 py-3 rounded-xl theme-bg-tertiary theme-text-secondary hover:theme-bg-hover active:scale-[0.98] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {t('later', { defaultValue: 'Later' })}
-          </button>
         </div>
       </div>
     </BottomSheet>

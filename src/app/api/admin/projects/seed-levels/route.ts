@@ -60,15 +60,14 @@ export async function POST(request: Request) {
 
     // Seed levels for each project
     for (const project of projects) {
-      // Check if levels already exist
-      const { data: existingLevels } = await adminClient
+      // Delete existing levels to ensure clean slate (all 10 levels will be created)
+      const { error: deleteError } = await adminClient
         .from('project_levels')
-        .select('id')
+        .delete()
         .eq('project_id', project.id)
 
-      // Skip if levels already exist
-      if (existingLevels && existingLevels.length > 0) {
-        continue
+      if (deleteError) {
+        console.error(`Error deleting existing levels for project ${project.id}:`, deleteError)
       }
 
       // Insert all 10 levels for this project
