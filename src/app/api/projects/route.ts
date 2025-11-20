@@ -21,6 +21,8 @@ export async function GET(request: Request) {
           level_name,
           price_xaf,
           hourly_return_xaf,
+          daily_roi,
+          max_earnings_multiplier,
           tag,
           display_order
         )
@@ -62,9 +64,16 @@ export async function GET(request: Request) {
         level: level.level_name,
         priceXaf: Number(level.price_xaf),
         hourlyReturnXaf: Number(level.hourly_return_xaf),
+        dailyRoi: Number(level.daily_roi) || 0,
+        maxEarningsMultiplier: Number(level.max_earnings_multiplier) || 2.0,
         tag: level.tag || undefined,
+        displayOrder: level.display_order || 1,
       })).sort((a: any, b: any) => {
-        // Sort by level order (LV1, LV2, LV3)
+        // Sort by display_order or level number
+        if (a.displayOrder !== b.displayOrder) {
+          return a.displayOrder - b.displayOrder
+        }
+        // Fallback to parsing level name
         const orderA = parseInt(a.level.replace('LV', ''))
         const orderB = parseInt(b.level.replace('LV', ''))
         return orderA - orderB

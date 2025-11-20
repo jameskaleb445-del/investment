@@ -1,7 +1,7 @@
 import { createClient } from '@/app/lib/supabase/server'
 import { withdrawalSchema } from '@/app/validation/wallet'
 import { NextResponse } from 'next/server'
-import { PLATFORM_FEES } from '@/app/constants/projects'
+import { PLATFORM_FEES, WITHDRAWAL_LADDER, WITHDRAWAL_COOLDOWN_HOURS } from '@/app/constants/projects'
 import crypto from 'crypto'
 import { notifyWithdrawal } from '@/app/lib/notifications'
 
@@ -45,10 +45,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get wallet
+    // Get wallet with withdrawal tracking
     const { data: wallet, error: walletError } = await supabase
       .from('wallets')
-      .select('balance, pending_withdrawal')
+      .select('balance, pending_withdrawal, withdrawal_count, last_withdrawal_at')
       .eq('user_id', user.id)
       .single()
 
@@ -56,6 +56,81 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Wallet not found' },
         { status: 404 }
+      )
+    }
+
+    // Check 48-hour cooldown
+    if (wallet.last_withdrawal_at) {
+      const lastWithdrawalDate = new Date(wallet.last_withdrawal_at)
+      const now = new Date()
+      const hoursSinceLastWithdrawal = 
+        (now.getTime() - lastWithdrawalDate.getTime()) / (1000 * 60 * 60)
+      
+      if (hoursSinceLastWithdrawal < WITHDRAWAL_COOLDOWN_HOURS) {
+        const remainingHours = Math.ceil(WITHDRAWAL_COOLDOWN_HOURS - hoursSinceLastWithdrawal)
+        return NextResponse.json(
+          { 
+            error: `You must wait ${remainingHours} more hour(s) before making another withdrawal. 48-hour cooldown period.`,
+            cooldown_remaining_hours: remainingHours,
+          },
+          { status: 429 }
+        )
+      }
+    }
+
+    // Get withdrawal limits based on withdrawal count
+    const withdrawalCount = wallet.withdrawal_count || 0
+    const withdrawalNumber = withdrawalCount + 1 // Next withdrawal number
+    
+    let minAmount = 0
+    let maxAmount = 0
+    
+    if (withdrawalNumber <= 5) {
+      // Use ladder limits for withdrawals 1-5
+      const ladderLimit = WITHDRAWAL_LADDER[withdrawalNumber - 1]
+      minAmount = ladderLimit.minAmount
+      maxAmount = ladderLimit.maxAmount
+    } else {
+      // Withdrawal 6+: min 40k, max = 40% of balance OR highest active stake
+      minAmount = 40000
+      
+      // Get highest active stake
+      const { data: activeInvestments } = await supabase
+        .from('investments')
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('amount', { ascending: false })
+        .limit(1)
+      
+      const highestStake = activeInvestments && activeInvestments.length > 0
+        ? Number(activeInvestments[0].amount)
+        : 0
+      
+      const balanceMax = Number(wallet.balance) * 0.4 // 40% of balance
+      maxAmount = Math.max(balanceMax, highestStake)
+    }
+
+    // Validate withdrawal amount against limits
+    if (validated.amount < minAmount) {
+      return NextResponse.json(
+        { 
+          error: `Minimum withdrawal amount is ${minAmount.toLocaleString()} XAF for withdrawal #${withdrawalNumber}`,
+          min_amount: minAmount,
+          withdrawal_number: withdrawalNumber,
+        },
+        { status: 400 }
+      )
+    }
+
+    if (validated.amount > maxAmount) {
+      return NextResponse.json(
+        { 
+          error: `Maximum withdrawal amount is ${maxAmount.toLocaleString()} XAF for withdrawal #${withdrawalNumber}`,
+          max_amount: maxAmount,
+          withdrawal_number: withdrawalNumber,
+        },
+        { status: 400 }
       )
     }
 
@@ -69,7 +144,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Calculate fee
+    // Calculate 5% fee
     const fee = validated.amount * PLATFORM_FEES.WITHDRAWAL
     const netAmount = validated.amount - fee
 
@@ -94,11 +169,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Update wallet pending withdrawal
+    // Update wallet: pending withdrawal, withdrawal count, and last withdrawal time
     await supabase
       .from('wallets')
       .update({
         pending_withdrawal: Number(wallet.pending_withdrawal) + validated.amount,
+        withdrawal_count: withdrawalCount + 1,
+        last_withdrawal_at: new Date().toISOString(),
       })
       .eq('user_id', user.id)
 

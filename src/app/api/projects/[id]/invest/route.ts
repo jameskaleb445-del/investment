@@ -2,7 +2,7 @@ import { createClient } from '@/app/lib/supabase/server'
 import { investmentSchema } from '@/app/validation/investments'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { REFERRAL_COMMISSION_RATES, REFERRAL_LEVELS } from '@/app/constants/projects'
+import { REFERRAL_COMMISSION_RATES, REFERRAL_LEVELS, getInvestmentLevelByAmount, getReferralBonusForAmount } from '@/app/constants/projects'
 import { notifyInvestment, notifyReferralCommission } from '@/app/lib/notifications'
 
 export async function POST(
@@ -117,11 +117,24 @@ export async function POST(
       )
     }
 
-    // Calculate expected return
-    const expectedReturn =
-      (validated.amount * Number(project.estimated_roi)) / 100
+    // Find investment level based on amount
+    const investmentLevel = getInvestmentLevelByAmount(validated.amount)
+    
+    if (!investmentLevel) {
+      return NextResponse.json(
+        { error: 'Invalid investment amount. Please select a valid investment level.' },
+        { status: 400 }
+      )
+    }
 
-    // Create investment
+    // Calculate earnings cap (2x multiplier)
+    const maxEarningsCap = validated.amount * investmentLevel.maxEarningsMultiplier
+
+    // Calculate expected return based on level's daily ROI
+    const expectedReturn = (validated.amount * investmentLevel.dailyRoi) / 100
+
+    // Create investment with level information and earnings cap
+    // Status is set to 'active' immediately - investments start earning right away
     const { data: investment, error: invError } = await supabase
       .from('investments')
       .insert({
@@ -129,7 +142,13 @@ export async function POST(
         project_id: projectId,
         amount: validated.amount,
         expected_return: expectedReturn,
-        status: 'pending',
+        status: 'active',
+        level_name: investmentLevel.levelName,
+        daily_roi: investmentLevel.dailyRoi,
+        max_earnings_multiplier: investmentLevel.maxEarningsMultiplier,
+        max_earnings_cap: maxEarningsCap,
+        accumulated_earnings: 0,
+        last_earnings_calculation: new Date().toISOString(),
       })
       .select()
       .single()
@@ -181,13 +200,30 @@ export async function POST(
       .select('id, referrer_id, level')
       .eq('referred_id', user.id)
 
+    // Calculate referral commissions based on investment level
+    // Level 1 (direct referrer) gets level-based bonus (26%, 30%, 32.5%, or 35% cap)
+    // Level 2 and 3 get standard percentages of investment amount
+    const referralBonusAmount = getReferralBonusForAmount(validated.amount)
+
     if (referrals) {
       for (const referral of referrals) {
-        const commissionRate =
-          REFERRAL_COMMISSION_RATES[
-            referral.level as keyof typeof REFERRAL_COMMISSION_RATES
-          ]
-        const commissionAmount = validated.amount * commissionRate
+        let commissionAmount = 0
+        
+        if (referral.level === REFERRAL_LEVELS.LEVEL_1) {
+          // Direct referrer gets the full level-based bonus
+          commissionAmount = referralBonusAmount
+        } else if (referral.level === REFERRAL_LEVELS.LEVEL_2) {
+          // Level 2 gets 5% of investment amount
+          const commissionRate = REFERRAL_COMMISSION_RATES[REFERRAL_LEVELS.LEVEL_2]
+          commissionAmount = validated.amount * commissionRate
+        } else if (referral.level === REFERRAL_LEVELS.LEVEL_3) {
+          // Level 3 gets 2% of investment amount
+          const commissionRate = REFERRAL_COMMISSION_RATES[REFERRAL_LEVELS.LEVEL_3]
+          commissionAmount = validated.amount * commissionRate
+        }
+
+        // Skip if commission amount is 0
+        if (commissionAmount === 0) continue
 
         // Get referrer wallet
         const { data: referrerWallet } = await supabase
@@ -249,7 +285,10 @@ export async function POST(
         id: investment.id,
         amount: validated.amount,
         expected_return: expectedReturn,
-        status: 'pending',
+        max_earnings_cap: maxEarningsCap,
+        accumulated_earnings: 0,
+        level_name: investmentLevel.levelName,
+        status: 'active',
       },
     })
   } catch (error: any) {
