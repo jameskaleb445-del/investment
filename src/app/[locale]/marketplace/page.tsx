@@ -26,28 +26,7 @@ import { formatCurrency, formatCurrencyUSD, formatPercentage } from '@/app/utils
 import { cn } from '@/app/lib/utils'
 import { Button } from '@/app/components/ui/button'
 
-const PROJECT_LEVEL_OPTIONS: Record<string, ProjectLevel[]> = {
-  '1': [
-    { id: '1-lv1', level: 'LV1', priceXaf: 300000, hourlyReturnXaf: 10500, tag: 'New' },
-    { id: '1-lv2', level: 'LV2', priceXaf: 600000, hourlyReturnXaf: 23500 },
-    { id: '1-lv3', level: 'LV3', priceXaf: 1200000, hourlyReturnXaf: 52000 },
-  ],
-  '3': [
-    { id: '3-lv1', level: 'LV1', priceXaf: 500000, hourlyReturnXaf: 12500, tag: 'New' },
-    { id: '3-lv2', level: 'LV2', priceXaf: 1000000, hourlyReturnXaf: 27000 },
-    { id: '3-lv3', level: 'LV3', priceXaf: 2000000, hourlyReturnXaf: 62000 },
-  ],
-  '7': [
-    { id: '7-lv1', level: 'LV1', priceXaf: 1000000, hourlyReturnXaf: 41670, tag: 'New' },
-    { id: '7-lv2', level: 'LV2', priceXaf: 2000000, hourlyReturnXaf: 95000 },
-    { id: '7-lv3', level: 'LV3', priceXaf: 3500000, hourlyReturnXaf: 165000 },
-  ],
-  '8': [
-    { id: '8-lv1', level: 'LV1', priceXaf: 750000, hourlyReturnXaf: 30500, tag: 'New' },
-    { id: '8-lv2', level: 'LV2', priceXaf: 1500000, hourlyReturnXaf: 72000 },
-    { id: '8-lv3', level: 'LV3', priceXaf: 2500000, hourlyReturnXaf: 138000 },
-  ],
-}
+// Levels are now fetched from the database via the API
 
 function MarketplacePageContent() {
   const t = useTranslations('marketplace')
@@ -250,12 +229,13 @@ function MarketplacePageContent() {
   }
 
   const handleShowLevels = (project: any) => {
-    // Use levels from database (project.levels) if available, otherwise fallback to hardcoded PROJECT_LEVEL_OPTIONS
+    // Use levels from database (project.levels)
     const levels = project.levels && project.levels.length > 0 
       ? project.levels 
-      : PROJECT_LEVEL_OPTIONS[project.id] || []
+      : []
     
     if (levels.length === 0) {
+      // If no levels exist, show project details instead
       handleProjectClick(project)
       return
     }
@@ -347,10 +327,10 @@ function MarketplacePageContent() {
                     >
                       {userInvestments.map((inv) => {
                         if (!inv.project) return null
-                        // Use levels from database if available, otherwise fallback to hardcoded
+                        // Use levels from database
                         const investmentLevels = inv.project.levels && inv.project.levels.length > 0
                           ? inv.project.levels
-                          : PROJECT_LEVEL_OPTIONS[inv.project.id] || []
+                          : []
                         const activeLevel = investmentLevels.find((level: ProjectLevel) => level.priceXaf === inv.amount) || null
 
                         return (
@@ -396,10 +376,10 @@ function MarketplacePageContent() {
                   <div className="px-4">
                     <div className="grid grid-cols-2 gap-3 pb-2">
                       {visibleProjects.map((project) => {
-                        // Use levels from database if available, otherwise fallback to hardcoded PROJECT_LEVEL_OPTIONS
+                        // Use levels from database
                         const projectLevels = project.levels && project.levels.length > 0
                           ? project.levels
-                          : PROJECT_LEVEL_OPTIONS[project.id] || []
+                          : []
                         return (
                           <ProjectMarketCard
                             key={project.id}
