@@ -412,6 +412,14 @@
     "pushSubscribeFailed": "Échec de l'abonnement aux notifications push",
     "pushEnabled": "Notifications push activées!",
     "pushEnableFailed": "Échec de l'activation des notifications push",
+    "pushDisabled": "Notifications push désactivées!",
+    "pushDisableFailed": "Échec de la désactivation des notifications push",
+    "pushNotifications": "Notifications push",
+    "pushEnabledDescription": "Recevoir des notifications push sur cet appareil",
+    "pushDisabledDescription": "Activez pour recevoir des notifications push",
+    "noNotificationsDescription": "Vous êtes à jour! Revenez plus tard pour de nouvelles notifications.",
+    "allMarkedAsRead": "Toutes les notifications ont été marquées comme lues",
+    "markReadFailed": "Échec du marquage des notifications comme lues",
     "deposit": {
       "title": "Dépôt reçu",
       "message": "Votre dépôt de {amount} a été reçu et est en cours de traitement."

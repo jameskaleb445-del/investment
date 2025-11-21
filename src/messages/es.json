@@ -400,6 +400,14 @@
     "pushSubscribeFailed": "Error al suscribirse a las notificaciones push",
     "pushEnabled": "¡Notificaciones push habilitadas!",
     "pushEnableFailed": "Error al habilitar las notificaciones push",
+    "pushDisabled": "¡Notificaciones push deshabilitadas!",
+    "pushDisableFailed": "Error al deshabilitar las notificaciones push",
+    "pushNotifications": "Notificaciones push",
+    "pushEnabledDescription": "Recibir notificaciones push en este dispositivo",
+    "pushDisabledDescription": "Habilita para recibir notificaciones push",
+    "noNotificationsDescription": "¡Estás al día! Vuelve más tarde para nuevas notificaciones.",
+    "allMarkedAsRead": "Todas las notificaciones marcadas como leídas",
+    "markReadFailed": "Error al marcar las notificaciones como leídas",
     "deposit": {
       "title": "Depósito recibido",
       "message": "Tu depósito de {amount} ha sido recibido y está siendo procesado."

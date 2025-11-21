@@ -57,7 +57,6 @@ export function ProjectMarketCard({
   const t = useTranslations('marketplace')
   const [customAmount, setCustomAmount] = useState('')
   const [showRoiHelp, setShowRoiHelp] = useState(false)
-  const fundingPercentage = (fundedAmount / goalAmount) * 100
   const roiDisplay = estimatedRoi > 0 ? `+${estimatedRoi.toFixed(2)}` : estimatedRoi.toFixed(2)
   const isPositiveRoi = estimatedRoi >= 0
 
@@ -106,9 +105,8 @@ export function ProjectMarketCard({
           : '0 12px 32px -18px rgba(139,92,246,0.35)',
       }}
     >
-      {/* ROI percentage and circular progress at top right */}
-      <div className="absolute top-4 right-4 flex flex-col items-end gap-2 z-10">
-        {/* ROI percentage */}
+      {/* ROI percentage at top right */}
+      <div className="absolute top-4 right-4 z-10">
         <div
           className={cn(
             'flex items-center gap-1 text-xs font-semibold',
@@ -122,60 +120,17 @@ export function ProjectMarketCard({
           )}
           {roiDisplay}%
         </div>
-        
-        {/* Circular Progress Bar */}
-        <div className="relative w-10 h-10">
-          <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-            {/* Background circle */}
-            <circle
-              cx="18"
-              cy="18"
-              r="15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              className="text-gray-300 dark:text-[#2d2d35]"
-            />
-            {/* Progress circle */}
-            <circle
-              cx="18"
-              cy="18"
-              r="15"
-              fill="none"
-              stroke={fundingPercentage >= 100 ? '#10b981' : '#8b5cf6'}
-              strokeWidth="3"
-              strokeDasharray={`${fundingPercentage}, 100`}
-              strokeLinecap="round"
-              className="transition-all duration-300"
-            />
-          </svg>
-          {/* Percentage text in center */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[8px] font-semibold theme-text-primary">
-              {Math.round(fundingPercentage)}%
-            </span>
-          </div>
-        </div>
       </div>
 
       <div className="flex items-start justify-between mb-3 pr-16">
         <div className="flex-1 min-w-0">
           <h3 className="theme-text-primary font-semibold text-base mb-1 truncate">{name}</h3>
           <p
-            className="text-xs theme-text-secondary mb-2"
+            className="text-xs theme-text-secondary"
             style={{ color: isDark ? undefined : '#4c1d95' }}
           >
             {category}
           </p>
-          {status === 'active' ? (
-            <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
-              {t('active')}
-            </span>
-          ) : (
-            <span className="px-2.5 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
-              {t('funding')}
-            </span>
-          )}
           {activeLevel && (
             <div className="mt-2 inline-flex items-center gap-2 px-2 py-1 rounded-md bg-[#8b5cf6]/10 border border-[#8b5cf6]/25">
               <span className="text-[11px] font-semibold text-[#8b5cf6] uppercase tracking-wide">

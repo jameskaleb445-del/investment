@@ -10,6 +10,7 @@ const protectedRoutes = [
   '/profile',
   '/referrals',
   '/marketplace',
+  '/notifications',
 ]
 
 // Public routes that don't require authentication

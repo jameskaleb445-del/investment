@@ -43,10 +43,8 @@ export function ProjectDetailsSheet({
   walletBalance = 0,
 }: ProjectDetailsSheetProps) {
   const t = useTranslations('marketplace')
-  const fundingPercentage = (project.fundedAmount / project.goalAmount) * 100
   const roiDisplay = project.estimatedRoi > 0 ? `+${project.estimatedRoi.toFixed(2)}` : project.estimatedRoi.toFixed(2)
   const isPositiveRoi = project.estimatedRoi >= 0
-  const remainingAmount = project.goalAmount - project.fundedAmount
   const [customAmount, setCustomAmount] = useState<string>(selectedLevel ? selectedLevel.priceXaf.toString() : '')
   const exampleExitDays =
     project.durationDays && project.durationDays > 0 ? Math.max(1, Math.round(project.durationDays / 2)) : null
@@ -104,18 +102,7 @@ export function ProjectDetailsSheet({
       <BottomSheet isOpen={isOpen} onClose={onClose} title={project.name}>
         <div className="px-5 py-6 space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm theme-text-secondary">{project.category}</span>
-              {project.status === 'active' ? (
-                <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
-                  {t('active')}
-                </span>
-              ) : (
-                <span className="px-2.5 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
-                  {t('funding')}
-                </span>
-              )}
-            </div>
+            <span className="text-sm theme-text-secondary">{project.category}</span>
             <div className={cn(
               "flex items-center gap-1 text-sm font-semibold",
               isPositiveRoi ? "text-[#10b981]" : "text-red-400"
@@ -277,23 +264,6 @@ export function ProjectDetailsSheet({
             </div>
           </div>
 
-          <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs theme-text-secondary">
-              <span>{t('funded', { defaultValue: 'Funded' })}: {formatCurrency(project.fundedAmount)}</span>
-              <span>{t('goal', { defaultValue: 'Goal' })}: {formatCurrency(project.goalAmount)}</span>
-            </div>
-            <div className="h-2 w-full rounded-full theme-bg-tertiary overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed]"
-                style={{ width: `${Math.min(100, fundingPercentage)}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-xs theme-text-muted">
-              <span>{Math.round(fundingPercentage)}%</span>
-              <span>{t('remaining', { defaultValue: 'Remaining' })}: {formatCurrency(remainingAmount)}</span>
-            </div>
-          </div>
-
           <Button
             onClick={() => {
               if (investmentAmount > walletBalance) {
@@ -306,13 +276,11 @@ export function ProjectDetailsSheet({
             }}
             className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold"
             size="lg"
-            disabled={project.status !== 'funding' || investmentAmount > walletBalance || investmentAmount <= 0}
+            disabled={investmentAmount > walletBalance || investmentAmount <= 0}
           >
             {investmentAmount > walletBalance
               ? t('insufficientBalance', { defaultValue: 'Insufficient Balance' })
-              : project.status === 'funding'
-              ? t('investNow', { defaultValue: 'Invest Now' })
-              : t('projectActiveMessage', { defaultValue: 'This project is now active and generating returns' })}
+              : t('investNow', { defaultValue: 'Invest Now' })}
           </Button>
         </div>
       </BottomSheet>
@@ -322,20 +290,9 @@ export function ProjectDetailsSheet({
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} title={project.name}>
       <div className="px-5 py-6 space-y-6">
-        {/* Project Status and Category */}
+        {/* Project Category and ROI */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm theme-text-secondary">{project.category}</span>
-            {project.status === 'active' ? (
-              <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
-                {t('active')}
-              </span>
-            ) : (
-              <span className="px-2.5 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
-                {t('funding')}
-              </span>
-            )}
-          </div>
+          <span className="text-sm theme-text-secondary">{project.category}</span>
           <div className={cn(
             "flex items-center gap-1 text-sm font-semibold",
             isPositiveRoi ? "text-[#10b981]" : "text-red-400"
@@ -363,57 +320,11 @@ export function ProjectDetailsSheet({
                 category: project.category.toLowerCase(),
                 roi: formatPercentage(project.estimatedRoi),
                 days: project.durationDays,
-                status: project.status === 'active' ? t('active') : t('funding'),
-                defaultValue: `This investment opportunity focuses on ${project.category.toLowerCase()}, offering investors a potential return of ${formatPercentage(project.estimatedRoi)} over ${project.durationDays} days. The project is currently in the ${project.status === 'active' ? 'active' : 'funding'} phase.`
+                defaultValue: `This investment opportunity focuses on ${project.category.toLowerCase()}, offering investors a potential return of ${formatPercentage(project.estimatedRoi)} over ${project.durationDays} days.`
               })}
             </p>
           </div>
         )}
-
-        {/* Funding Progress */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 space-y-2">
-            <span className="text-sm font-semibold theme-text-primary">{t('fundingProgress', { defaultValue: 'Funding Progress' })}</span>
-            <div className="flex items-center justify-between text-xs text-[#6b7280]">
-              <span>{t('funded', { defaultValue: 'Funded' })}: {formatCurrencyUSD(project.fundedAmount)}</span>
-              <span>{t('goal', { defaultValue: 'Goal' })}: {formatCurrencyUSD(project.goalAmount)}</span>
-            </div>
-          </div>
-          
-          {/* Circular Progress Bar */}
-          <div className="relative w-16 h-16 flex-shrink-0">
-            <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
-              {/* Background circle */}
-              <circle
-                cx="18"
-                cy="18"
-                r="15"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                className="text-gray-300 dark:text-[#2d2d35]"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="18"
-                cy="18"
-                r="15"
-                fill="none"
-                stroke={fundingPercentage >= 100 ? '#10b981' : '#8b5cf6'}
-                strokeWidth="3"
-                strokeDasharray={`${fundingPercentage}, 100`}
-                strokeLinecap="round"
-                className="transition-all duration-300"
-              />
-            </svg>
-            {/* Percentage text in center */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-semibold theme-text-primary">
-                {Math.round(fundingPercentage)}%
-              </span>
-            </div>
-          </div>
-        </div>
 
         {/* Project Stats */}
         <div className="grid grid-cols-2 gap-3">
@@ -440,20 +351,6 @@ export function ProjectDetailsSheet({
               <span className="text-xs theme-text-secondary">{t('durationLabel', { defaultValue: 'Duration' })}</span>
             </div>
             <p className="text-lg font-bold theme-text-primary">{project.durationDays} {t('days', { defaultValue: 'days' })}</p>
-          </div>
-          <div className="theme-bg-secondary theme-border border rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <GiChart className="w-4 h-4 text-[#8b5cf6]" />
-              <span className="text-xs theme-text-secondary">{t('status', { defaultValue: 'Status' })}</span>
-            </div>
-            <p className="text-lg font-bold theme-text-primary capitalize">{project.status === 'active' ? t('active') : project.status === 'funding' ? t('funding') : project.status}</p>
-          </div>
-          <div className="theme-bg-secondary theme-border border rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <GiMoneyStack className="w-4 h-4 text-[#8b5cf6]" />
-              <span className="text-xs theme-text-secondary">{t('remaining', { defaultValue: 'Remaining' })}</span>
-            </div>
-            <p className="text-lg font-bold theme-text-primary">{formatCurrency(remainingAmount)}</p>
           </div>
         </div>
 
@@ -545,7 +442,7 @@ export function ProjectDetailsSheet({
         </div>
 
         {/* Action Button */}
-        {project.status === 'funding' && onInvest && (
+        {onInvest && (
           <Button
             onClick={() => {
               if (investmentAmount > walletBalance || investmentAmount <= 0) {
@@ -563,13 +460,6 @@ export function ProjectDetailsSheet({
               ? t('insufficientBalance', { defaultValue: 'Insufficient Balance' })
               : t('investNow', { defaultValue: 'Invest Now' })}
           </Button>
-        )}
-        {project.status === 'active' && (
-          <div className="bg-[#10b981]/20 border border-[#10b981]/30 rounded-lg p-3">
-            <p className="text-sm text-[#10b981] text-center font-medium">
-              {t('projectActiveMessage', { defaultValue: 'This project is now active and generating returns' })}
-            </p>
-          </div>
         )}
       </div>
     </BottomSheet>

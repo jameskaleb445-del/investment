@@ -97,18 +97,18 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url)
     const endpoint = searchParams.get('endpoint')
 
-    if (!endpoint) {
-      return NextResponse.json(
-        { error: 'Endpoint is required' },
-        { status: 400 }
-      )
-    }
-
-    const { error } = await supabase
+    let query = supabase
       .from('push_subscriptions')
       .delete()
       .eq('user_id', user.id)
-      .eq('endpoint', endpoint)
+
+    // If endpoint is provided, delete only that subscription
+    // Otherwise, delete all subscriptions for this user
+    if (endpoint) {
+      query = query.eq('endpoint', endpoint)
+    }
+
+    const { error } = await query
 
     if (error) {
       console.error('Error deleting push subscription:', error)

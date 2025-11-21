@@ -412,6 +412,14 @@
     "pushSubscribeFailed": "Failed to subscribe to push notifications",
     "pushEnabled": "Push notifications enabled!",
     "pushEnableFailed": "Failed to enable push notifications",
+    "pushDisabled": "Push notifications disabled!",
+    "pushDisableFailed": "Failed to disable push notifications",
+    "pushNotifications": "Push Notifications",
+    "pushEnabledDescription": "Receive push notifications on this device",
+    "pushDisabledDescription": "Enable to receive push notifications",
+    "noNotificationsDescription": "You're all caught up! Check back later for new notifications.",
+    "allMarkedAsRead": "All notifications marked as read",
+    "markReadFailed": "Failed to mark notifications as read",
     "deposit": {
       "title": "Deposit Received",
       "message": "Your deposit of {amount} has been received and is being processed."

@@ -165,12 +165,6 @@ function MarketplacePageContent() {
       // Sort
       if (sortBy === 'roi') {
         filtered.sort((a: any, b: any) => Number(b.estimated_roi) - Number(a.estimated_roi))
-      } else if (sortBy === 'progress') {
-        filtered.sort((a: any, b: any) => {
-          const progressA = (Number(a.funded_amount) / Number(a.goal_amount)) * 100
-          const progressB = (Number(b.funded_amount) / Number(b.goal_amount)) * 100
-          return progressB - progressA
-        })
       } else {
         // Already sorted by created_at DESC from API, so no need to reverse
       }
@@ -528,9 +522,6 @@ function MarketplacePageContent() {
                   <SelectItem value="roi" className="text-white hover:bg-[#2d2d35]">
                     {t('highestRoi')}
                   </SelectItem>
-                  <SelectItem value="progress" className="text-white hover:bg-[#2d2d35]">
-                    {t('mostFunded')}
-                  </SelectItem>
                 </SelectContent>
               </Select>
                 </div>
@@ -547,20 +538,9 @@ function MarketplacePageContent() {
           >
             <div className="px-5 py-6 space-y-5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm theme-text-secondary">
-                    {levelsSheetProject.project.category}
-                  </span>
-                  {levelsSheetProject.project.status === PROJECT_STATUS.ACTIVE ? (
-                    <span className="px-2.5 py-0.5 bg-[#10b981]/20 text-[#10b981] text-xs font-medium rounded-full border border-[#10b981]/30">
-                      {t('active')}
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-0.5 bg-[#8b5cf6]/20 text-[#8b5cf6] text-xs font-medium rounded-full border border-[#8b5cf6]/30">
-                      {t('funding')}
-                    </span>
-                  )}
-                </div>
+                <span className="text-sm theme-text-secondary">
+                  {levelsSheetProject.project.category}
+                </span>
                 <div className="text-xs font-semibold text-[#10b981]">
                   ROI: {formatPercentage(levelsSheetProject.project.estimated_roi)}
                 </div>
