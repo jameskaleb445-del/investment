@@ -31,6 +31,7 @@ interface ProjectDetailsSheetProps {
   }
   selectedLevel?: ProjectLevel | null
   onInvest?: (options?: { level?: ProjectLevel | null; amount?: number }) => void
+  walletBalance?: number
 }
 
 export function ProjectDetailsSheet({
@@ -39,6 +40,7 @@ export function ProjectDetailsSheet({
   project,
   selectedLevel = null,
   onInvest,
+  walletBalance = 0,
 }: ProjectDetailsSheetProps) {
   const t = useTranslations('marketplace')
   const fundingPercentage = (project.fundedAmount / project.goalAmount) * 100
@@ -75,8 +77,27 @@ export function ProjectDetailsSheet({
 
   const parsedAmount = customAmount ? parseFloat(customAmount.replace(/[^\d.]/g, '')) || 0 : 0
   const investmentAmount = parsedAmount > 0 ? parsedAmount : selectedLevel ? selectedLevel.priceXaf : 0
-  const potentialReturn = investmentAmount * (project.estimatedRoi / 100)
-  const totalReturn = investmentAmount + potentialReturn
+  
+  // Calculate based on level data if available, otherwise use project ROI
+  let potentialReturn = 0
+  let totalReturn = 0
+  let dailyProfit = 0
+  let daysToCap = 0
+  
+  if (investmentAmount > 0) {
+    if (selectedLevel?.dailyRoi && selectedLevel?.maxEarningsMultiplier) {
+      // Use level-based calculation (correct method)
+      dailyProfit = (investmentAmount * selectedLevel.dailyRoi) / 100
+      const maxProfit = investmentAmount * (selectedLevel.maxEarningsMultiplier - 1)
+      totalReturn = investmentAmount * selectedLevel.maxEarningsMultiplier // Total at cap
+      potentialReturn = maxProfit // Profit at cap
+      daysToCap = dailyProfit > 0 ? maxProfit / dailyProfit : 0
+    } else {
+      // Fallback to project ROI (old calculation)
+      potentialReturn = investmentAmount * (project.estimatedRoi / 100)
+      totalReturn = investmentAmount + potentialReturn
+    }
+  }
 
   if (selectedLevel) {
     return (
@@ -136,47 +157,50 @@ export function ProjectDetailsSheet({
                       defaultValue: `Earn ${formatCurrency(selectedLevel.hourlyReturnXaf)}/hour`,
                     })}
                   </p>
-                  <p className="text-xs font-semibold text-[#10b981]">
-                    {t('estimatedMaturity', {
-                      amount: formatCurrency(
-                        calculateProjectedReturn(
-                          selectedLevel.priceXaf,
-                          project.estimatedRoi,
-                          project.durationDays
-                        )
-                      ),
-                      days: project.durationDays || 0,
-                      defaultValue: `Est. ${formatCurrency(
-                        calculateProjectedReturn(
-                          selectedLevel.priceXaf,
-                          project.estimatedRoi,
-                          project.durationDays
-                        )
-                      )} in ${project.durationDays} days`,
-                    })}
-                  </p>
-                  {exampleExitDays && (
-                    <p className="text-[11px] text-[#facc15]">
-                      {t('earlyExitSample', {
-                        days: exampleExitDays ?? project.durationDays ?? 0,
+                  {selectedLevel.dailyRoi && selectedLevel.maxEarningsMultiplier ? (
+                    <>
+                      <p className="text-xs font-semibold text-[#10b981]">
+                        {t('estimatedMaturity', {
+                          amount: formatCurrency(
+                            selectedLevel.priceXaf * selectedLevel.maxEarningsMultiplier
+                          ),
+                          days: Math.ceil(
+                            (selectedLevel.priceXaf * (selectedLevel.maxEarningsMultiplier - 1)) /
+                            ((selectedLevel.priceXaf * selectedLevel.dailyRoi) / 100)
+                          ),
+                          defaultValue: `Est. ${formatCurrency(
+                            selectedLevel.priceXaf * selectedLevel.maxEarningsMultiplier
+                          )} in ~${Math.ceil(
+                            (selectedLevel.priceXaf * (selectedLevel.maxEarningsMultiplier - 1)) /
+                            ((selectedLevel.priceXaf * selectedLevel.dailyRoi) / 100)
+                          )} days`,
+                        })}
+                      </p>
+                      <p className="text-xs text-[#10b981]/70">
+                        {t('dailyEarningsInfo', {
+                          amount: formatCurrency((selectedLevel.priceXaf * selectedLevel.dailyRoi) / 100),
+                          defaultValue: `Earn ${formatCurrency((selectedLevel.priceXaf * selectedLevel.dailyRoi) / 100)} daily`,
+                        })}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs font-semibold text-[#10b981]">
+                      {t('estimatedMaturity', {
                         amount: formatCurrency(
                           calculateProjectedReturn(
                             selectedLevel.priceXaf,
                             project.estimatedRoi,
-                            project.durationDays,
-                            exampleExitDays
+                            project.durationDays
                           )
                         ),
-                        defaultValue: `Exit after ${
-                          exampleExitDays ?? project.durationDays ?? 0
-                        } days → approx. ${formatCurrency(
+                        days: project.durationDays || 0,
+                        defaultValue: `Est. ${formatCurrency(
                           calculateProjectedReturn(
                             selectedLevel.priceXaf,
                             project.estimatedRoi,
-                            project.durationDays,
-                            exampleExitDays
+                            project.durationDays
                           )
-                        )}`,
+                        )} in ${project.durationDays} days`,
                       })}
                     </p>
                   )}
@@ -221,6 +245,18 @@ export function ProjectDetailsSheet({
                 <span className="text-xs text-[#10b981]">{t('profit', { defaultValue: 'Profit' })}</span>
                 <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(potentialReturn)}</span>
               </div>
+              {dailyProfit > 0 && daysToCap > 0 && (
+                <>
+                  <div className="flex items-center justify-between pt-2 border-t border-[#10b981]/20">
+                    <span className="text-xs text-[#10b981]">{t('dailyEarnings', { defaultValue: 'Daily earnings' })}</span>
+                    <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(dailyProfit)}/day</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs text-[#10b981]">{t('daysToCap', { defaultValue: 'Days to reach cap' })}</span>
+                    <span className="text-xs font-medium text-[#10b981]">~{Math.ceil(daysToCap)} days</span>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -260,14 +296,21 @@ export function ProjectDetailsSheet({
 
           <Button
             onClick={() => {
+              if (investmentAmount > walletBalance) {
+                // Alert will be shown by the parent component
+                onInvest?.({ level: selectedLevel, amount: investmentAmount })
+                return
+              }
               onInvest?.({ level: selectedLevel, amount: investmentAmount })
               onClose()
             }}
             className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold"
             size="lg"
-            disabled={project.status !== 'funding'}
+            disabled={project.status !== 'funding' || investmentAmount > walletBalance || investmentAmount <= 0}
           >
-            {project.status === 'funding'
+            {investmentAmount > walletBalance
+              ? t('insufficientBalance', { defaultValue: 'Insufficient Balance' })
+              : project.status === 'funding'
               ? t('investNow', { defaultValue: 'Invest Now' })
               : t('projectActiveMessage', { defaultValue: 'This project is now active and generating returns' })}
           </Button>
@@ -505,13 +548,20 @@ export function ProjectDetailsSheet({
         {project.status === 'funding' && onInvest && (
           <Button
             onClick={() => {
-              onInvest({ level: null })
+              if (investmentAmount > walletBalance || investmentAmount <= 0) {
+                // Button is disabled for these cases, but handle gracefully
+                return
+              }
+              onInvest({ level: null, amount: investmentAmount })
               onClose()
             }}
-            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] theme-text-primary font-semibold"
+            className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold"
             size="lg"
+            disabled={investmentAmount > walletBalance || investmentAmount <= 0}
           >
-            {t('investNow', { defaultValue: 'Invest Now' })}
+            {investmentAmount > walletBalance
+              ? t('insufficientBalance', { defaultValue: 'Insufficient Balance' })
+              : t('investNow', { defaultValue: 'Invest Now' })}
           </Button>
         )}
         {project.status === 'active' && (

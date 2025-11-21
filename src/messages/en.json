@@ -219,12 +219,21 @@
     "selectedLevelLabel": "Level {level}",
     "selectedLevelButton": "Selected level",
     "investmentAmount": "Investment Amount",
+    "availableBalance": "Available Balance",
+    "afterInvestment": "After Investment",
+    "enterPin": "Enter PIN",
     "investAmount": "Invest {amount}",
     "youInvestLabel": "You invest",
     "youEarnPerHour": "Earn {amount}/hour",
     "estimatedMaturity": "Est. {amount} in {days} days",
     "earlyExitSample": "Exit after {days} days → approx. {amount}",
-    "earlyExitNote": "If you exit before maturity, profit is prorated based on the hours completed."
+    "earlyExitNote": "If you exit before maturity, profit is prorated based on the hours completed.",
+    "dailyEarnings": "Daily earnings",
+    "daysToCap": "Days to reach cap",
+    "dailyEarningsInfo": "Earn {amount} daily",
+    "confirmInvestment": "Confirm Investment",
+    "pinDescription": "Enter your 4-digit PIN to confirm",
+    "confirmAndInvest": "Confirm & Invest"
   },
   "referrals": {
     "title": "Referrals",

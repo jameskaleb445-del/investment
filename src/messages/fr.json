@@ -219,12 +219,21 @@
     "selectedLevelLabel": "Niveau {level}",
     "selectedLevelButton": "Niveau sélectionné",
     "investmentAmount": "Montant d'investissement",
+    "availableBalance": "Solde disponible",
+    "afterInvestment": "Après investissement",
+    "enterPin": "Entrez votre PIN",
     "investAmount": "Investir {amount}",
     "youInvestLabel": "Vous investissez",
     "youEarnPerHour": "Gagnez {amount}/heure",
     "estimatedMaturity": "Est. {amount} en {days} jours",
     "earlyExitSample": "Sortie après {days} jours → env. {amount}",
-    "earlyExitNote": "Si vous retirez avant l'échéance, le profit est calculé au prorata des heures effectuées."
+    "earlyExitNote": "Si vous retirez avant l'échéance, le profit est calculé au prorata des heures effectuées.",
+    "dailyEarnings": "Gains quotidiens",
+    "daysToCap": "Jours pour atteindre le plafond",
+    "dailyEarningsInfo": "Gagnez {amount} par jour",
+    "confirmInvestment": "Confirmer l'investissement",
+    "pinDescription": "Entrez votre PIN à 4 chiffres pour confirmer",
+    "confirmAndInvest": "Confirmer et investir"
   },
   "referrals": {
     "title": "Parrainage",

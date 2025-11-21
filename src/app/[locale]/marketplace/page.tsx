@@ -25,6 +25,8 @@ import type { ProjectLevel } from '@/app/components/marketplace/ProjectMarketCar
 import { formatCurrency, formatCurrencyUSD, formatPercentage } from '@/app/utils/format'
 import { cn } from '@/app/lib/utils'
 import { Button } from '@/app/components/ui/button'
+import toast from 'react-hot-toast'
+import { Input } from '@/app/components/ui'
 
 // Levels are now fetched from the database via the API
 
@@ -33,6 +35,11 @@ function MarketplacePageContent() {
   const [projects, setProjects] = useState<any[]>([])
   const [userInvestments, setUserInvestments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [walletBalance, setWalletBalance] = useState<{ balance: number; available_balance: number } | null>(null)
+  const [isInvestModalOpen, setIsInvestModalOpen] = useState(false)
+  const [pendingInvestment, setPendingInvestment] = useState<{ projectId: string; level: ProjectLevel | null; amount: number } | null>(null)
+  const [pin, setPin] = useState('')
+  const [investing, setInvesting] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
@@ -87,6 +94,7 @@ function MarketplacePageContent() {
   useEffect(() => {
     fetchProjects()
     fetchUserInvestments()
+    fetchWalletBalance()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -198,6 +206,7 @@ function MarketplacePageContent() {
           estimated_roi: inv.projects.estimated_roi || 0,
           status: inv.projects.status,
           duration_days: inv.projects.duration_days || 0,
+          levels: inv.projects.levels || [],
         } : null,
         amount: Number(inv.amount),
         status: inv.status,
@@ -208,6 +217,23 @@ function MarketplacePageContent() {
     } catch (error) {
       console.error('Error fetching user investments:', error)
       setUserInvestments([])
+    }
+  }
+
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await fetch('/api/wallet/balance')
+      if (!response.ok) {
+        throw new Error('Failed to fetch wallet balance')
+      }
+      const data = await response.json()
+      setWalletBalance({
+        balance: data.balance || 0,
+        available_balance: data.available_balance || 0,
+      })
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error)
+      setWalletBalance(null)
     }
   }
 
@@ -253,8 +279,70 @@ function MarketplacePageContent() {
   }
 
   const handleInvest = (options?: { level?: ProjectLevel | null; amount?: number }) => {
-    // TODO: Navigate to investment flow with selected level and amount
-    console.log('Invest in project:', selectedProject?.id, options)
+    if (!selectedProject) return
+    
+    const investmentAmount = options?.amount || options?.level?.priceXaf || 0
+    if (investmentAmount <= 0) return
+
+    // Check if user has sufficient balance
+    const availableBalance = walletBalance?.available_balance || 0
+    if (investmentAmount > availableBalance) {
+      toast.error(`Insufficient balance. You have ${formatCurrency(availableBalance)} available.`)
+      return
+    }
+
+    // Open PIN entry modal
+    setPendingInvestment({
+      projectId: selectedProject.id,
+      level: options?.level || null,
+      amount: investmentAmount,
+    })
+    setIsInvestModalOpen(true)
+  }
+
+  const handleConfirmInvest = async () => {
+    if (!pendingInvestment || pin.length !== 4) {
+      toast.error('Please enter a 4-digit PIN')
+      return
+    }
+
+    setInvesting(true)
+    try {
+      const response = await fetch(`/api/projects/${pendingInvestment.projectId}/invest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: pendingInvestment.amount,
+          pin: pin,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error(data.error || 'Failed to invest')
+        return
+      }
+
+      // Success - refresh data and close modal
+      toast.success('Investment successful!')
+      setPin('')
+      setIsInvestModalOpen(false)
+      setPendingInvestment(null)
+      setIsDetailsOpen(false)
+      
+      // Refresh data
+      await fetchProjects()
+      await fetchUserInvestments()
+      await fetchWalletBalance()
+    } catch (error) {
+      console.error('Error investing:', error)
+      toast.error('Failed to invest. Please try again.')
+    } finally {
+      setInvesting(false)
+    }
   }
 
   // Show all projects (filtering is done server-side and client-side)
@@ -536,7 +624,7 @@ function MarketplacePageContent() {
                           </span>
                         </div>
                         {levelsSheetProject.project.duration_days && levelsSheetProject.project.duration_days > 0 && (
-                          <div className="text-[11px] text-[#facc15]">
+                          <div className="text-[11px] text-[#8b5cf6]">
                             {t('earlyExitSample', {
                               days: Math.max(1, Math.round((levelsSheetProject.project.duration_days || 0) / 2)),
                               amount: formatCurrency(
@@ -555,7 +643,7 @@ function MarketplacePageContent() {
                       </div>
                       <div className="pt-3 border-t border-[#2d2d35]">
                         <div className="mb-3">
-                          <p className="text-[11px] text-[#facc15] mb-2">
+                          <p className="text-[11px] text-[#8b5cf6] mb-2">
                             {t('earlyExitNote', {
                               defaultValue:
                                 'If you exit early, profit is prorated and only the worked hours count.',
@@ -563,13 +651,20 @@ function MarketplacePageContent() {
                           </p>
                         </div>
                         <Button
-                          onClick={() => handleLevelSelect(levelsSheetProject.project, level)}
+                          onClick={() => {
+                            const availableBalance = walletBalance?.available_balance || 0
+                            if (level.priceXaf > availableBalance) {
+                              toast.error(`Insufficient balance. You need ${formatCurrency(level.priceXaf)} but only have ${formatCurrency(availableBalance)} available.`)
+                              return
+                            }
+                            handleLevelSelect(levelsSheetProject.project, level)
+                          }}
                           className={cn(
                             'w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold',
-                            isActive && 'opacity-80 cursor-default'
+                            (isActive || (level.priceXaf > (walletBalance?.available_balance || 0))) && 'opacity-60 cursor-not-allowed'
                           )}
                           size="sm"
-                          disabled={isActive}
+                          disabled={isActive || (level.priceXaf > (walletBalance?.available_balance || 0))}
                         >
                           {isActive
                             ? t('selectedLevelButton', { defaultValue: 'Selected level' })
@@ -608,6 +703,7 @@ function MarketplacePageContent() {
             }}
             selectedLevel={selectedLevel}
             onInvest={handleInvest}
+            walletBalance={walletBalance?.available_balance || 0}
           />
         )}
 
@@ -631,6 +727,74 @@ function MarketplacePageContent() {
             })
           }}
         />
+
+        {/* PIN Entry Modal */}
+        <BottomSheet
+          isOpen={isInvestModalOpen}
+          onClose={() => {
+            setIsInvestModalOpen(false)
+            setPin('')
+            setPendingInvestment(null)
+          }}
+          title={t('confirmInvestment', { defaultValue: 'Confirm Investment' })}
+        >
+          <div className="px-5 py-6 space-y-6">
+            {pendingInvestment && (
+              <>
+                <div className="space-y-2">
+                  <p className="text-sm theme-text-secondary">{t('investmentAmount', { defaultValue: 'Investment Amount' })}</p>
+                  <p className="text-2xl font-bold theme-text-primary">{formatCurrency(pendingInvestment.amount)}</p>
+                </div>
+                
+                <div className="bg-gradient-to-r from-[#8b5cf6]/20 to-[#7c3aed]/10 border border-[#8b5cf6]/30 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm theme-text-secondary">{t('availableBalance', { defaultValue: 'Available Balance' })}</span>
+                    <span className="text-base font-semibold theme-text-primary">{formatCurrency(walletBalance?.available_balance || 0)}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-[#8b5cf6]/20">
+                    <span className="text-sm theme-text-secondary">{t('afterInvestment', { defaultValue: 'After Investment' })}</span>
+                    <span className="text-base font-semibold text-[#10b981]">
+                      {formatCurrency((walletBalance?.available_balance || 0) - pendingInvestment.amount)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold theme-text-primary block">{t('enterPin', { defaultValue: 'Enter PIN' })}</label>
+                  <Input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={pin}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d]/g, '')
+                      setPin(value)
+                    }}
+                    className="theme-bg-tertiary theme-border-secondary theme-text-primary text-center text-2xl tracking-widest font-semibold h-14"
+                    placeholder="••••"
+                    autoFocus
+                  />
+                  <p className="text-xs theme-text-secondary text-center">
+                    {t('pinDescription', { defaultValue: 'Enter your 4-digit PIN to confirm' })}
+                  </p>
+                </div>
+
+                <Button
+                  onClick={handleConfirmInvest}
+                  disabled={pin.length !== 4 || investing || (pendingInvestment.amount > (walletBalance?.available_balance || 0))}
+                  className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] hover:from-[#7c3aed] hover:to-[#6d28d9] !text-white font-semibold"
+                  size="lg"
+                >
+                  {investing
+                    ? t('processing', { defaultValue: 'Processing...' })
+                    : pendingInvestment.amount > (walletBalance?.available_balance || 0)
+                    ? t('insufficientBalance', { defaultValue: 'Insufficient Balance' })
+                    : t('confirmAndInvest', { defaultValue: 'Confirm & Invest' })}
+                </Button>
+              </>
+            )}
+          </div>
+        </BottomSheet>
       </div>
     </AppLayout>
   )

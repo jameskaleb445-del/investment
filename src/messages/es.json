@@ -195,6 +195,10 @@
     "projectActiveMessage": "Este proyecto ahora está activo y generando retornos",
     "calculateYourReturns": "Calcula tus retornos",
     "enterAmount": "Ingresa el monto...",
+    "investmentAmount": "Monto de inversión",
+    "availableBalance": "Saldo disponible",
+    "afterInvestment": "Después de invertir",
+    "enterPin": "Ingresa tu PIN",
     "youInvest": "Inviertes",
     "yourInvestment": "Tu inversión",
     "expectedReturn": "Retorno esperado",
@@ -216,7 +220,13 @@
     "hourlyReturnLabel": "Ganancia por hora",
     "investInLevel": "Invertir en {level}",
     "selectedLevelLabel": "Nivel {level}",
-    "selectedLevelButton": "Nivel seleccionado"
+    "selectedLevelButton": "Nivel seleccionado",
+    "dailyEarnings": "Ganancias diarias",
+    "daysToCap": "Días para alcanzar el límite",
+    "dailyEarningsInfo": "Gana {amount} diariamente",
+    "confirmInvestment": "Confirmar inversión",
+    "pinDescription": "Ingresa tu PIN de 4 dígitos para confirmar",
+    "confirmAndInvest": "Confirmar e invertir"
   },
   "referrals": {
     "title": "Referidos",

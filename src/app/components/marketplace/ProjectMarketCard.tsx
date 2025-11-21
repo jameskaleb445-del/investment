@@ -16,6 +16,8 @@ export interface ProjectLevel {
   level: string
   priceXaf: number
   hourlyReturnXaf: number
+  dailyRoi?: number // Daily ROI percentage (e.g., 12.0 for 12%)
+  maxEarningsMultiplier?: number // Earnings cap multiplier (default 2.0 = 2x)
   tag?: string
 }
 
@@ -59,10 +61,31 @@ export function ProjectMarketCard({
   const roiDisplay = estimatedRoi > 0 ? `+${estimatedRoi.toFixed(2)}` : estimatedRoi.toFixed(2)
   const isPositiveRoi = estimatedRoi >= 0
 
-  // Calculate potential return
+  // Calculate potential return based on level data or project ROI
   const investmentAmount = customAmount ? parseFloat(customAmount.replace(/[^\d.]/g, '')) || 0 : 0
-  const potentialReturn = investmentAmount * (estimatedRoi / 100)
-  const totalReturn = investmentAmount + potentialReturn
+  let potentialReturn = 0
+  let totalReturn = 0
+  let dailyProfit = 0
+  let daysToCap = 0
+  
+  if (investmentAmount > 0) {
+    // Try to find matching level for custom amount
+    const matchingLevel = levels.find(l => l.priceXaf === investmentAmount)
+    const levelData = matchingLevel || activeLevel
+    
+    if (levelData?.dailyRoi && levelData?.maxEarningsMultiplier) {
+      // Use level-based calculation
+      dailyProfit = (investmentAmount * levelData.dailyRoi) / 100
+      const maxProfit = investmentAmount * (levelData.maxEarningsMultiplier - 1)
+      totalReturn = investmentAmount * levelData.maxEarningsMultiplier // Total at cap
+      potentialReturn = maxProfit // Profit at cap
+      daysToCap = dailyProfit > 0 ? maxProfit / dailyProfit : 0
+    } else {
+      // Fallback to project ROI (old calculation)
+      potentialReturn = investmentAmount * (estimatedRoi / 100)
+      totalReturn = investmentAmount + potentialReturn
+    }
+  }
 
   let theme: 'light' | 'dark' = 'light'
   try {
@@ -205,8 +228,6 @@ export function ProjectMarketCard({
                   >
                     {t('youInvest', { defaultValue: 'You invest' })}
                   </span>
-
-
                   <span className="text-xs font-medium theme-text-primary">{formatCurrency(investmentAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -222,6 +243,18 @@ export function ProjectMarketCard({
                   <span className="text-xs text-[#10b981]">{t('profit', { defaultValue: 'Profit' })}</span>
                   <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(potentialReturn)}</span>
                 </div>
+                {dailyProfit > 0 && daysToCap > 0 && (
+                  <>
+                    <div className="flex items-center justify-between pt-1 border-t border-[#10b981]/20">
+                      <span className="text-xs text-[#10b981]">{t('dailyEarnings', { defaultValue: 'Daily earnings' })}</span>
+                      <span className="text-xs font-medium text-[#10b981]">+{formatCurrency(dailyProfit)}/day</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-[#10b981]">{t('daysToCap', { defaultValue: 'Days to reach cap' })}</span>
+                      <span className="text-xs font-medium text-[#10b981]">~{Math.ceil(daysToCap)} days</span>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
