@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter, useSearchParams } from '@/i18n/navigation'
+// import { useRouter, useSearchParams } from '@/i18n/navigation'
 import { Button } from '../ui/button'
 import { useTopLoadingBar } from '@/app/hooks/use-top-loading-bar'
 import { useTranslations } from 'next-intl'
 import { Lock, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useRouter } from '@/i18n/navigation'
+import { useSearchParams } from 'next/navigation'
 
 export function ResetPinForm() {
   const router = useRouter()

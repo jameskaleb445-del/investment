@@ -1,6 +1,6 @@
 // Service Worker for PWA offline support
 // This file version changes on each deploy to trigger updates
-const CACHE_VERSION = 'v2.5.2'
+const CACHE_VERSION = 'v2.5.3'
 const CACHE_NAME = `investment-app-${CACHE_VERSION}`
 const STATIC_CACHE = `investment-static-${CACHE_VERSION}`
 
