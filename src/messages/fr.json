@@ -130,7 +130,8 @@
     "depositInitiated": "Dépôt initié avec succès !",
     "withdrawalInitiated": "Demande de retrait soumise avec succès !",
     "pleaseCheckForm": "Veuillez vérifier le formulaire pour les erreurs",
-    "paymentMethod": "Mode de paiement"
+    "paymentMethod": "Mode de paiement",
+    "forgotPin": "Mot de passe PIN oublié?"
   },
   "marketplace": {
     "title": "Investir",
@@ -233,7 +234,8 @@
     "dailyEarningsInfo": "Gagnez {amount} par jour",
     "confirmInvestment": "Confirmer l'investissement",
     "pinDescription": "Entrez votre PIN à 4 chiffres pour confirmer",
-    "confirmAndInvest": "Confirmer et investir"
+    "confirmAndInvest": "Confirmer et investir",
+    "forgotPin": "Mot de passe PIN oublié?"
   },
   "referrals": {
     "title": "Parrainage",
@@ -399,7 +401,20 @@
     "settingUp": "Configuration en cours...",
     "completeSetup": "Terminer la configuration",
     "pinSecurityNote": "Votre code PIN est crypté et utilisé pour sécuriser les transactions et les actions sensibles. Gardez-le privé et ne le partagez avec personne.",
-    "failedToSetupPin": "Échec de la configuration du code PIN"
+    "failedToSetupPin": "Échec de la configuration du code PIN",
+    "forgotPin": "Mot de passe PIN oublié?",
+    "pinResetCodeSent": "Code de réinitialisation du PIN envoyé à votre email!",
+    "pinResetCodeCheckEmail": "Veuillez vérifier votre email et utiliser le code pour réinitialiser votre PIN",
+    "incorrectPin": "PIN incorrect. Veuillez réessayer ou réinitialiser votre PIN si vous l'avez oublié.",
+    "pinResetRequestFailed": "Échec de la demande de réinitialisation du PIN. Veuillez réessayer.",
+    "resetPinTitle": "Réinitialiser votre PIN",
+    "resetPinDescription": "Entrez le code à 6 chiffres envoyé à votre email",
+    "codeSentTo": "Code envoyé à",
+    "enterResetCode": "Entrez le code de réinitialisation",
+    "createNewPin": "Créer un nouveau PIN",
+    "resetPin": "Réinitialiser le PIN",
+    "resettingPin": "Réinitialisation...",
+    "pinResetSuccess": "PIN réinitialisé avec succès!"
   },
   "notifications": {
     "title": "Notifications",

@@ -129,7 +129,8 @@
     "depositInitiated": "¡Depósito iniciado con éxito!",
     "withdrawalInitiated": "¡Solicitud de retiro enviada con éxito!",
     "pleaseCheckForm": "Por favor revisa el formulario por errores",
-    "paymentMethod": "Método de pago"
+    "paymentMethod": "Método de pago",
+    "forgotPin": "¿Olvidaste tu PIN?"
   },
   "marketplace": {
     "title": "Invertir",
@@ -226,7 +227,8 @@
     "dailyEarningsInfo": "Gana {amount} diariamente",
     "confirmInvestment": "Confirmar inversión",
     "pinDescription": "Ingresa tu PIN de 4 dígitos para confirmar",
-    "confirmAndInvest": "Confirmar e invertir"
+    "confirmAndInvest": "Confirmar e invertir",
+    "forgotPin": "¿Olvidaste tu PIN?"
   },
   "referrals": {
     "title": "Referidos",
@@ -387,7 +389,20 @@
     "settingUp": "Configurando...",
     "completeSetup": "Completar configuración",
     "pinSecurityNote": "Tu PIN está encriptado y se usa para asegurar transacciones y acciones sensibles. Manténlo privado y no lo compartas con nadie.",
-    "failedToSetupPin": "Error al configurar el PIN"
+    "failedToSetupPin": "Error al configurar el PIN",
+    "forgotPin": "¿Olvidaste tu PIN?",
+    "pinResetCodeSent": "¡Código de restablecimiento de PIN enviado a tu correo!",
+    "pinResetCodeCheckEmail": "Por favor revisa tu correo y usa el código para restablecer tu PIN",
+    "incorrectPin": "PIN incorrecto. Por favor intenta de nuevo o restablece tu PIN si lo olvidaste.",
+    "pinResetRequestFailed": "Error al solicitar restablecimiento de PIN. Por favor intenta de nuevo.",
+    "resetPinTitle": "Restablecer tu PIN",
+    "resetPinDescription": "Ingresa el código de 6 dígitos enviado a tu correo",
+    "codeSentTo": "Código enviado a",
+    "enterResetCode": "Ingresa el código de restablecimiento",
+    "createNewPin": "Crear nuevo PIN",
+    "resetPin": "Restablecer PIN",
+    "resettingPin": "Restableciendo...",
+    "pinResetSuccess": "¡PIN restablecido exitosamente!"
   },
   "notifications": {
     "title": "Notificaciones",

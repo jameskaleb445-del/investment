@@ -229,6 +229,14 @@ export function WithdrawalBottomSheet({
       const data = await response.json()
 
       if (!response.ok) {
+        // Check if it's an incorrect PIN error
+        if (data.code === 'INCORRECT_PIN' || data.error?.toLowerCase().includes('incorrect pin')) {
+          setErrors({ pin: data.error || 'Incorrect PIN. Please try again or reset your PIN if you forgot it.' })
+          toast.error(data.error || 'Incorrect PIN. Please try again or reset your PIN if you forgot it.', {
+            duration: 4000,
+          })
+          return
+        }
         throw new Error(data.error || t('failedToProcessWithdrawal', { defaultValue: 'Failed to process withdrawal' }))
       }
 
@@ -588,6 +596,65 @@ export function WithdrawalBottomSheet({
               {t('enter4DigitSecurityPin', { defaultValue: 'Enter your 4-digit security PIN' })}
             </p>
           )}
+          <button
+            type="button"
+            onClick={async () => {
+              // Get user email from session
+              try {
+                const userResponse = await fetch('/api/auth/me')
+                if (!userResponse.ok) {
+                  toast.error('Please login to reset your PIN')
+                  return
+                }
+                const userData = await userResponse.json()
+                const userEmail = userData.email
+
+                if (!userEmail) {
+                  toast.error('Unable to find your email. Please contact support.')
+                  return
+                }
+
+                // Request PIN reset
+                const resetResponse = await fetch('/api/auth/reset-pin', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'request', email: userEmail }),
+                })
+
+                const resetData = await resetResponse.json()
+
+                if (!resetResponse.ok) {
+                  toast.error(resetData.error || 'Failed to request PIN reset')
+                  return
+                }
+
+                toast.success('PIN reset code sent to your email!', { duration: 4000 })
+                
+                // Show reset code in development (remove in production)
+                if (process.env.NODE_ENV === 'development' && resetData.code) {
+                  console.log('PIN Reset Code:', resetData.code)
+                  toast(`Reset code: ${resetData.code} (dev only)`, { 
+                    duration: 6000,
+                    icon: 'ℹ️'
+                  })
+                }
+                
+                // Show message about checking email
+                setTimeout(() => {
+                  toast('Please check your email and use the code to reset your PIN', {
+                    duration: 5000,
+                    icon: '📧'
+                  })
+                }, 1000)
+              } catch (error) {
+                console.error('Error requesting PIN reset:', error)
+                toast.error('Failed to request PIN reset. Please try again.')
+              }
+            }}
+            className="text-xs text-[#8b5cf6] hover:text-[#7c3aed] underline mt-1"
+          >
+            {t('forgotPin', { defaultValue: 'Forgot PIN?' })}
+          </button>
         </div>
 
         {/* Fee Calculation */}

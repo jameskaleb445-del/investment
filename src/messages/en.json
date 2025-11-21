@@ -130,7 +130,8 @@
     "depositInitiated": "Deposit initiated successfully!",
     "withdrawalInitiated": "Withdrawal request submitted successfully!",
     "pleaseCheckForm": "Please check the form for errors",
-    "paymentMethod": "Payment Method"
+    "paymentMethod": "Payment Method",
+    "forgotPin": "Forgot PIN?"
   },
   "marketplace": {
     "title": "Invest",
@@ -233,7 +234,8 @@
     "dailyEarningsInfo": "Earn {amount} daily",
     "confirmInvestment": "Confirm Investment",
     "pinDescription": "Enter your 4-digit PIN to confirm",
-    "confirmAndInvest": "Confirm & Invest"
+    "confirmAndInvest": "Confirm & Invest",
+    "forgotPin": "Forgot PIN?"
   },
   "referrals": {
     "title": "Referrals",
@@ -399,7 +401,20 @@
     "settingUp": "Setting up...",
     "completeSetup": "Complete Setup",
     "pinSecurityNote": "Your PIN is encrypted and used to secure transactions and sensitive actions. Keep it private and don't share it with anyone.",
-    "failedToSetupPin": "Failed to setup PIN"
+    "failedToSetupPin": "Failed to setup PIN",
+    "forgotPin": "Forgot PIN?",
+    "pinResetCodeSent": "PIN reset code sent to your email!",
+    "pinResetCodeCheckEmail": "Please check your email and use the code to reset your PIN",
+    "incorrectPin": "Incorrect PIN. Please try again or reset your PIN if you forgot it.",
+    "pinResetRequestFailed": "Failed to request PIN reset. Please try again.",
+    "resetPinTitle": "Reset Your PIN",
+    "resetPinDescription": "Enter the 6-digit code sent to your email",
+    "codeSentTo": "Code sent to",
+    "enterResetCode": "Enter Reset Code",
+    "createNewPin": "Create New PIN",
+    "resetPin": "Reset PIN",
+    "resettingPin": "Resetting...",
+    "pinResetSuccess": "PIN reset successfully!"
   },
   "notifications": {
     "title": "Notifications",

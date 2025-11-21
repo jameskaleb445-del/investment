@@ -157,3 +157,43 @@ export async function sendOTPviaEmail(
   return sendEmail(email, subject, html, text)
 }
 
+/**
+ * Send PIN Reset Code via Email
+ */
+export async function sendPINResetCode(
+  email: string,
+  resetCode: string
+): Promise<{ success: boolean; error?: string }> {
+  const subject = 'Your Profit Bridge PIN Reset Code'
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>PIN Reset Code</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0;">Profit Bridge</h1>
+      </div>
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #333; margin-top: 0;">PIN Reset Code</h2>
+        <p>Hello,</p>
+        <p>You requested to reset your PIN. Your PIN reset code is:</p>
+        <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+          <span style="font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 8px;">${resetCode}</span>
+        </div>
+        <p>This code will expire in <strong>15 minutes</strong>.</p>
+        <p>If you didn't request this PIN reset, please ignore this email and ensure your account is secure.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px; margin: 0;">This is an automated message from Profit Bridge, please do not reply to this email.</p>
+      </div>
+    </body>
+    </html>
+  `
+  const text = `Your Profit Bridge PIN reset code is: ${resetCode}\n\nThis code will expire in 15 minutes.\n\nIf you didn't request this PIN reset, please ignore this email and ensure your account is secure.`
+
+  return sendEmail(email, subject, html, text)
+}
+

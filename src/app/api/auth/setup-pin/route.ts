@@ -177,7 +177,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     if (error.issues) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
+        { error: 'Please enter a valid 4-digit PIN.', details: error.issues },
         { status: 400 }
       )
     }

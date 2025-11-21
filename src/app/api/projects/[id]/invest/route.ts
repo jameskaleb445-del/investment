@@ -44,7 +44,7 @@ export async function POST(
 
     if (hashedPin !== storedPinHash) {
       return NextResponse.json(
-        { error: 'Invalid PIN' },
+        { error: 'Incorrect PIN. Please try again or reset your PIN if you forgot it.', code: 'INCORRECT_PIN' },
         { status: 401 }
       )
     }
@@ -294,7 +294,7 @@ export async function POST(
   } catch (error: any) {
     if (error.issues) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
+        { error: 'Please enter a valid 4-digit PIN.', details: error.issues },
         { status: 400 }
       )
     }
